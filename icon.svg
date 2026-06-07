@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#080b0d"/>
+  <rect x="0" y="0" width="512" height="8" fill="#ff6b00"/>
+  <rect x="0" y="504" width="512" height="8" fill="#ff6b00"/>
+  <rect x="0" y="0" width="8" height="512" fill="#ff6b00" opacity="0.4"/>
+  <rect x="504" y="0" width="8" height="512" fill="#ff6b00" opacity="0.4"/>
+  <polygon points="60,120 220,256 60,392" fill="#ff6b00"/>
+  <polygon points="180,120 340,256 180,392" fill="#00f5d4" opacity="0.95"/>
+  <text x="256" y="458" font-family="Arial Black, sans-serif" font-size="54" font-weight="900" fill="#e2f0f5" text-anchor="middle" letter-spacing="12">JACKED</text>
+</svg>
