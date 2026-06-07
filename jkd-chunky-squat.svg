@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <clipPath id="circ">
+      <circle cx="256" cy="256" r="248"/>
+    </clipPath>
+    <filter id="bloom" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <circle cx="256" cy="256" r="256" fill="#080608"/>
+  <circle cx="256" cy="256" r="248" fill="#0c080c"/>
+
+  <g clip-path="url(#circ)" filter="url(#bloom)">
+
+    <!--
+      Chunkier + less tall:
+      Block: 36px wide x 28px tall, gap: 5px
+      Cell: 41px wide x 33px tall
+      Letter: 4 cols x 4 rows (squatter proportions)
+      Letter width: 4*41 = 164px
+      Gap between letters: 20px
+      Total width: 3*164 + 2*20 = 492+40 = 532 — too wide
+
+      Use 3 cols x 4 rows per letter
+      Cell 44x36, block 38x30, gap 6
+      Letter width: 3*44=132
+      Total: 3*132+2*24 = 396+48 = 444
+      Start x: (512-444)/2 = 34
+      Letter height: 4*36 = 144
+      Start y: (512-144)/2 = 184
+    -->
+
+    <!-- OFF blocks -->
+    <!-- J: x=34, K: x=34+132+24=190, D: x=190+132+24=346 -->
+    <!-- 3 cols x 4 rows each -->
+
+    <!-- J off -->
+    <rect x="34"  y="184" width="38" height="30" fill="#200010"/>
+    <rect x="78"  y="184" width="38" height="30" fill="#200010"/>
+    <rect x="122" y="184" width="38" height="30" fill="#200010"/>
+    <rect x="34"  y="220" width="38" height="30" fill="#200010"/>
+    <rect x="78"  y="220" width="38" height="30" fill="#200010"/>
+    <rect x="122" y="220" width="38" height="30" fill="#200010"/>
+    <rect x="34"  y="256" width="38" height="30" fill="#200010"/>
+    <rect x="78"  y="256" width="38" height="30" fill="#200010"/>
+    <rect x="122" y="256" width="38" height="30" fill="#200010"/>
+    <rect x="34"  y="292" width="38" height="30" fill="#200010"/>
+    <rect x="78"  y="292" width="38" height="30" fill="#200010"/>
+    <rect x="122" y="292" width="38" height="30" fill="#200010"/>
+
+    <!-- K off -->
+    <rect x="190" y="184" width="38" height="30" fill="#200010"/>
+    <rect x="234" y="184" width="38" height="30" fill="#200010"/>
+    <rect x="278" y="184" width="38" height="30" fill="#200010"/>
+    <rect x="190" y="220" width="38" height="30" fill="#200010"/>
+    <rect x="234" y="220" width="38" height="30" fill="#200010"/>
+    <rect x="278" y="220" width="38" height="30" fill="#200010"/>
+    <rect x="190" y="256" width="38" height="30" fill="#200010"/>
+    <rect x="234" y="256" width="38" height="30" fill="#200010"/>
+    <rect x="278" y="256" width="38" height="30" fill="#200010"/>
+    <rect x="190" y="292" width="38" height="30" fill="#200010"/>
+    <rect x="234" y="292" width="38" height="30" fill="#200010"/>
+    <rect x="278" y="292" width="38" height="30" fill="#200010"/>
+
+    <!-- D off -->
+    <rect x="346" y="184" width="38" height="30" fill="#200010"/>
+    <rect x="390" y="184" width="38" height="30" fill="#200010"/>
+    <rect x="434" y="184" width="38" height="30" fill="#200010"/>
+    <rect x="346" y="220" width="38" height="30" fill="#200010"/>
+    <rect x="390" y="220" width="38" height="30" fill="#200010"/>
+    <rect x="434" y="220" width="38" height="30" fill="#200010"/>
+    <rect x="346" y="256" width="38" height="30" fill="#200010"/>
+    <rect x="390" y="256" width="38" height="30" fill="#200010"/>
+    <rect x="434" y="256" width="38" height="30" fill="#200010"/>
+    <rect x="346" y="292" width="38" height="30" fill="#200010"/>
+    <rect x="390" y="292" width="38" height="30" fill="#200010"/>
+    <rect x="434" y="292" width="38" height="30" fill="#200010"/>
+
+    <!-- ======================== -->
+    <!-- LIT BLOCKS               -->
+    <!-- ======================== -->
+
+    <!-- === J === 3 cols x 4 rows, x=34 -->
+    <!-- R0: . X X -->
+    <rect x="78"  y="184" width="38" height="30" fill="#ff1a6e"/>
+    <rect x="122" y="184" width="38" height="30" fill="#ff1a6e"/>
+    <!-- R1: . . X -->
+    <rect x="122" y="220" width="38" height="30" fill="#ff1a6e"/>
+    <!-- R2: X . X -->
+    <rect x="34"  y="256" width="38" height="30" fill="#ff1a6e"/>
+    <rect x="122" y="256" width="38" height="30" fill="#ff1a6e"/>
+    <!-- R3: . X X -->
+    <rect x="78"  y="292" width="38" height="30" fill="#ff1a6e"/>
+    <rect x="122" y="292" width="38" height="30" fill="#ff1a6e"/>
+
+    <!-- === K === 3 cols x 4 rows, x=190 -->
+    <!-- R0: X . X -->
+    <rect x="190" y="184" width="38" height="30" fill="#ff1a6e"/>
+    <rect x="278" y="184" width="38" height="30" fill="#ff1a6e"/>
+    <!-- R1: X X . -->
+    <rect x="190" y="220" width="38" height="30" fill="#ff1a6e"/>
+    <rect x="234" y="220" width="38" height="30" fill="#ff1a6e"/>
+    <!-- R2: X X . -->
+    <rect x="190" y="256" width="38" height="30" fill="#ff1a6e"/>
+    <rect x="234" y="256" width="38" height="30" fill="#ff1a6e"/>
+    <!-- R3: X . X -->
+    <rect x="190" y="292" width="38" height="30" fill="#ff1a6e"/>
+    <rect x="278" y="292" width="38" height="30" fill="#ff1a6e"/>
+
+    <!-- === D === 3 cols x 4 rows, x=346 -->
+    <!-- R0: X X . -->
+    <rect x="346" y="184" width="38" height="30" fill="#ff1a6e"/>
+    <rect x="390" y="184" width="38" height="30" fill="#ff1a6e"/>
+    <!-- R1: X . X -->
+    <rect x="346" y="220" width="38" height="30" fill="#ff1a6e"/>
+    <rect x="434" y="220" width="38" height="30" fill="#ff1a6e"/>
+    <!-- R2: X . X -->
+    <rect x="346" y="256" width="38" height="30" fill="#ff1a6e"/>
+    <rect x="434" y="256" width="38" height="30" fill="#ff1a6e"/>
+    <!-- R3: X X . -->
+    <rect x="346" y="292" width="38" height="30" fill="#ff1a6e"/>
+    <rect x="390" y="292" width="38" height="30" fill="#ff1a6e"/>
+
+  </g>
+
+  <circle cx="256" cy="256" r="248" fill="none" stroke="#ff1a6e" stroke-width="8"/>
+  <circle cx="256" cy="256" r="238" fill="none" stroke="#ff1a6e" stroke-width="2" opacity="0.2"/>
+
+</svg>
