@@ -230,7 +230,7 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
 .feedback-skip{background:none;border:none;color:var(--muted);font-size:13px;text-align:center;cursor:pointer;padding:8px;text-decoration:underline;width:100%}
 .vl-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 12px}
 .vl-card{background:var(--surface);border:1px solid var(--border);padding:12px;position:relative;overflow:hidden}
-.vl-muscle{font-size:9px;text-transform:uppercase;letter-spacing:.18em;color:var(--muted);margin-bottom:6px;font-weight:700;font-family:var(--font-condensed)}
+.vl-muscle{font-size:14px;text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;font-weight:700;font-family:var(--font-condensed)}
 .vl-sets{font-family:var(--font-display);font-size:26px;letter-spacing:1px}
 .vl-sets span{font-size:11px;font-family:var(--font-body);color:var(--muted)}
 .vl-bar-bg{height:6px;background:var(--border);margin-top:8px;position:relative}
@@ -2308,6 +2308,7 @@ function skipFeedback() {
 // ══════════════════════════════════════════
 // VOLUME LANDMARKS
 // ══════════════════════════════════════════
+const MUSCLE_PILL_COLORS = {Chest:'#ff6a00',Back:'#00f0d0',Shoulders:'#9d5cff',Traps:'#ffaa40',Triceps:'#e8ff00',Biceps:'#ff2d78',Forearms:'#80ff80',Legs:'#9d5cff',Calves:'#00b4ff',Core:'#ffb800'};
 function renderVolumeLandmarks() {
   const grid = document.getElementById('vlGrid');
   if (!grid) return;
@@ -2316,13 +2317,14 @@ function renderVolumeLandmarks() {
     const lm = VOLUME_LANDMARKS[m], sets = ws[m]||0;
     const pct = Math.min(100,(sets/lm.mrv)*100);
     const mevPct = (lm.mev/lm.mrv)*100;
+    const mc = MUSCLE_PILL_COLORS[m] || 'var(--text)';
     let status, color, cc;
     if (sets===0){status='No sets logged';color='var(--muted)';cc='var(--border)';}
     else if (sets<lm.mev){status='Below MEV';color='var(--muted)';cc='var(--muted)';}
     else if (sets<=lm.mav_hi){status='In MAV \u2713';color='var(--acid)';cc='var(--acid)';}
     else if (sets<=lm.mrv){status='Near MRV';color='#ff6a00';cc='#ff6a00';}
     else{status='Above MRV!';color='var(--danger)';cc='var(--danger)';}
-    return '<div class="vl-card"><div class="vl-corner" style="background:'+cc+'"></div><div class="vl-muscle">'+m+'</div><div class="vl-sets" style="color:'+color+'">'+sets+'<span> / '+lm.mrv+'</span></div><div class="vl-bar-bg"><div class="vl-mev-mark" style="left:'+mevPct+'%"></div><div class="vl-mrv-mark" style="left:99%"></div><div class="vl-fill" style="width:'+pct+'%;background:'+color+'"></div></div><div class="vl-status" style="color:'+color+'">'+status+'</div></div>';
+    return '<div class="vl-card"><div class="vl-corner" style="background:'+cc+'"></div><div class="vl-muscle" style="color:'+mc+'">'+m+'</div><div class="vl-sets" style="color:'+color+'">'+sets+'<span> / '+lm.mrv+'</span></div><div class="vl-bar-bg"><div class="vl-mev-mark" style="left:'+mevPct+'%"></div><div class="vl-mrv-mark" style="left:99%"></div><div class="vl-fill" style="width:'+pct+'%;background:'+color+'"></div></div><div class="vl-status" style="color:'+color+'">'+status+'</div></div>';
   }).join('');
 }
 
