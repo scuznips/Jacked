@@ -275,6 +275,19 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
 </div>
 
 <!-- SWAP MODAL -->
+<div class="modal-overlay" id="historyModal">
+  <div class="modal-sheet">
+    <div class="modal-hdr">
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div class="modal-title" id="historyModalTitle">HISTORY</div>
+        <div style="font-size:10px;color:var(--muted);font-family:var(--font-mono);letter-spacing:.08em" id="historyModalSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeExHistory()">&#x2715;</button>
+    </div>
+    <div class="modal-results" id="historyModalContent"></div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="swapModal">
   <div class="modal-sheet">
     <div class="modal-hdr">
@@ -305,6 +318,10 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
   </div>
 
   <!-- week strip -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0">
+    <div style="font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase">THIS WEEK</div>
+    <div style="font-family:var(--font-display);font-size:18px;letter-spacing:2px;color:var(--acid)" id="dashWeekCounter"></div>
+  </div>
   <div class="week-strip" id="dashWeekStrip"></div>
 
   <!-- stats -->
@@ -371,9 +388,9 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
 
     <div style="padding:16px">
 
-      <!-- DAY PICKER -->
-      <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.12em;margin-bottom:10px">// SELECT TRAINING DAYS</div>
-      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:20px" id="dayPickerGrid"></div>
+      <!-- FREQUENCY PICKER -->
+      <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.12em;margin-bottom:10px">// WORKOUTS PER WEEK (TARGET)</div>
+      <div style="display:flex;gap:8px;margin-bottom:20px" id="freqPickerGrid"></div>
 
       <!-- RECOMMENDATION -->
       <div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--acid);padding:12px;margin-bottom:16px" id="splitRecommendation">
@@ -844,6 +861,11 @@ function todayKey() {
   const d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 }
+function fmtDate(s) {
+  if (!s) return '';
+  const [,m,d] = s.split('-').map(Number);
+  return d + ' ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1];
+}
 function getWorkoutLog() { try { return JSON.parse(localStorage.getItem('jacked_log') || '{}'); } catch(e) { return {}; } }
 function saveWorkoutLog(log) { localStorage.setItem('jacked_log', JSON.stringify(log)); }
 function getActiveProgram() { try { return JSON.parse(localStorage.getItem('jacked_program') || 'null'); } catch(e) { return null; } }
@@ -909,8 +931,10 @@ function calcSuggestion(ex) {
 // ══════════════════════════════════════════
 function getWeekDates() {
   const today = new Date();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
   return Array.from({length:7}, (_,i) => {
-    const d = new Date(today); d.setDate(today.getDate() - (6-i));
+    const d = new Date(monday); d.setDate(monday.getDate() + i);
     return { date:d, key: d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'), dayIndex:d.getDay(), isToday: d.toDateString()===today.toDateString() };
   });
 }
@@ -931,7 +955,7 @@ function showScreen(id) {
   // log screen - route through goToLog for smart state detection
   if (id === 'log') { goToLog(); return; }
   if (id === 'library') { renderMuscleFilter(); renderLibrary(); }
-  if (id === 'program') initDayPicker();
+  if (id === 'program') initFrequencyPicker();
   if (id === 'analytics') renderAnalytics();
 }
 
@@ -1299,7 +1323,7 @@ const DAYS_OF_WEEK = [
   {key:'fri',label:'F',full:'Friday'},{key:'sat',label:'S',full:'Saturday'},
   {key:'sun',label:'S',full:'Sunday'}
 ];
-let selectedDays = [], selectedSplit = null, recommendedSplit = null;
+let weeklyTarget = 3, selectedSplit = null, recommendedSplit = null;
 
 function getRecommendedSplit(n) {
   if (n <= 2) return 'beginner';
@@ -1309,80 +1333,61 @@ function getRecommendedSplit(n) {
   return 'ppl';
 }
 
-function initDayPicker() {
-  const grid = document.getElementById('dayPickerGrid');
+function initFrequencyPicker() {
+  const grid = document.getElementById('freqPickerGrid');
   if (!grid) return;
-  grid.innerHTML = DAYS_OF_WEEK.map(d => {
-    const sel = selectedDays.includes(d.key);
-    return '<button class="day-pick-btn' + (sel?' selected':'') + '" data-day="' + d.key + '">'
-      + '<span style="font-family:var(--font-display);font-size:20px">' + d.label + '</span>'
-      + '<span class="day-abbr">' + d.full.substring(0,3).toUpperCase() + '</span>'
-      + '</button>';
-  }).join('');
-  grid.querySelectorAll('.day-pick-btn').forEach(btn => {
-    btn.addEventListener('click', () => toggleDay2(btn.getAttribute('data-day')));
-  });
+  grid.innerHTML = [2,3,4,5,6].map(n =>
+    '<button class="day-pick-btn' + (weeklyTarget===n?' selected':'') + '" onclick="setFrequency(' + n + ')" style="flex:1;aspect-ratio:auto;padding:16px 0;flex-direction:column;gap:4px">'
+    + '<span style="font-family:var(--font-display);font-size:26px">' + n + '</span>'
+    + '<span class="day-abbr" style="font-size:9px">' + (n===1?'DAY':'DAYS') + '</span>'
+    + '</button>'
+  ).join('');
   updateRecommendation();
   renderSplitOptions();
 }
 
-function toggleDay2(key) {
-  if (selectedDays.includes(key)) {
-    selectedDays = selectedDays.filter(d => d !== key);
-  } else {
-    selectedDays.push(key);
-    const order = DAYS_OF_WEEK.map(d => d.key);
-    selectedDays.sort((a,b) => order.indexOf(a) - order.indexOf(b));
-  }
-  initDayPicker();
+function setFrequency(n) {
+  weeklyTarget = n;
+  selectedSplit = null;
+  initFrequencyPicker();
 }
 
 function updateRecommendation() {
-  const n = selectedDays.length;
+  const n = weeklyTarget;
   const recEl = document.getElementById('recSplitName');
   const descEl = document.getElementById('recSplitDesc');
   if (!recEl) return;
-  if (n === 0) {
-    recEl.textContent = '';
-    descEl.textContent = 'Select your training days above';
-    recommendedSplit = null;
-    renderSplitOptions();
-    return;
-  }
   const rec = getRecommendedSplit(n);
   recommendedSplit = rec;
   if (!selectedSplit) selectedSplit = rec;
   const split = SPLITS[rec];
   recEl.textContent = split.name.toUpperCase();
-  descEl.textContent = n + ' days selected \u00B7 ' + split.desc;
+  descEl.textContent = n + '\u00D7/week target \u00B7 ' + split.desc;
   renderSplitOptions();
 }
 
 function renderSplitOptions() {
   const container = document.getElementById('splitOverrideList');
   if (!container) return;
-  const n = selectedDays.length;
+  const n = weeklyTarget;
   container.innerHTML = Object.entries(SPLITS).map(([key, split]) => {
     const isSel = key === (selectedSplit || recommendedSplit);
-    const incompatible = n > 0 && n < split.minDays;
-    const borderColor = isSel ? 'var(--acid)' : 'var(--border)';
+    const incompatible = n < split.minDays;
+    const borderColor = isSel ? 'var(--acid)' : (incompatible ? 'var(--border)' : 'var(--border)');
     const bg = isSel ? 'rgba(232,255,0,.05)' : 'var(--surface)';
-    const nameColor = isSel ? 'var(--acid)' : 'var(--text)';
+    const nameColor = isSel ? 'var(--acid)' : (incompatible ? 'var(--muted)' : 'var(--text)');
     const radioStyle = isSel ? 'background:var(--acid);border-color:var(--acid)' : 'background:none;border:2px solid var(--border)';
-    const recTag = key === recommendedSplit && n > 0 ? '<span style="font-size:9px;font-family:var(--font-mono);color:#060809;background:var(--acid);padding:2px 8px;margin-left:auto;flex-shrink:0">REC</span>' : '';
-    const daysTag = '';
-    return '<div data-split="' + key + '" class="split-opt-btn" style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:' + bg + ';border:1px solid ' + borderColor + ';border-left:3px solid ' + borderColor + ';cursor:pointer;margin-bottom:6px">'
+    const recTag = key === recommendedSplit ? '<span style="font-size:9px;font-family:var(--font-mono);color:#060809;background:var(--acid);padding:2px 8px;margin-left:auto;flex-shrink:0">REC</span>' : '';
+    return '<div data-split="' + key + '" class="split-opt-btn" style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:' + bg + ';border:1px solid ' + borderColor + ';border-left:3px solid ' + borderColor + ';cursor:pointer;margin-bottom:6px;opacity:' + (incompatible?'.45':'1') + '">'
       + '<div style="width:14px;height:14px;flex-shrink:0;margin-top:3px;' + radioStyle + '"></div>'
       + '<div style="flex:1;min-width:0">'
       + '<div style="font-family:var(--font-condensed);font-size:18px;font-weight:700;color:' + nameColor + ';text-transform:uppercase">' + split.name + '</div>'
-      + '<div style="font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4">' + split.desc + '</div>'
-      + '</div>' + recTag + daysTag + '</div>';
+      + '<div style="font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4">' + split.desc + (incompatible?' <span style="color:var(--danger)">\u2014 needs '+split.minDays+'+/week</span>':'') + '</div>'
+      + '</div>' + recTag + '</div>';
   }).join('');
   container.querySelectorAll('.split-opt-btn').forEach(el => {
     el.addEventListener('click', () => {
-      const key = el.getAttribute('data-split');
-      const n = selectedDays.length;
-      selectedSplit = key;
+      selectedSplit = el.getAttribute('data-split');
       renderSplitOptions();
     });
   });
@@ -1391,42 +1396,38 @@ function renderSplitOptions() {
 function goToStep1() {
   document.getElementById('prog-step-1').style.display = 'block';
   document.getElementById('prog-step-2').style.display = 'none';
+  initFrequencyPicker();
 }
 
 function goToStep2() {
-  const n = selectedDays.length;
-  if (n === 0) { showToast('Select at least 1 training day'); return; }
+  const n = weeklyTarget;
   const splitKey = selectedSplit || recommendedSplit || 'fb';
   const split = SPLITS[splitKey];
-  const assigned = [];
+  const sessionList = [];
   for (let i = 0; i < n; i++) {
     const sessionId = split.priority[i % split.priority.length];
-    assigned.push({ day: selectedDays[i], session: split.sessions.find(s => s.id === sessionId) });
+    sessionList.push({ idx: i+1, session: split.sessions.find(s => s.id === sessionId) });
   }
-  const weekHtml = DAYS_OF_WEEK.map(d => {
-    const a = assigned.find(x => x.day === d.key);
-    if (!a) return '<div style="margin:0 16px 6px;background:var(--surface);border:1px solid var(--border);padding:12px 16px"><div style="font-family:var(--font-mono);font-size:10px;color:var(--muted)">' + d.full.toUpperCase() + '</div><div style="font-family:var(--font-condensed);font-size:16px;color:var(--muted);margin-top:2px">REST</div></div>';
-    const s = a.session;
-    return '<div style="margin:0 16px 6px;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--acid);overflow:hidden">'
-      + '<div onclick="toggleExList(this)" style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">'
-      + '<div><div style="font-family:var(--font-mono);font-size:10px;color:var(--acid)">' + d.full.toUpperCase() + '</div>'
-      + '<div style="font-family:var(--font-display);font-size:20px;letter-spacing:2px;color:var(--acid);margin-top:2px">' + s.name + '</div>'
-      + '<div style="font-size:11px;color:var(--muted);font-family:var(--font-body)">' + s.sub + '</div></div>'
-      + '<span style="font-family:var(--font-mono);font-size:10px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);padding:3px 8px">' + s.exercises.length + ' ex</span></div>'
-      + '<div style="display:none;border-top:1px solid var(--border);padding:10px 16px">'
-      + s.exercises.map(ex => '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:13px;font-weight:600;color:var(--text)">' + ex.name + '</div><div style="font-size:11px;color:var(--muted)">' + ex.muscle + '</div></div><span style="font-family:var(--font-mono);font-size:11px;color:var(--acid)">' + ex.sets + '\u00D7' + ex.reps + '</span></div>').join('')
-      + '</div></div>';
-  }).join('');
+  const sessionHtml = sessionList.map(({idx, session: s}) =>
+    '<div style="margin:0 16px 6px;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--acid);overflow:hidden">'
+    + '<div onclick="toggleExList(this)" style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">'
+    + '<div><div style="font-family:var(--font-mono);font-size:10px;color:var(--acid)">SESSION ' + idx + '</div>'
+    + '<div style="font-family:var(--font-display);font-size:20px;letter-spacing:2px;color:var(--acid);margin-top:2px">' + s.name + '</div>'
+    + '<div style="font-size:11px;color:var(--muted);font-family:var(--font-body)">' + s.sub + '</div></div>'
+    + '<span style="font-family:var(--font-mono);font-size:10px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);padding:3px 8px">' + s.exercises.length + ' ex</span></div>'
+    + '<div style="display:none;border-top:1px solid var(--border);padding:10px 16px">'
+    + s.exercises.map(ex => '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:13px;font-weight:600;color:var(--text)">' + ex.name + '</div><div style="font-size:11px;color:var(--muted)">' + ex.muscle + '</div></div><span style="font-family:var(--font-mono);font-size:11px;color:var(--acid)">' + ex.sets + '\u00D7' + ex.reps + '</span></div>').join('')
+    + '</div></div>'
+  ).join('');
   document.getElementById('genProgramTitle').textContent = split.name.toUpperCase();
-  document.getElementById('genProgramMeta').textContent = n + ' training days \u00B7 ' + selectedDays.map(k => DAYS_OF_WEEK.find(d => d.key===k).full.substring(0,3)).join(', ');
-  document.getElementById('generatedWeek').innerHTML = '<div style="height:10px"></div>' + weekHtml;
+  document.getElementById('genProgramMeta').textContent = n + '\u00D7/week \u00B7 ' + sessionList.map(x => x.session.name).join(' \u2192 ');
+  document.getElementById('generatedWeek').innerHTML = '<div style="height:10px"></div>' + sessionHtml;
   document.getElementById('prog-step-1').style.display = 'none';
   document.getElementById('prog-step-2').style.display = 'block';
 }
 
 function activateGeneratedProgram() {
-  const n = selectedDays.length;
-  if (n === 0) return;
+  const n = weeklyTarget;
   const splitKey = selectedSplit || recommendedSplit || 'fb';
   const split = SPLITS[splitKey];
   const sessions = [];
@@ -1434,17 +1435,15 @@ function activateGeneratedProgram() {
     const sessionId = split.priority[i % split.priority.length];
     const splitSession = split.sessions.find(s => s.id === sessionId);
     sessions.push({
-      dayKey: selectedDays[i],
       sessionId,
       name: splitSession.name,
       sub: splitSession.sub,
-      // Deep copy exercises so swaps don't mutate SPLITS
       exercises: splitSession.exercises.map(e => ({...e}))
     });
   }
-  saveActiveProgram({ splitKey, selectedDays: [...selectedDays], startDate: new Date().toISOString(), sessions });
+  saveActiveProgram({ splitKey, weeklyTarget: n, startDate: new Date().toISOString(), sessions });
   showToast(split.name + ' activated!');
-  selectedDays = []; selectedSplit = null;
+  selectedSplit = null;
   setTimeout(() => showScreen('dash'), 600);
 }
 
@@ -1456,6 +1455,14 @@ function toggleExList(el) {
 // ══════════════════════════════════════════
 // DASHBOARD
 // ══════════════════════════════════════════
+function getNextSession(prog, log) {
+  if (!prog || !prog.sessions || !prog.sessions.length) return null;
+  const wd = getWeekDates();
+  const startKey = wd[0].key, endKey = wd[6].key;
+  const weekCount = Object.keys(log).filter(k => k >= startKey && k <= endKey).length;
+  return { session: prog.sessions[weekCount % prog.sessions.length], weekCount };
+}
+
 function renderDashboard() {
   const prog = getActiveProgram();
   const log = getWorkoutLog();
@@ -1470,15 +1477,21 @@ function renderDashboard() {
   if (dateEl) dateEl.textContent = DAYS[today.getDay()].toUpperCase() + ' ' + today.getDate() + ' ' + MONTHS[today.getMonth()].toUpperCase();
   if (dayEl) {
     if (prog) {
-      const todayDayKey = ['sun','mon','tue','wed','thu','fri','sat'][today.getDay()];
-      const hasTodaySession = prog.sessions.find(s => s.dayKey === todayDayKey);
-      dayEl.textContent = hasTodaySession ? 'TRAINING DAY' : 'REST DAY';
-      dayEl.style.color = hasTodaySession ? 'var(--acid)' : 'var(--muted)';
+      const alreadyToday = !!log[tk];
+      dayEl.textContent = alreadyToday ? 'LOGGED TODAY' : 'READY TO TRAIN';
+      dayEl.style.color = alreadyToday ? 'var(--muted)' : 'var(--acid)';
     } else {
       dayEl.textContent = 'NO ACTIVE PROGRAM';
       dayEl.style.color = 'var(--muted)';
     }
   }
+
+  // Week counter
+  const startKey = weekDates[0].key, endKey = weekDates[6].key;
+  const weekSessionsDone = Object.keys(log).filter(k => k >= startKey && k <= endKey).length;
+  const target = prog ? (prog.weeklyTarget || (prog.selectedDays || []).length || prog.sessions.length) : null;
+  const counterEl = document.getElementById('dashWeekCounter');
+  if (counterEl) counterEl.textContent = target != null ? weekSessionsDone + ' / ' + target : '';
 
   // Week strip
   const strip = document.getElementById('dashWeekStrip');
@@ -1544,13 +1557,12 @@ function renderDashboard() {
       const split = SPLITS[prog.splitKey];
       const startDate = prog.startDate ? new Date(prog.startDate) : new Date();
       const weekNum = Math.floor((today - startDate) / (7*24*60*60*1000)) + 1;
-      const dayBadges = (prog.selectedDays||[]).map(k => { const d = DAYS_OF_WEEK.find(x => x.key===k); return d ? '<span class="day-badge">' + d.full.substring(0,3).toUpperCase() + '</span>' : ''; }).join('');
+      const progTarget = prog.weeklyTarget || (prog.selectedDays || []).length || prog.sessions.length;
       progSection.innerHTML = '<div class="section-title"><span></span>ACTIVE PROGRAM</div>'
         + '<div style="margin:0 16px 12px;background:linear-gradient(135deg,#0a0c06,#0c1014);border:1px solid var(--border);border-left:3px solid var(--acid);padding:16px">'
         + '<div class="program-name">' + (split ? split.name.toUpperCase() : prog.splitKey.toUpperCase()) + '</div>'
-        + '<div class="program-meta">Week ' + weekNum + ' \u00B7 ' + (prog.selectedDays||[]).length + ' days/week \u00B7 started ' + startDate.getDate() + ' ' + MONTHS[startDate.getMonth()] + '</div>'
-        + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0">' + dayBadges + '</div>'
-        + '<button onclick="if(confirm(\'Clear active program?\')){{localStorage.removeItem(\'jacked_program\');renderDashboard();}}" style="background:none;border:none;color:var(--muted);font-size:12px;padding:0;cursor:pointer;text-decoration:underline">Clear program</button>'
+        + '<div class="program-meta">Week ' + weekNum + ' \u00B7 ' + progTarget + '\u00D7/week target \u00B7 started ' + startDate.getDate() + ' ' + MONTHS[startDate.getMonth()] + '</div>'
+        + '<button onclick="if(confirm(\'Clear active program?\')){{localStorage.removeItem(\'jacked_program\');renderDashboard();}}" style="background:none;border:none;color:var(--muted);font-size:12px;padding:0;cursor:pointer;text-decoration:underline;margin-top:10px">Clear program</button>'
         + '</div>';
     }
   }
@@ -1559,36 +1571,27 @@ function renderDashboard() {
   const todaySection = document.getElementById('dashTodaySection');
   if (!todaySection) return;
   if (!prog) { todaySection.innerHTML = ''; return; }
-  const todayDayKey = ['sun','mon','tue','wed','thu','fri','sat'][today.getDay()];
-  const todayAssigned = prog.sessions.find(s => s.dayKey === todayDayKey);
   const alreadyLogged = !!log[tk];
-  if (!todayAssigned) {
-    todaySection.innerHTML = '<div class="section-title"><span></span>TODAY</div>'
-      + '<div style="margin:0 16px 12px;padding:20px;background:var(--surface);border:1px solid var(--border);text-align:center">'
-      + '<div style="font-family:var(--font-display);font-size:22px;letter-spacing:2px;color:var(--muted)">REST DAY</div>'
-      + '<div style="font-size:12px;color:var(--muted);margin-top:6px">Recovery is part of the program.</div></div>';
-    return;
-  }
-  // Use session data directly from prog if available (new format)
-  let session = todayAssigned.exercises ? todayAssigned : null;
-  if (!session) {
-    const splitData = SPLITS[prog.splitKey];
-    session = splitData ? splitData.sessions.find(s => s.id === todayAssigned.sessionId) : null;
-  }
-  if (!session) { todaySection.innerHTML = ''; return; }
+  migrateProgramIfNeeded(prog);
+  const nextInfo = getNextSession(prog, log);
+  if (!nextInfo) { todaySection.innerHTML = ''; return; }
+  const session = nextInfo.session;
+  if (!session || !session.exercises) { todaySection.innerHTML = ''; return; }
+  const sessionIdx = nextInfo.weekCount % prog.sessions.length;
   const exList = session.exercises.slice(0,4).map(ex =>
     '<div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border)">'
     + '<span style="color:var(--text)">' + ex.name + '</span>'
     + '<span style="color:var(--muted);font-family:var(--font-mono);font-size:11px">' + ex.sets + 'x' + ex.reps + '</span></div>'
   ).join('');
   const moreText = session.exercises.length > 4 ? '<div style="font-size:12px;color:var(--muted);margin-top:6px">+' + (session.exercises.length-4) + ' more</div>' : '';
-  todaySection.innerHTML = '<div class="section-title"><span></span>TODAY</div>'
+  const sessionLabel = alreadyLogged ? '// NEXT SESSION' : '// SESSION ' + (sessionIdx+1) + ' OF ' + prog.sessions.length;
+  todaySection.innerHTML = '<div class="section-title"><span></span>' + (alreadyLogged ? 'NEXT UP' : 'TODAY') + '</div>'
     + '<div style="margin:0 16px 12px;background:var(--surface);border:1px solid var(--border);padding:16px">'
-    + '<div style="font-family:var(--font-mono);font-size:10px;color:var(--acid);letter-spacing:.1em;margin-bottom:6px">// TODAY\'S SESSION</div>'
+    + '<div style="font-family:var(--font-mono);font-size:10px;color:var(--acid);letter-spacing:.1em;margin-bottom:6px">' + sessionLabel + '</div>'
     + '<div class="card-title">' + session.name + '</div>'
     + '<div style="margin-bottom:10px">' + exList + moreText + '</div></div>'
     + (alreadyLogged
-      ? '<div style="margin:0 16px 20px;padding:18px;background:rgba(232,255,0,.08);border:2px solid var(--acid);text-align:center;cursor:pointer" onclick="startTodaySession()">'
+      ? '<div style="margin:0 16px 20px;padding:18px;background:rgba(232,255,0,.08);border:2px solid var(--acid);text-align:center">'
         + '<div style="font-family:var(--font-display);font-size:22px;letter-spacing:3px;color:var(--acid)">\u2713 LOGGED TODAY</div></div>'
       : '<button class="start-btn" onclick="startTodaySession()">START SESSION &#x2192;</button>');
 }
@@ -1831,14 +1834,12 @@ function startTodaySession() {
   if (el) { el.textContent = 'READY'; el.style.color = 'var(--muted)'; }
   const prog = getActiveProgram();
   if (!prog) { showToast('No active program — build one first'); return; }
-  const todayDayKey = ['sun','mon','tue','wed','thu','fri','sat'][new Date().getDay()];
-  const assigned = prog.sessions.find(s => s.dayKey === todayDayKey);
-  if (!assigned) { showToast('No session scheduled today'); return; }
-  // Read session directly from prog (self-contained after activation)
-  // Fall back to SPLITS for old programs that predate this change
   migrateProgramIfNeeded(prog);
-  let session = assigned;
-  if (!session.exercises) {
+  const log = getWorkoutLog();
+  const nextInfo = getNextSession(prog, log);
+  if (!nextInfo) { showToast('No session found — rebuild your program'); return; }
+  let session = nextInfo.session;
+  if (!session || !session.exercises) {
     showToast('Session not found — rebuild your program'); return;
   }
   const titleEl = document.getElementById('logTitle');
@@ -1942,6 +1943,13 @@ function renderExercises() {
         + '<button class="set-check' + (set.done?' done':'') + '" onclick="togSet(' + ei + ',' + si + ')"><svg viewBox="0 0 24 24" fill="none" stroke="' + (set.done?'#060809':'var(--muted)') + '" stroke-width="3"><polyline points="20,6 9,17 4,12"/></svg></button>'
         + sugBar + '</div>';
     }).join('');
+    const lastSess = getLastSession(ex.id);
+    const lastBar = lastSess
+      ? '<div style="display:flex;align-items:baseline;gap:10px;padding:7px 14px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.2);flex-wrap:wrap">'
+        + '<span style="font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:.12em;flex-shrink:0">LAST \u00B7 ' + fmtDate(lastSess.date) + '</span>'
+        + (lastSess.sets||[]).map((s,i) => '<span style="font-family:var(--font-mono);font-size:11px;color:var(--muted)"><span style="color:var(--text);opacity:.4">' + (i+1) + '</span> ' + (s.w||'\u2014') + 'kg\u00D7' + (s.r||'\u2014') + '</span>').join('<span style="color:var(--border);margin:0 3px">\u00B7</span>')
+        + '</div>'
+      : '';
     return '<div class="exercise-block">'
       + '<div class="exercise-hdr">'
       + '<div><div class="exercise-name">' + ex.name + '</div>'
@@ -1950,7 +1958,7 @@ function renderExercises() {
       + '<button class="swap-btn" onclick="openSwap(' + ei + ')">SWAP</button>'
       + '<div class="rir-badge" style="' + getRirStyle(ex.rir) + '">RIR ' + ex.rir + '</div>'
       + '</div></div>'
-      + lastNote + progBadge
+      + lastBar + lastNote + progBadge
       + '<div class="col-labels"><span>#</span><span>KG</span><span>REPS</span><span></span></div>'
       + sets
       + '<button class="add-set-btn" onclick="addSet(' + ei + ')">+ ADD SET</button>'
@@ -2413,13 +2421,54 @@ function renderLibrary() {
   if (!list.length) { el.innerHTML="<div class='empty-state'><div>No exercises found</div></div>"; return; }
   el.innerHTML = list.map(e => {
     const customTag = e.custom ? '<span style="color:var(--acid);font-size:9px;font-weight:700"> CUSTOM</span>' : '';
-    const delBtn = e.custom ? '<button class="lib-add-btn" style="color:var(--danger);border-color:var(--danger)" data-del="'+e.id+'">\u2715</button>' : '';
-    return '<div class="lib-item"><div class="lib-item-left"><div class="lib-name">'+e.name+customTag+'</div><div style="display:flex;align-items:center;gap:6px;margin-top:3px"><span class="muscle-pill '+e.muscle.toLowerCase()+'">'+e.muscle+'</span><span class="lib-eq">'+e.equip+'</span></div>'+(e.notes?'<div class="lib-meta" style="margin-top:2px">'+e.notes+'</div>':'')+'</div>'+delBtn+'</div>';
+    const hasDel = e.custom;
+    const hist = getHistory(e.id);
+    const histBtn = hist.length
+      ? '<button class="lib-add-btn" style="color:var(--accent);border-color:var(--border);margin-right:6px" data-hist="'+e.id+'" data-name="'+e.name.replace(/"/g,'&quot;')+'">HIST</button>'
+      : '<button class="lib-add-btn" style="color:var(--muted);border-color:var(--border);opacity:.35;margin-right:6px;cursor:default">HIST</button>';
+    const delBtn = hasDel ? '<button class="lib-add-btn" style="color:var(--danger);border-color:var(--danger)" data-del="'+e.id+'">\u2715</button>' : '';
+    return '<div class="lib-item"><div class="lib-item-left"><div class="lib-name">'+e.name+customTag+'</div><div style="display:flex;align-items:center;gap:6px;margin-top:3px"><span class="muscle-pill '+e.muscle.toLowerCase()+'">'+e.muscle+'</span><span class="lib-eq">'+e.equip+'</span></div>'+(e.notes?'<div class="lib-meta" style="margin-top:2px">'+e.notes+'</div>':'')+'</div><div style="display:flex;align-items:center;flex-shrink:0">'+histBtn+delBtn+'</div></div>';
   }).join('');
   el.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => delEx(b.getAttribute('data-del'))));
+  el.querySelectorAll('[data-hist]').forEach(b => b.addEventListener('click', () => openExHistory(b.getAttribute('data-hist'), b.getAttribute('data-name'))));
 }
 
 function delEx(id) { allExercises=allExercises.filter(e=>e.id!==id); saveExercises(); renderLibrary(); showToast("Removed"); }
+
+function openExHistory(exId, exName) {
+  const hist = getHistory(exId).slice().reverse();
+  const titleEl = document.getElementById('historyModalTitle');
+  const subEl = document.getElementById('historyModalSub');
+  const contentEl = document.getElementById('historyModalContent');
+  if (!titleEl || !contentEl) return;
+  titleEl.textContent = exName;
+  subEl.textContent = hist.length + ' SESSION' + (hist.length !== 1 ? 'S' : '') + ' LOGGED';
+  if (!hist.length) {
+    contentEl.innerHTML = '<div class="empty-state"><div>No history yet</div></div>';
+  } else {
+    contentEl.innerHTML = hist.map(entry => {
+      const setsHtml = (entry.sets || []).map((s, i) =>
+        '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">'
+        + '<span style="font-family:var(--font-mono);font-size:11px;color:var(--muted)">SET ' + (i+1) + '</span>'
+        + '<div style="display:flex;gap:16px">'
+        + '<span style="font-family:var(--font-mono);font-size:14px;color:var(--text)">' + (s.w||'—') + '<span style="font-size:10px;color:var(--muted)"> kg</span></span>'
+        + '<span style="font-family:var(--font-mono);font-size:14px;color:var(--text)">' + (s.r||'—') + '<span style="font-size:10px;color:var(--muted)"> reps</span></span>'
+        + '</div></div>'
+      ).join('');
+      const totalVol = (entry.sets || []).reduce((sum, s) => sum + (parseFloat(s.w)||0) * (parseInt(s.r)||0), 0);
+      return '<div style="padding:14px 16px;border-bottom:2px solid var(--border)">'
+        + '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">'
+        + '<span style="font-family:var(--font-display);font-size:18px;letter-spacing:2px;color:var(--acid)">' + fmtDate(entry.date) + '</span>'
+        + '<span style="font-family:var(--font-mono);font-size:10px;color:var(--muted)">' + (entry.sets||[]).length + ' sets · ' + Math.round(totalVol) + 'kg vol</span>'
+        + '</div>' + setsHtml + '</div>';
+    }).join('');
+  }
+  document.getElementById('historyModal').classList.add('show');
+}
+
+function closeExHistory() {
+  document.getElementById('historyModal').classList.remove('show');
+}
 
 function switchLibTab(tab) {
   document.getElementById("lib-browse").style.display = tab==="browse"?"block":"none";
