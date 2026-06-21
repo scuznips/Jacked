@@ -71,10 +71,10 @@ body::before{animation:scanpulse 3s ease-in-out infinite}
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 12px}
 .stat-box{background:var(--surface);border:1px solid var(--border);border-radius:0;padding:14px;position:relative}
 .stat-box::before{content:"";position:absolute;top:0;right:0;width:10px;height:10px;background:var(--acid);clip-path:polygon(100% 0,0 0,100% 100%)}
-.stat-label{font-size:9px;text-transform:uppercase;letter-spacing:.15em;color:var(--muted);margin-bottom:6px;font-family:var(--font-mono)}
+.stat-label{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:6px;font-family:var(--font-mono)}
 .stat-val{font-family:var(--font-display);font-size:28px;font-weight:700;letter-spacing:2px;color:var(--accent);text-shadow:0 0 10px rgba(0,240,208,.35);line-height:1.1}
 .stat-val span{font-size:13px;font-family:var(--font-body);color:var(--muted)}
-.section-title{font-family:var(--font-mono);font-size:10px;letter-spacing:.2em;color:var(--muted);padding:10px 16px 6px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.section-title{font-family:var(--font-mono);font-size:12px;letter-spacing:.15em;color:var(--muted);padding:10px 16px 6px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
 .section-title::before{content:"";display:block;width:2px;height:12px;background:var(--acid);flex-shrink:0;box-shadow:0 0 6px rgba(232,255,0,.5)}
 .program-card{margin:0 16px 12px;background:linear-gradient(135deg,#080f12 0%,#0e1215 60%);border:1px solid var(--border);border-left:3px solid #ff6a00;border-radius:0;padding:16px;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)}
 .program-name{font-family:var(--font-display);font-size:24px;letter-spacing:3px;text-shadow:0 0 12px rgba(0,240,208,.3)}
@@ -89,8 +89,8 @@ body::before{animation:scanpulse 3s ease-in-out infinite}
 .timer-badge{display:inline-block;background:#0d1a20;border:2px solid rgba(232,255,0,.4);border-radius:0;padding:8px 18px;font-family:var(--font-mono);font-size:18px;color:var(--acid);margin-top:10px;box-shadow:0 0 14px rgba(232,255,0,.25);letter-spacing:.15em}
 .exercise-block{margin:10px 14px 0;background:#0a0f12;border:1px solid #1a2830;border-top:3px solid var(--accent);border-radius:0;overflow:hidden}
 .exercise-hdr{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
-.exercise-name{font-weight:700;font-size:16px;font-family:var(--font-condensed);letter-spacing:.04em;text-transform:uppercase;line-height:1.3;word-break:break-word;color:#ffffff}
-.exercise-meta{font-size:11px;color:var(--muted);margin-top:3px;font-family:var(--font-mono);letter-spacing:.04em}
+.exercise-name{font-weight:700;font-size:18px;font-family:var(--font-condensed);letter-spacing:.04em;text-transform:uppercase;line-height:1.3;word-break:break-word;color:#ffffff}
+.exercise-meta{font-size:12px;color:var(--muted);margin-top:3px;font-family:var(--font-mono);letter-spacing:.04em}
 .rir-badge{border-radius:0;padding:7px 14px;font-size:14px;font-family:var(--font-mono);white-space:nowrap;font-weight:600;letter-spacing:.08em}
 .swap-btn{background:none;border:1px solid #243540;border-radius:0;padding:6px 12px;font-size:11px;color:var(--muted);cursor:pointer;margin-right:6px;font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase}
 .swap-btn:hover{border-color:var(--acid);color:var(--acid)}
@@ -145,11 +145,11 @@ body::before{animation:scanpulse 3s ease-in-out infinite}
 .muscle-filter::-webkit-scrollbar{display:none}
 .mf-chip{flex-shrink:0;padding:5px 12px;border-radius:0;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;font-family:var(--font-condensed);letter-spacing:.1em;text-transform:uppercase}
 .mf-chip.active{background:var(--acid);border-color:var(--acid);color:#060809;box-shadow:0 0 8px rgba(232,255,0,.3)}
-.lib-item{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border)}
+.lib-item{display:flex;align-items:flex-start;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border)}
 .lib-item-left{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0;margin-right:10px}
-.lib-name{font-size:13px;font-weight:700;font-family:var(--font-condensed);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
-.lib-meta{font-size:11px;color:var(--muted)}
-.muscle-pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;flex-shrink:0}
+.lib-name{font-size:14px;font-weight:700;font-family:var(--font-condensed);letter-spacing:.04em;text-transform:uppercase;color:var(--text);line-height:1.3}
+.lib-meta{font-size:12px;color:var(--muted)}
+.muscle-pill{display:inline-block;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;flex-shrink:0}
 .muscle-pill.chest{background:rgba(255,106,0,.2);color:#ff6a00;text-shadow:0 0 6px rgba(255,106,0,.4)}
 .muscle-pill.back{background:rgba(0,240,208,.12);color:#00f0d0;text-shadow:0 0 6px rgba(0,240,208,.4)}
 .muscle-pill.shoulders{background:rgba(157,92,255,.15);color:#9d5cff;text-shadow:0 0 6px rgba(157,92,255,.4)}
@@ -160,9 +160,9 @@ body::before{animation:scanpulse 3s ease-in-out infinite}
 .muscle-pill.core{background:rgba(255,184,0,.15);color:#ffb800;text-shadow:0 0 6px rgba(255,184,0,.4)}
 .muscle-pill.traps{background:rgba(255,200,150,.15);color:#ffaa40}
 .muscle-pill.forearms{background:rgba(150,255,150,.15);color:#80ff80}
-.lib-eq{font-size:10px;color:var(--muted);font-family:var(--font-mono)}
+.lib-eq{font-size:12px;color:var(--muted);font-family:var(--font-mono)}
 .lib-add-btn{background:var(--surface2);border:1px solid var(--border);border-radius:0;padding:6px 12px;color:var(--accent);font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0}
-.lib-count{font-family:var(--font-mono);font-size:11px;color:var(--muted);padding:8px 16px;border-bottom:1px solid var(--border);letter-spacing:.08em}
+.lib-count{font-family:var(--font-mono);font-size:12px;color:var(--muted);padding:8px 16px;border-bottom:1px solid var(--border);letter-spacing:.08em}
 .create-form{padding:16px;display:flex;flex-direction:column;gap:14px}
 .form-group{display:flex;flex-direction:column;gap:6px}
 .form-label{font-size:10px;text-transform:uppercase;letter-spacing:.18em;color:var(--muted);font-weight:700;font-family:var(--font-condensed)}
