@@ -51,59 +51,59 @@ body::after{content:"";position:fixed;inset:0;background:url("data:image/svg+xml
 /* Vertical scan line */
 body::before{animation:scanpulse 3s ease-in-out infinite}
 .nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);box-shadow:0 -4px 20px rgba(0,0,0,.5);display:flex;padding-bottom:var(--safe-bottom);z-index:100}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0;background:none;border:none;color:var(--muted);font-family:var(--font-condensed);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:color .15s,background .15s;position:relative}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 0;background:none;border:none;color:var(--muted);font-family:var(--font-condensed);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:color .15s,background .15s;position:relative}
 .nav-btn.active{color:var(--accent);text-shadow:0 0 8px rgba(0,240,208,.6)}
 .nav-btn.active::after{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--acid);box-shadow:0 0 8px rgba(232,255,0,.6)}
-.nav-btn svg{width:18px;height:18px}
+.nav-btn svg{width:22px;height:22px}
 .screen{display:none}
 .screen.active{display:block}
 .header{padding:16px 20px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:10;border-bottom:1px solid var(--border)}
 .logo{font-family:var(--font-display);font-size:40px;font-weight:700;letter-spacing:8px;color:var(--accent);text-shadow:0 0 16px rgba(0,240,208,0.6),0 0 40px rgba(0,240,208,0.2)}
-.header-sub{font-size:10px;color:var(--muted);font-family:var(--font-mono);letter-spacing:.15em;text-transform:uppercase}
+.header-sub{font-size:13px;color:var(--muted);font-family:var(--font-mono);letter-spacing:.12em;text-transform:uppercase}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:0;padding:16px;margin:0 16px 12px;position:relative}
 .card-title{font-family:var(--font-display);font-size:22px;letter-spacing:3px;margin-bottom:12px;color:var(--accent);text-shadow:0 0 14px rgba(0,240,208,0.5)}
 .week-strip{display:flex;gap:8px;padding:16px;overflow-x:auto;scrollbar-width:none}
 .week-strip::-webkit-scrollbar{display:none}
-.day-dot{flex-shrink:0;width:44px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--muted);font-weight:500}
+.day-dot{flex-shrink:0;width:44px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:13px;color:var(--muted);font-weight:500}
 .day-dot .dot{width:38px;height:38px;border-radius:0;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--muted);font-family:var(--font-mono)}
 .day-dot .dot.done{background:var(--acid);border-color:var(--acid);color:#060809;box-shadow:0 0 12px rgba(232,255,0,.6)}
 .day-dot .dot.today{border-color:#ff6a00;color:#ff6a00;box-shadow:0 0 10px rgba(255,106,0,0.5)}
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 12px}
 .stat-box{background:var(--surface);border:1px solid var(--border);border-radius:0;padding:14px;position:relative}
 .stat-box::before{content:"";position:absolute;top:0;right:0;width:10px;height:10px;background:var(--acid);clip-path:polygon(100% 0,0 0,100% 100%)}
-.stat-label{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:6px;font-family:var(--font-mono)}
+.stat-label{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px;font-family:var(--font-mono)}
 .stat-val{font-family:var(--font-display);font-size:28px;font-weight:700;letter-spacing:2px;color:var(--accent);text-shadow:0 0 10px rgba(0,240,208,.35);line-height:1.1}
 .stat-val span{font-size:13px;font-family:var(--font-body);color:var(--muted)}
 .section-title{font-family:var(--font-mono);font-size:12px;letter-spacing:.15em;color:var(--muted);padding:10px 16px 6px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
 .section-title::before{content:"";display:block;width:2px;height:12px;background:var(--acid);flex-shrink:0;box-shadow:0 0 6px rgba(232,255,0,.5)}
 .program-card{margin:0 16px 12px;background:linear-gradient(135deg,#080f12 0%,#0e1215 60%);border:1px solid var(--border);border-left:3px solid #ff6a00;border-radius:0;padding:16px;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)}
 .program-name{font-family:var(--font-display);font-size:24px;letter-spacing:3px;text-shadow:0 0 12px rgba(0,240,208,.3)}
-.program-meta{font-size:11px;color:var(--muted);margin-top:4px;font-family:var(--font-condensed);letter-spacing:.08em}
+.program-meta{font-size:13px;color:var(--muted);margin-top:4px;font-family:var(--font-condensed);letter-spacing:.06em}
 .meso-bar{height:6px;background:var(--border);border-radius:3px;margin-top:12px;overflow:hidden}
 .meso-fill{height:100%;background:var(--acid);border-radius:0;box-shadow:0 0 8px rgba(232,255,0,.4)}
 .start-btn{display:block;width:calc(100% - 32px);margin:4px 16px 12px;padding:16px;background:var(--orange);color:#05080a;border:none;border-radius:0;font-family:var(--font-display);font-size:22px;letter-spacing:5px;cursor:pointer;transition:opacity .15s,box-shadow .15s;box-shadow:0 0 32px rgba(255,106,0,0.6),inset 0 0 20px rgba(255,130,0,0.15);clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%)}
 .start-btn:active{opacity:.85}
 .workout-header{background:#0a0f12;padding:18px 16px 14px;border-bottom:2px solid var(--border)}
 .workout-title{font-family:var(--font-display);font-size:32px;letter-spacing:4px;color:var(--acid);text-shadow:0 0 16px rgba(232,255,0,.5)}
-.workout-sub{font-size:13px;color:var(--accent);margin-top:4px;font-family:var(--font-mono);letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+.workout-sub{font-size:15px;color:var(--accent);margin-top:4px;font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;opacity:.8}
 .timer-badge{display:inline-block;background:#0d1a20;border:2px solid rgba(232,255,0,.4);border-radius:0;padding:8px 18px;font-family:var(--font-mono);font-size:18px;color:var(--acid);margin-top:10px;box-shadow:0 0 14px rgba(232,255,0,.25);letter-spacing:.15em}
-.exercise-block{margin:10px 14px 0;background:#0a0f12;border:1px solid #1a2830;border-top:3px solid var(--accent);border-radius:0;overflow:hidden}
-.exercise-hdr{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.exercise-block{margin:10px 12px 0;background:#0a0f12;border:1px solid #1a2830;border-top:3px solid var(--accent);border-radius:0;overflow:hidden}
+.exercise-hdr{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
 .exercise-name{font-weight:700;font-size:18px;font-family:var(--font-condensed);letter-spacing:.04em;text-transform:uppercase;line-height:1.3;word-break:break-word;color:#ffffff}
 .exercise-meta{font-size:12px;color:var(--muted);margin-top:3px;font-family:var(--font-mono);letter-spacing:.04em}
 .rir-badge{border-radius:0;padding:7px 14px;font-size:14px;font-family:var(--font-mono);white-space:nowrap;font-weight:600;letter-spacing:.08em}
-.swap-btn{background:none;border:1px solid #243540;border-radius:0;padding:6px 12px;font-size:11px;color:var(--muted);cursor:pointer;margin-right:6px;font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase}
+.swap-btn{background:none;border:1px solid #243540;border-radius:0;padding:8px 14px;font-size:13px;color:var(--muted);cursor:pointer;margin-right:6px;font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase}
 .swap-btn:hover{border-color:var(--acid);color:var(--acid)}
-.set-row{display:grid;grid-template-columns:32px 1fr 1fr 46px;gap:8px;align-items:center;padding:12px 12px;border-bottom:1px solid var(--border);transition:background .15s}
+.set-row{display:grid;grid-template-columns:32px 1fr 1fr 46px;gap:8px;align-items:center;padding:13px 12px;border-bottom:1px solid var(--border);transition:background .15s}
 .set-row.completed{background:rgba(232,255,0,.05);border-left:3px solid rgba(232,255,0,.4)}
 .set-num{font-family:var(--font-mono);font-size:18px;color:var(--acid);text-align:center;opacity:.7}
 .set-input{background:#0d1a20;border:1px solid #243540;border-bottom:2px solid rgba(0,240,208,.3);border-radius:0;padding:14px 6px;color:#ffffff;font-family:var(--font-mono);font-size:24px;font-weight:500;width:100%;text-align:center;-webkit-appearance:none;transition:border-color .15s}
 .set-input:focus{outline:none;border-bottom-color:var(--acid);box-shadow:0 0 0 1px rgba(232,255,0,.2);background:#0f2028}
-.set-check{width:42px;height:42px;border-radius:0!important;border:2px solid #243540;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;flex-shrink:0;-webkit-border-radius:0}
+.set-check{width:46px;height:46px;border-radius:0!important;border:2px solid #243540;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;flex-shrink:0;-webkit-border-radius:0}
 .set-check.done{background:var(--acid);border-color:var(--acid);box-shadow:0 0 14px rgba(232,255,0,.6)}
-.set-check svg{width:18px;height:18px}
-.col-labels{display:grid;grid-template-columns:32px 1fr 1fr 46px;gap:8px;padding:8px 12px 6px;font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.12em;text-align:center;border-bottom:1px solid var(--border);font-family:var(--font-mono)}
-.add-set-btn{width:100%;padding:14px;background:none;border:none;border-top:1px solid var(--border);color:var(--acid);font-family:var(--font-mono);font-size:13px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;opacity:.8}
+.set-check svg{width:20px;height:20px}
+.col-labels{display:grid;grid-template-columns:32px 1fr 1fr 46px;gap:8px;padding:9px 12px 7px;font-size:12px;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;text-align:center;border-bottom:1px solid var(--border);font-family:var(--font-mono)}
+.add-set-btn{width:100%;padding:16px;background:none;border:none;border-top:1px solid var(--border);color:var(--acid);font-family:var(--font-mono);font-size:15px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;opacity:.8}
 .finish-btn{display:block;width:calc(100% - 32px);margin:16px 16px 24px;padding:16px;background:var(--success);color:#05080a;border:none;border-radius:0;font-family:var(--font-display);font-size:22px;font-weight:700;letter-spacing:4px;cursor:pointer;box-shadow:0 0 24px rgba(232,255,0,0.4);clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%)}
 .rest-overlay{display:none;position:fixed;inset:0;background:rgba(6,8,9,.95);z-index:200;padding:0 30px}
 .rest-overlay.show{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px}
@@ -119,33 +119,33 @@ body::before{animation:scanpulse 3s ease-in-out infinite}
 .modal-search{padding:12px 16px;flex-shrink:0}
 .modal-results{overflow-y:auto;flex:1}
 .meso-selector{display:flex;gap:8px;padding:16px;overflow-x:auto;scrollbar-width:none}
-.meso-chip{flex-shrink:0;padding:7px 14px;border-radius:0;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font-condensed);letter-spacing:.1em;text-transform:uppercase}
+.meso-chip{flex-shrink:0;padding:10px 18px;border-radius:0;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font-condensed);letter-spacing:.08em;text-transform:uppercase}
 .meso-chip.active{background:var(--accent);border-color:var(--accent);color:#080b0d;box-shadow:0 0 10px rgba(0,240,208,0.3)}
 .day-card{margin:0 16px 10px;background:var(--surface);border:1px solid var(--border);border-radius:0;overflow:hidden;border-left:2px solid var(--border)}
 .day-card:hover{border-left-color:var(--accent);box-shadow:inset 2px 0 0 var(--accent)}
-.day-card-hdr{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.day-card-hdr{padding:16px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
 .day-card-title{font-family:var(--font-display);font-size:20px;letter-spacing:3px;color:var(--acid)}
-.day-card-sub{font-size:12px;color:var(--muted);margin-top:2px;font-family:var(--font-body)}
-.day-badge{background:var(--surface2);border:1px solid var(--border);border-radius:0;padding:3px 10px;font-size:10px;color:var(--muted);font-family:var(--font-mono);letter-spacing:.08em}
-.day-exercises{border-top:1px solid var(--border);padding:12px 16px}
-.ex-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.day-card-sub{font-size:14px;color:var(--muted);margin-top:2px;font-family:var(--font-body)}
+.day-badge{background:var(--surface2);border:1px solid var(--border);border-radius:0;padding:5px 12px;font-size:12px;color:var(--muted);font-family:var(--font-mono);letter-spacing:.06em}
+.day-exercises{border-top:1px solid var(--border);padding:14px 18px}
+.ex-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
 .ex-item:last-child{border-bottom:none}
-.ex-item-name{font-size:14px;font-weight:600;color:var(--text)}
-.ex-item-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.ex-item-name{font-size:15px;font-weight:600;color:var(--text)}
+.ex-item-meta{font-size:13px;color:var(--muted);margin-top:3px}
 .ex-sets{font-family:var(--font-mono);font-size:12px;color:var(--orange)}
 .new-program-btn{display:block;width:calc(100% - 32px);margin:4px 16px 12px;padding:14px;background:none;border:1px dashed var(--border);border-radius:var(--radius);color:var(--muted);font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer;text-align:center}
 
 .pill-tabs{display:flex;gap:6px;padding:12px 16px;overflow-x:auto;scrollbar-width:none}
-.pill-tab{flex-shrink:0;padding:6px 14px;border-radius:0;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font-condensed);letter-spacing:.12em;text-transform:uppercase}
+.pill-tab{flex-shrink:0;padding:9px 18px;border-radius:0;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font-condensed);letter-spacing:.1em;text-transform:uppercase}
 .pill-tab.active{border-color:var(--acid);color:var(--acid);box-shadow:0 0 6px rgba(232,255,0,.2)}
 .search-bar-wrap{padding:12px 16px;background:var(--bg);border-bottom:1px solid var(--border)}
-.search-input{width:100%;background:var(--surface);border:1px solid var(--border);border-bottom:2px solid var(--border);border-radius:0;padding:10px 14px;color:var(--text);font-family:var(--font-mono);font-size:13px;letter-spacing:.04em}
+.search-input{width:100%;background:var(--surface);border:1px solid var(--border);border-bottom:2px solid var(--border);border-radius:0;padding:13px 16px;color:var(--text);font-family:var(--font-mono);font-size:16px;letter-spacing:.04em}
 .search-input:focus{outline:none;border-color:var(--acid);box-shadow:0 0 0 1px rgba(232,255,0,.3)}
 .muscle-filter{display:flex;gap:6px;padding:10px 16px;overflow-x:auto;scrollbar-width:none}
 .muscle-filter::-webkit-scrollbar{display:none}
-.mf-chip{flex-shrink:0;padding:5px 12px;border-radius:0;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;font-family:var(--font-condensed);letter-spacing:.1em;text-transform:uppercase}
+.mf-chip{flex-shrink:0;padding:8px 14px;border-radius:0;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-condensed);letter-spacing:.08em;text-transform:uppercase}
 .mf-chip.active{background:var(--acid);border-color:var(--acid);color:#060809;box-shadow:0 0 8px rgba(232,255,0,.3)}
-.lib-item{display:flex;align-items:flex-start;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border)}
+.lib-item{display:flex;align-items:flex-start;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border)}
 .lib-item-left{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0;margin-right:10px}
 .lib-name{font-size:14px;font-weight:700;font-family:var(--font-condensed);letter-spacing:.04em;text-transform:uppercase;color:var(--text);line-height:1.3}
 .lib-meta{font-size:12px;color:var(--muted)}
@@ -161,12 +161,12 @@ body::before{animation:scanpulse 3s ease-in-out infinite}
 .muscle-pill.traps{background:rgba(255,200,150,.15);color:#ffaa40}
 .muscle-pill.forearms{background:rgba(150,255,150,.15);color:#80ff80}
 .lib-eq{font-size:12px;color:var(--muted);font-family:var(--font-mono)}
-.lib-add-btn{background:var(--surface2);border:1px solid var(--border);border-radius:0;padding:6px 12px;color:var(--accent);font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0}
+.lib-add-btn{background:var(--surface2);border:1px solid var(--border);border-radius:0;padding:9px 14px;color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0}
 .lib-count{font-family:var(--font-mono);font-size:12px;color:var(--muted);padding:8px 16px;border-bottom:1px solid var(--border);letter-spacing:.08em}
 .create-form{padding:16px;display:flex;flex-direction:column;gap:14px}
 .form-group{display:flex;flex-direction:column;gap:6px}
-.form-label{font-size:10px;text-transform:uppercase;letter-spacing:.18em;color:var(--muted);font-weight:700;font-family:var(--font-condensed)}
-.form-input{background:var(--surface);border:1px solid var(--border);border-radius:0;padding:12px 14px;color:var(--text);font-family:var(--font-body);font-size:14px}
+.form-label{font-size:13px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);font-weight:700;font-family:var(--font-condensed)}
+.form-input{background:var(--surface);border:1px solid var(--border);border-radius:0;padding:13px 14px;color:var(--text);font-family:var(--font-body);font-size:16px}
 .form-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
 select.form-input{-webkit-appearance:none}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -174,13 +174,13 @@ select.form-input{-webkit-appearance:none}
 .divider{height:1px;background:var(--border);margin:4px 16px 12px}
 .spacer{height:24px}
 input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--accent);color:#f0e8e0;padding:10px 20px;border-radius:0;font-weight:700;font-size:12px;letter-spacing:.1em;font-family:var(--font-display);z-index:9999;transition:transform .3s ease;white-space:nowrap;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%)}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--accent);color:#f0e8e0;padding:12px 24px;border-radius:0;font-weight:700;font-size:14px;letter-spacing:.1em;font-family:var(--font-display);z-index:9999;transition:transform .3s ease;white-space:nowrap;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%)}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .empty-state{padding:40px 16px;text-align:center;color:var(--muted);font-size:14px}
 .empty-icon{font-size:40px;margin-bottom:12px}
 .lib-tabs{display:flex;border-bottom:1px solid var(--border)}
 .day-pick-btn{width:100%;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--border);border-radius:0;cursor:pointer;font-family:var(--font-display);font-size:18px;color:var(--muted);transition:all .15s;padding:0}
-.day-pick-btn .day-abbr{font-size:8px;font-family:var(--font-condensed);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.day-pick-btn .day-abbr{font-size:11px;font-family:var(--font-condensed);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .day-pick-btn.selected{background:rgba(232,255,0,.06);border-color:var(--acid);border-top-color:var(--acid);color:var(--acid);box-shadow:0 0 12px rgba(232,255,0,.2)}
 .day-pick-btn.selected .day-abbr{color:var(--acid)}
 .split-option{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:0;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
@@ -190,25 +190,25 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
 .split-option-name{font-family:var(--font-condensed);font-size:19px;font-weight:900;letter-spacing:.05em;color:var(--text);text-transform:uppercase}
 .split-option.selected .split-option-name{color:var(--acid)}
 .split-option-meta{font-size:12px;color:var(--muted);margin-top:3px;font-family:var(--font-body);font-weight:400;letter-spacing:0;line-height:1.4}
-.split-rec-tag{font-size:9px;font-family:var(--font-body);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#080b0d;background:var(--accent);padding:2px 6px;margin-left:auto;flex-shrink:0}
+.split-rec-tag{font-size:11px;font-family:var(--font-body);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#080b0d;background:var(--accent);padding:3px 8px;margin-left:auto;flex-shrink:0}
 .gen-day-card{margin:0 16px 10px;background:var(--surface);border:1px solid var(--border);border-left:2px solid var(--border);overflow:hidden}
 .gen-day-card.training{border-left-color:var(--accent)}
 .gen-day-hdr{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
-.gen-day-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.gen-day-label{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .gen-day-name{font-family:var(--font-display);font-size:20px;letter-spacing:3px;color:var(--acid);margin-top:2px;text-shadow:0 0 8px rgba(232,255,0,.3)}
-.gen-day-sub{font-size:11px;color:var(--muted);margin-top:1px}
-.gen-day-rest{padding:12px 16px;font-family:var(--font-display);font-size:13px;letter-spacing:.15em;color:var(--muted)}
-.week-badge{background:rgba(255,106,0,.12);border:1px solid rgba(255,106,0,.3);color:var(--orange);font-size:10px;font-family:var(--font-mono);padding:3px 8px;letter-spacing:.06em}
-.rtab{flex:1;padding:10px 4px;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:var(--font-condensed);font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;white-space:nowrap}
+.gen-day-sub{font-size:13px;color:var(--muted);margin-top:1px}
+.gen-day-rest{padding:12px 16px;font-family:var(--font-display);font-size:14px;letter-spacing:.12em;color:var(--muted)}
+.week-badge{background:rgba(255,106,0,.12);border:1px solid rgba(255,106,0,.3);color:var(--orange);font-size:12px;font-family:var(--font-mono);padding:5px 10px;letter-spacing:.06em}
+.rtab{flex:1;padding:12px 6px;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:var(--font-condensed);font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;white-space:nowrap}
 .rtab.active{color:var(--acid);border-bottom-color:var(--acid);text-shadow:0 0 6px rgba(232,255,0,.4)}
 .routine-meta-card{margin:12px 16px;background:linear-gradient(135deg,#060d12,#0e1215);border:1px solid var(--border);border-left:3px solid #ff6a00;border-radius:0;padding:16px;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)}
-.science-badge{display:inline-block;padding:4px 10px;border-radius:0;font-size:10px;letter-spacing:.1em;font-family:var(--font-mono);background:rgba(232,255,0,.06);color:var(--acid);border:1px solid rgba(232,255,0,.3);white-space:nowrap;flex-shrink:0}
+.science-badge{display:inline-block;padding:5px 12px;border-radius:0;font-size:12px;letter-spacing:.08em;font-family:var(--font-mono);background:rgba(232,255,0,.06);color:var(--acid);border:1px solid rgba(232,255,0,.3);white-space:nowrap;flex-shrink:0}
 .science-notes{margin-top:14px;display:flex;flex-direction:column;gap:6px}
-.sn-row{display:flex;justify-content:space-between;align-items:center;font-size:12px}
+.sn-row{display:flex;justify-content:space-between;align-items:center;font-size:13px}
 .sn-key{color:var(--muted);font-weight:500}
-.sn-val{color:var(--text);font-family:var(--font-mono);font-size:12px}
-.rest-day-row{padding:10px 16px;font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.12em;text-transform:uppercase;border-bottom:1px solid var(--border);margin:0 0 10px;border-left:2px solid var(--border);margin-left:16px;margin-right:16px}
-.lib-tab{flex:1;padding:11px;text-align:center;font-size:10px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;font-family:var(--font-condensed);letter-spacing:.15em;text-transform:uppercase}
+.sn-val{color:var(--text);font-family:var(--font-mono);font-size:13px}
+.rest-day-row{padding:12px 16px;font-size:13px;color:var(--muted);font-weight:600;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid var(--border);margin:0 0 10px;border-left:2px solid var(--border);margin-left:16px;margin-right:16px}
+.lib-tab{flex:1;padding:14px;text-align:center;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;font-family:var(--font-condensed);letter-spacing:.12em;text-transform:uppercase}
 .lib-tab.active{color:var(--acid);border-bottom-color:var(--acid);text-shadow:0 0 6px rgba(232,255,0,.4)}
 
 /* ── POST-SESSION FEEDBACK ── */
@@ -216,28 +216,28 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
 .feedback-overlay.show{display:flex}
 .feedback-inner{padding:24px 20px;display:flex;flex-direction:column;gap:20px;max-width:500px;width:100%;margin:0 auto}
 .feedback-title{font-family:var(--font-display);font-size:32px;letter-spacing:4px;color:var(--acid);text-shadow:0 0 16px rgba(232,255,0,.5)}
-.feedback-sub{font-size:13px;color:var(--muted);margin-top:-14px}
+.feedback-sub{font-size:14px;color:var(--muted);margin-top:-14px}
 .feedback-section{background:var(--surface);border:1px solid var(--border);border-top:2px solid #ff6a00;padding:16px}
 .feedback-label{font-family:var(--font-display);font-size:18px;letter-spacing:.2em;color:var(--acid);margin-bottom:4px}
-.feedback-desc{font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+.feedback-desc{font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.5}
 input[type=range].feedback-range{width:100%;-webkit-appearance:none;height:6px;background:var(--border);outline:none;border-radius:0;display:block}
 input[type=range].feedback-range::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:var(--accent);border-radius:0;cursor:pointer;box-shadow:0 0 10px rgba(0,240,208,.5)}
 input[type=range].feedback-range.orange::-webkit-slider-thumb{background:#ff6a00;box-shadow:0 0 10px rgba(255,106,0,.5)}
 input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff;box-shadow:0 0 10px rgba(157,92,255,.5)}
-.slider-val-row{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:6px;letter-spacing:.04em}
+.slider-val-row{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-top:6px;letter-spacing:.04em}
 .slider-current{font-family:var(--font-mono);font-size:18px;text-align:center;margin-top:6px}
 .feedback-save-btn{padding:16px;background:var(--accent);color:#080b0d;border:none;font-family:var(--font-display);font-size:22px;letter-spacing:3px;cursor:pointer;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);width:100%}
-.feedback-skip{background:none;border:none;color:var(--muted);font-size:13px;text-align:center;cursor:pointer;padding:8px;text-decoration:underline;width:100%}
+.feedback-skip{background:none;border:none;color:var(--muted);font-size:15px;text-align:center;cursor:pointer;padding:10px;text-decoration:underline;width:100%}
 .vl-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 12px}
 .vl-card{background:var(--surface);border:1px solid var(--border);padding:12px;position:relative;overflow:hidden}
 .vl-muscle{font-size:14px;text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;font-weight:700;font-family:var(--font-condensed)}
 .vl-sets{font-family:var(--font-display);font-size:26px;letter-spacing:1px}
-.vl-sets span{font-size:11px;font-family:var(--font-body);color:var(--muted)}
+.vl-sets span{font-size:13px;font-family:var(--font-body);color:var(--muted)}
 .vl-bar-bg{height:6px;background:var(--border);margin-top:8px;position:relative}
 .vl-mev-mark{position:absolute;top:-3px;width:2px;height:12px;background:#9d5cff;z-index:1}
 .vl-mrv-mark{position:absolute;top:-3px;width:2px;height:12px;background:var(--danger);z-index:1}
 .vl-fill{height:100%;transition:width .5s ease;border-radius:0}
-.vl-status{font-size:9px;margin-top:5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.vl-status{font-size:12px;margin-top:5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
 .vl-status.below{color:var(--muted)}
 .vl-status.mev{color:#ff6a00}
 .vl-status.mav{color:var(--accent)}
@@ -249,7 +249,7 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
 .wdot.done{background:var(--acid);border-color:var(--acid);color:#060809}
 .wdot.current{border-color:var(--acid);color:var(--acid);box-shadow:0 0 8px rgba(232,255,0,.3)}
 .wdot.deload{background:#9d5cff;border-color:#9d5cff;color:#000}
-.meso-week-dot span{font-size:9px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.meso-week-dot span{font-size:12px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
 .deload-banner{margin:0 16px 12px;background:rgba(157,92,255,.08);border:1px solid #9d5cff;border-left:3px solid #9d5cff;padding:14px}
 .deload-title{font-family:var(--font-display);font-size:20px;letter-spacing:1px;color:#9d5cff}
 .bw-input-row{display:flex;gap:10px;padding:0 16px 12px;align-items:center}
@@ -257,7 +257,7 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
 .bw-input:focus{outline:none;border-color:var(--accent)}
 .bw-log-btn{padding:12px 20px;background:#ff6a00;color:#000;border:none;font-family:var(--font-display);font-size:18px;letter-spacing:1px;cursor:pointer}
 .bw-entry{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid var(--border)}
-.bw-date{font-size:12px;color:var(--muted)}
+.bw-date{font-size:14px;color:var(--muted)}
 .bw-val{font-family:var(--font-mono);font-size:22px;letter-spacing:2px;color:var(--acid);text-shadow:0 0 6px rgba(232,255,0,.3)}
 .bw-change.up{color:var(--danger)}.bw-change.down{color:var(--success)}
 </style>
@@ -280,7 +280,7 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
     <div class="modal-hdr">
       <div style="display:flex;flex-direction:column;gap:2px">
         <div class="modal-title" id="historyModalTitle">HISTORY</div>
-        <div style="font-size:10px;color:var(--muted);font-family:var(--font-mono);letter-spacing:.08em" id="historyModalSub"></div>
+        <div style="font-size:13px;color:var(--muted);font-family:var(--font-mono);letter-spacing:.06em" id="historyModalSub"></div>
       </div>
       <button class="modal-close" onclick="closeExHistory()">&#x2715;</button>
     </div>
@@ -294,7 +294,7 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
       <div class="modal-title">ADD EXERCISE</div>
       <button class="modal-close" onclick="closeAddExModal()">&#x2715;</button>
     </div>
-    <div style="padding:8px 16px;font-size:11px;color:var(--muted);font-family:var(--font-mono);border-bottom:1px solid var(--border)">// Saves to this session for the rest of the cycle</div>
+    <div style="padding:10px 16px;font-size:13px;color:var(--muted);font-family:var(--font-mono);border-bottom:1px solid var(--border)">// Saves to this session for the rest of the cycle</div>
     <div class="modal-search">
       <input class="search-input" type="search" placeholder="Search exercises&#x2026;" id="addExSearch" oninput="renderAddExList()">
     </div>
@@ -326,14 +326,14 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
       <div class="header-sub" style="padding-left:11px">HYPERTROPHY SYSTEM</div>
     </div>
     <div style="text-align:right">
-      <div style="font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase" id="dashDateLabel"></div>
+      <div style="font-size:13px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase" id="dashDateLabel"></div>
       <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);margin-top:2px" id="dashDayLabel"></div>
     </div>
   </div>
 
   <!-- week strip -->
   <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0">
-    <div style="font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase">THIS WEEK</div>
+    <div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase">THIS WEEK</div>
     <div style="font-family:var(--font-display);font-size:18px;letter-spacing:2px;color:var(--acid)" id="dashWeekCounter"></div>
   </div>
   <div class="week-strip" id="dashWeekStrip"></div>
@@ -368,7 +368,7 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
         <div class="timer-badge" id="workoutTimer" style="color:var(--muted)">READY</div>
-        <button id="histToggle" onclick="toggleHistory()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:10px;padding:4px 10px;cursor:pointer;letter-spacing:.08em">LAST SESSION &#x25BC;</button>
+        <button id="histToggle" onclick="toggleHistory()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:13px;padding:7px 12px;cursor:pointer;letter-spacing:.06em">LAST SESSION &#x25BC;</button>
       </div>
     </div>
     <div id="lastSessionPanel" style="display:none;background:#080e12;border-bottom:1px solid var(--border);padding:10px 14px;overflow-x:auto"></div>
@@ -404,18 +404,18 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
     <div style="padding:16px">
 
       <!-- FREQUENCY PICKER -->
-      <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.12em;margin-bottom:10px">// WORKOUTS PER WEEK (TARGET)</div>
+      <div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);letter-spacing:.1em;margin-bottom:10px">// WORKOUTS PER WEEK (TARGET)</div>
       <div style="display:flex;gap:8px;margin-bottom:20px" id="freqPickerGrid"></div>
 
       <!-- RECOMMENDATION -->
       <div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--acid);padding:12px;margin-bottom:16px" id="splitRecommendation">
-        <div style="font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:.12em;margin-bottom:6px">// RECOMMENDATION</div>
+        <div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);letter-spacing:.08em;margin-bottom:6px">// RECOMMENDATION</div>
         <div style="font-family:var(--font-display);font-size:22px;letter-spacing:2px;color:var(--acid)" id="recSplitName"></div>
         <div style="font-size:12px;color:var(--muted);margin-top:4px;font-family:var(--font-body)" id="recSplitDesc">Select your training days above</div>
       </div>
 
       <!-- SPLIT SELECTOR -->
-      <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.12em;margin-bottom:10px">// CHOOSE SPLIT</div>
+      <div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);letter-spacing:.08em;margin-bottom:10px">// CHOOSE SPLIT</div>
       <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px" id="splitOverrideList"></div>
 
       <!-- GENERATE -->
@@ -430,7 +430,7 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
         <button onclick="goToStep1()" style="background:none;border:1px solid var(--border);color:var(--muted);padding:6px 12px;font-size:18px;cursor:pointer;font-family:var(--font-mono)">&larr;</button>
         <div>
           <div style="font-family:var(--font-display);font-size:22px;letter-spacing:2px;color:var(--acid)" id="genProgramTitle">PROGRAM</div>
-          <div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-family:var(--font-mono)" id="genProgramMeta"></div>
+          <div style="font-size:13px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;font-family:var(--font-mono)" id="genProgramMeta"></div>
         </div>
       </div>
     </div>
@@ -470,15 +470,15 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
   <!-- VOLUME LANDMARKS TAB -->
   <div id="an-volume" style="display:none">
     <div style="padding:12px 16px 4px">
-      <div style="font-size:10px;font-family:var(--font-mono);color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">// weekly sets vs landmarks</div>
-      <div style="display:flex;gap:16px;font-size:10px;color:var(--muted);margin-bottom:8px;font-family:var(--font-mono)">
+      <div style="font-size:13px;font-family:var(--font-mono);color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">// weekly sets vs landmarks</div>
+      <div style="display:flex;gap:16px;font-size:13px;color:var(--muted);margin-bottom:10px;font-family:var(--font-mono)">
         <span><span style="display:inline-block;width:8px;height:8px;background:#9d5cff;margin-right:4px"></span>MEV</span>
         <span><span style="display:inline-block;width:8px;height:8px;background:var(--acid);margin-right:4px"></span>MAV</span>
         <span><span style="display:inline-block;width:8px;height:8px;background:var(--danger);margin-right:4px"></span>MRV</span>
       </div>
     </div>
     <div class="vl-grid" id="vlGrid"></div>
-    <div style="margin:0 16px 12px;background:var(--surface);border:1px solid var(--border);border-left:2px solid var(--acid);padding:12px;font-size:11px;color:var(--muted);line-height:1.7;font-family:var(--font-mono)">
+    <div style="margin:0 16px 12px;background:var(--surface);border:1px solid var(--border);border-left:2px solid var(--acid);padding:12px 14px;font-size:13px;color:var(--muted);line-height:1.7;font-family:var(--font-mono)">
       MEV = Minimum Effective Volume &nbsp;|&nbsp; MAV = Maximum Adaptive Volume &nbsp;|&nbsp; MRV = Maximum Recoverable Volume
     </div>
   </div>
@@ -486,7 +486,7 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
   <!-- BODYWEIGHT TAB -->
   <div id="an-body" style="display:none">
     <div style="padding:16px 16px 8px">
-      <div style="font-size:10px;font-family:var(--font-mono);color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">// log bodyweight</div>
+      <div style="font-size:13px;font-family:var(--font-mono);color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">// log bodyweight</div>
       <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px">
         <input type="number" class="bw-input" id="bwManualInput" placeholder="e.g. 84.5" inputmode="decimal">
         <span style="color:var(--muted);font-size:13px;font-family:var(--font-mono)">kg</span>
@@ -520,10 +520,10 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
   </div>
   <div id="lib-create" style="display:none">
     <div style="padding:12px 16px;border-bottom:1px solid var(--border);background:var(--surface)">
-  <div style="font-size:10px;font-family:var(--font-mono);color:var(--muted);letter-spacing:.1em;margin-bottom:8px">// IMPORT FROM DATABASE</div>
+  <div style="font-size:13px;font-family:var(--font-mono);color:var(--muted);letter-spacing:.08em;margin-bottom:8px">// IMPORT FROM DATABASE</div>
   <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6">Fetch exercises from the free-exercise-db (800+ public domain exercises). Imports strength exercises only, filtered for hypertrophy-relevant equipment.</div>
   <button id="importBtn" onclick="importExerciseDB()" style="background:var(--acid);color:#060809;border:none;padding:10px 18px;font-family:var(--font-display);font-size:16px;letter-spacing:2px;cursor:pointer;width:100%">IMPORT EXERCISE DB</button>
-  <div id="importStatus" style="font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-top:8px;text-align:center"></div>
+  <div id="importStatus" style="font-family:var(--font-mono);font-size:13px;color:var(--muted);margin-top:8px;text-align:center"></div>
 </div>
 <div class="create-form">
       <div class="form-group">
@@ -623,7 +623,7 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
     </div>
 
     <div class="feedback-section">
-      <div class="feedback-label">BODYWEIGHT <span style="font-size:11px;color:var(--muted);font-family:var(--font-body)">(optional)</span></div>
+      <div class="feedback-label">BODYWEIGHT <span style="font-size:13px;color:var(--muted);font-family:var(--font-body)">(optional)</span></div>
       <div class="feedback-desc">Log today's bodyweight to track trends across the meso.</div>
       <div style="display:flex;gap:10px;align-items:center">
         <input type="number" class="bw-input" id="fbBodyweight" placeholder="kg" inputmode="decimal" style="flex:1">
@@ -1389,7 +1389,7 @@ function initFrequencyPicker() {
   grid.innerHTML = [2,3,4,5,6].map(n =>
     '<button class="day-pick-btn' + (weeklyTarget===n?' selected':'') + '" onclick="setFrequency(' + n + ')" style="flex:1;aspect-ratio:auto;padding:16px 0;flex-direction:column;gap:4px">'
     + '<span style="font-family:var(--font-display);font-size:26px">' + n + '</span>'
-    + '<span class="day-abbr" style="font-size:9px">' + (n===1?'DAY':'DAYS') + '</span>'
+    + '<span class="day-abbr" style="font-size:11px">' + (n===1?'DAY':'DAYS') + '</span>'
     + '</button>'
   ).join('');
   updateRecommendation();
@@ -1427,7 +1427,7 @@ function renderSplitOptions() {
     const bg = isSel ? 'rgba(232,255,0,.05)' : 'var(--surface)';
     const nameColor = isSel ? 'var(--acid)' : (incompatible ? 'var(--muted)' : 'var(--text)');
     const radioStyle = isSel ? 'background:var(--acid);border-color:var(--acid)' : 'background:none;border:2px solid var(--border)';
-    const recTag = key === recommendedSplit ? '<span style="font-size:9px;font-family:var(--font-mono);color:#060809;background:var(--acid);padding:2px 8px;margin-left:auto;flex-shrink:0">REC</span>' : '';
+    const recTag = key === recommendedSplit ? '<span style="font-size:11px;font-family:var(--font-mono);color:#060809;background:var(--acid);padding:3px 10px;margin-left:auto;flex-shrink:0">REC</span>' : '';
     return '<div data-split="' + key + '" class="split-opt-btn" style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:' + bg + ';border:1px solid ' + borderColor + ';border-left:3px solid ' + borderColor + ';cursor:pointer;margin-bottom:6px;opacity:' + (incompatible?'.45':'1') + '">'
       + '<div style="width:14px;height:14px;flex-shrink:0;margin-top:3px;' + radioStyle + '"></div>'
       + '<div style="flex:1;min-width:0">'
@@ -1461,12 +1461,12 @@ function goToStep2() {
   const sessionHtml = sessionList.map(({idx, session: s}) =>
     '<div style="margin:0 16px 6px;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--acid);overflow:hidden">'
     + '<div onclick="toggleExList(this)" style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">'
-    + '<div><div style="font-family:var(--font-mono);font-size:10px;color:var(--acid)">SESSION ' + idx + '</div>'
+    + '<div><div style="font-family:var(--font-mono);font-size:13px;color:var(--acid)">SESSION ' + idx + '</div>'
     + '<div style="font-family:var(--font-display);font-size:20px;letter-spacing:2px;color:var(--acid);margin-top:2px">' + s.name + '</div>'
-    + '<div style="font-size:11px;color:var(--muted);font-family:var(--font-body)">' + s.sub + '</div></div>'
-    + '<span style="font-family:var(--font-mono);font-size:10px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);padding:3px 8px">' + s.exercises.length + ' ex</span></div>'
-    + '<div style="display:none;border-top:1px solid var(--border);padding:10px 16px">'
-    + s.exercises.map(ex => '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:13px;font-weight:600;color:var(--text)">' + ex.name + '</div><div style="font-size:11px;color:var(--muted)">' + ex.muscle + '</div></div><span style="font-family:var(--font-mono);font-size:11px;color:var(--acid)">' + ex.sets + '\u00D7' + ex.reps + '</span></div>').join('')
+    + '<div style="font-size:13px;color:var(--muted);font-family:var(--font-body)">' + s.sub + '</div></div>'
+    + '<span style="font-family:var(--font-mono);font-size:12px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);padding:5px 10px">' + s.exercises.length + ' ex</span></div>'
+    + '<div style="display:none;border-top:1px solid var(--border);padding:12px 16px">'
+    + s.exercises.map(ex => '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:14px;font-weight:600;color:var(--text)">' + ex.name + '</div><div style="font-size:13px;color:var(--muted)">' + ex.muscle + '</div></div><span style="font-family:var(--font-mono);font-size:13px;color:var(--acid)">' + ex.sets + '\u00D7' + ex.reps + '</span></div>').join('')
     + '</div></div>'
   ).join('');
   document.getElementById('genProgramTitle').textContent = split.name.toUpperCase();
@@ -1587,8 +1587,8 @@ function renderDashboard() {
       deloadEl.style.display = 'block';
       deloadEl.innerHTML = '<div style="margin:0 16px 8px;background:rgba(157,92,255,.1);border:1px solid #9d5cff;border-left:3px solid #9d5cff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">'
         + '<div><div style="font-family:var(--font-display);font-size:16px;letter-spacing:2px;color:#9d5cff">DELOAD RECOMMENDED</div>'
-        + '<div style="font-size:11px;color:var(--muted);margin-top:3px;font-family:var(--font-mono)">' + (flag.reason||'') + '</div></div>'
-        + '<button onclick="clearDeloadFlag()" style="background:none;border:1px solid #9d5cff;color:#9d5cff;padding:6px 12px;font-size:11px;cursor:pointer;font-family:var(--font-mono)">CLEAR</button>'
+        + '<div style="font-size:13px;color:var(--muted);margin-top:3px;font-family:var(--font-mono)">' + (flag.reason||'') + '</div></div>'
+        + '<button onclick="clearDeloadFlag()" style="background:none;border:1px solid #9d5cff;color:#9d5cff;padding:8px 14px;font-size:13px;cursor:pointer;font-family:var(--font-mono)">CLEAR</button>'
         + '</div>';
     } else {
       deloadEl.style.display = 'none';
@@ -1601,7 +1601,7 @@ function renderDashboard() {
     if (!prog) {
       progSection.innerHTML = '<div class="section-title"><span></span>ACTIVE PROGRAM</div>'
         + '<div style="margin:0 16px 12px;padding:16px;background:var(--surface);border:1px solid var(--border)">'
-        + '<div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.08em;margin-bottom:12px">// NO ACTIVE PROGRAM DETECTED<br>// INITIALISE A MESOCYCLE TO BEGIN</div>'
+        + '<div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);letter-spacing:.06em;margin-bottom:12px">// NO ACTIVE PROGRAM DETECTED<br>// INITIALISE A MESOCYCLE TO BEGIN</div>'
         + '<button data-goto="program" style="background:none;border:2px solid var(--acid);color:var(--acid);padding:12px 20px;font-family:var(--font-display);font-size:17px;letter-spacing:3px;cursor:pointer">BUILD PROGRAM &#x2192;</button>'
         + '</div>';
     } else {
@@ -1646,13 +1646,13 @@ function renderDashboard() {
   const exList = session.exercises.slice(0,4).map(ex =>
     '<div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border)">'
     + '<span style="color:var(--text)">' + ex.name + '</span>'
-    + '<span style="color:var(--muted);font-family:var(--font-mono);font-size:11px">' + ex.sets + 'x' + ex.reps + '</span></div>'
+    + '<span style="color:var(--muted);font-family:var(--font-mono);font-size:13px">' + ex.sets + 'x' + ex.reps + '</span></div>'
   ).join('');
-  const moreText = session.exercises.length > 4 ? '<div style="font-size:12px;color:var(--muted);margin-top:6px">+' + (session.exercises.length-4) + ' more</div>' : '';
+  const moreText = session.exercises.length > 4 ? '<div style="font-size:13px;color:var(--muted);margin-top:6px">+' + (session.exercises.length-4) + ' more</div>' : '';
   const sessionLabel = alreadyLogged ? '// NEXT SESSION' : '// SESSION ' + (sessionIdx+1) + ' OF ' + prog.sessions.length;
   todaySection.innerHTML = '<div class="section-title"><span></span>' + (alreadyLogged ? 'NEXT UP' : 'TODAY') + '</div>'
     + '<div style="margin:0 16px 12px;background:var(--surface);border:1px solid var(--border);padding:16px">'
-    + '<div style="font-family:var(--font-mono);font-size:10px;color:var(--acid);letter-spacing:.1em;margin-bottom:6px">' + sessionLabel + '</div>'
+    + '<div style="font-family:var(--font-mono);font-size:13px;color:var(--acid);letter-spacing:.08em;margin-bottom:6px">' + sessionLabel + '</div>'
     + '<div class="card-title">' + session.name + '</div>'
     + '<div style="margin-bottom:10px">' + exList + moreText + '</div></div>'
     + (alreadyLogged
@@ -1734,7 +1734,7 @@ function renderLogStaticView(prog) {
     if (weekNum > 6) {
       cycleHtml = '<div style="margin:12px 16px 0;background:rgba(157,92,255,.08);border:1px solid #9d5cff;border-left:3px solid #9d5cff;padding:12px 16px">'
         + '<div style="font-family:var(--font-display);font-size:16px;letter-spacing:2px;color:#9d5cff">CYCLE COMPLETE — 6 WEEKS DONE</div>'
-        + '<div style="font-size:11px;color:var(--muted);margin-top:2px">Head to Home to restart or choose a new program.</div>'
+        + '<div style="font-size:13px;color:var(--muted);margin-top:2px">Head to Home to restart or choose a new program.</div>'
         + '</div>';
     }
   }
@@ -1744,7 +1744,7 @@ function renderLogStaticView(prog) {
     + '<div style="display:flex;justify-content:space-between;align-items:flex-start">'
     + '<div>'
     + '<div style="font-family:var(--font-display);font-size:32px;letter-spacing:4px;color:var(--acid);text-shadow:0 0 16px rgba(232,255,0,.4);line-height:1">' + daysText + '</div>'
-    + '<div style="font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-top:6px;letter-spacing:.1em">' + sessText + (sessionsLeft !== null ? ' · ' + sessionsLeft + ' TO GO' : '') + '</div>'
+    + '<div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);margin-top:6px;letter-spacing:.08em">' + sessText + (sessionsLeft !== null ? ' · ' + sessionsLeft + ' TO GO' : '') + '</div>'
     + '</div>'
     + '<button onclick="_goToDash()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:4px">&#x2715;</button>'
     + '</div></div>';
@@ -1765,7 +1765,7 @@ function renderLogStaticView(prog) {
       if (s && s.name) sessionName = s.name;
     }
     lastSessionHtml = '<div style="margin:14px 16px 0">'
-      + '<div style="font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px">'
+      + '<div style="font-family:var(--font-mono);font-size:12px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px">'
       + '<span style="display:block;width:2px;height:10px;background:var(--acid)"></span>LAST SESSION · ' + fmtDate(lastKey)
       + '</div>'
       + '<div style="background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);padding:14px">'
@@ -1775,7 +1775,7 @@ function renderLogStaticView(prog) {
       + _miniStat('VOLUME', vol + ' kg')
       + _miniStat('AVG RIR', lastEntry.rir != null ? lastEntry.rir : '—')
       + '</div>'
-      + (dur ? '<div style="margin-top:8px;font-family:var(--font-mono);font-size:10px;color:var(--muted)">' + dur + '</div>' : '')
+      + (dur ? '<div style="margin-top:8px;font-family:var(--font-mono);font-size:13px;color:var(--muted)">' + dur + '</div>' : '')
       + '</div></div>';
   }
 
@@ -1794,9 +1794,9 @@ function renderLogStaticView(prog) {
 }
 
 function _miniStat(label, value) {
-  return '<div style="background:var(--surface2);border:1px solid var(--border);padding:10px;text-align:center">'
-    + '<div style="font-size:9px;font-family:var(--font-mono);color:var(--muted);letter-spacing:.1em;margin-bottom:4px">' + label + '</div>'
-    + '<div style="font-family:var(--font-mono);font-size:18px;color:var(--acid)">' + value + '</div>'
+  return '<div style="background:var(--surface2);border:1px solid var(--border);padding:12px 10px;text-align:center">'
+    + '<div style="font-size:12px;font-family:var(--font-mono);color:var(--muted);letter-spacing:.08em;margin-bottom:4px">' + label + '</div>'
+    + '<div style="font-family:var(--font-mono);font-size:20px;color:var(--acid)">' + value + '</div>'
     + '</div>';
 }
 
@@ -1813,23 +1813,23 @@ function renderNextSessionInfo(prog, log) {
     const parts = (ex.reps||'6-15').split('-').map(Number);
     const sug = libEx ? calcSuggestion({...libEx, repMin: parts[0]||6, repMax: parts[1]||15}) : null;
     const sugText = sug
-      ? '<span style="font-family:var(--font-mono);font-size:11px;color:var(--acid);margin-left:8px">▲ '
+      ? '<span style="font-family:var(--font-mono);font-size:12px;color:var(--acid);margin-left:8px">▲ '
         + (sug.type==='weight' ? sug.w+'kg · '+sug.r+' reps' : (sug.perSet ? sug.perSet[0].w+'kg · '+sug.perSet[0].r+' reps' : ''))
         + '</span>'
       : '';
-    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">'
-      + '<div style="flex:1"><div style="font-size:13px;color:var(--text);font-family:var(--font-condensed);text-transform:uppercase;letter-spacing:.03em">' + ex.name + '</div>'
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)">'
+      + '<div style="flex:1"><div style="font-size:14px;color:var(--text);font-family:var(--font-condensed);text-transform:uppercase;letter-spacing:.03em">' + ex.name + '</div>'
       + '<div style="display:flex;align-items:center;gap:6px;margin-top:2px"><span class="muscle-pill ' + (ex.muscle||'').toLowerCase() + '">' + (ex.muscle||'') + '</span>' + sugText + '</div></div>'
-      + '<span style="font-family:var(--font-mono);font-size:11px;color:var(--muted);flex-shrink:0;margin-left:8px">' + ex.sets + '×' + ex.reps + '</span>'
+      + '<span style="font-family:var(--font-mono);font-size:13px;color:var(--muted);flex-shrink:0;margin-left:8px">' + ex.sets + '×' + ex.reps + '</span>'
       + '</div>';
   }).join('');
-  const moreText = session.exercises.length > 5 ? '<div style="font-size:11px;color:var(--muted);margin-top:6px">+' + (session.exercises.length-5) + ' more</div>' : '';
+  const moreText = session.exercises.length > 5 ? '<div style="font-size:13px;color:var(--muted);margin-top:6px">+' + (session.exercises.length-5) + ' more</div>' : '';
 
   return '<div style="margin:14px 16px 0;background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--accent)">'
-    + '<div style="padding:12px 16px;border-bottom:1px solid var(--border)">'
-    + '<div style="font-family:var(--font-mono);font-size:10px;color:var(--accent);letter-spacing:.12em;margin-bottom:4px">// NEXT SESSION — ' + (sessionIdx+1) + ' OF ' + prog.sessions.length + '</div>'
+    + '<div style="padding:14px 16px;border-bottom:1px solid var(--border)">'
+    + '<div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);letter-spacing:.1em;margin-bottom:4px">// NEXT SESSION — ' + (sessionIdx+1) + ' OF ' + prog.sessions.length + '</div>'
     + '<div class="card-title" style="color:var(--acid)">' + (session.name||'SESSION') + '</div>'
-    + '<div style="font-size:11px;color:var(--muted);margin-top:2px;font-family:var(--font-body)">' + (session.sub||'') + '</div>'
+    + '<div style="font-size:13px;color:var(--muted);margin-top:2px;font-family:var(--font-body)">' + (session.sub||'') + '</div>'
     + '</div>'
     + '<div style="padding:0 16px 8px">' + exRows + moreText + '</div>'
     + '</div>';
@@ -1888,7 +1888,7 @@ function renderLoggedSession(entry, prog, todayDayKey) {
   const statCards = stats.map(s =>
     '<div style="background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--acid);padding:12px;position:relative">'
     + '<div style="position:absolute;top:0;right:0;width:8px;height:8px;background:var(--acid);clip-path:polygon(100% 0,0 0,100% 100%)"></div>'
-    + '<div style="font-size:9px;font-family:var(--font-mono);color:var(--muted);letter-spacing:.12em;margin-bottom:4px">' + s.l + '</div>'
+    + '<div style="font-size:12px;font-family:var(--font-mono);color:var(--muted);letter-spacing:.08em;margin-bottom:4px">' + s.l + '</div>'
     + '<div style="font-family:var(--font-mono);font-size:20px;color:var(--acid)">' + s.v + '</div>'
     + '</div>'
   ).join('');
@@ -1897,7 +1897,7 @@ function renderLoggedSession(entry, prog, todayDayKey) {
   let muscleHtml = '';
   if (entry.muscleBreakdown && Object.keys(entry.muscleBreakdown).length) {
     muscleHtml = '<div style="margin:0 16px 12px;background:var(--surface);border:1px solid var(--border);padding:14px">'
-      + '<div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:10px">// MUSCLE VOLUME</div>'
+      + '<div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);letter-spacing:.08em;margin-bottom:10px">// MUSCLE VOLUME</div>'
       + Object.entries(entry.muscleBreakdown).map(([m, sets]) =>
           '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border)">'
           + '<span class="muscle-pill ' + m.toLowerCase() + '">' + m + '</span>'
@@ -1978,27 +1978,27 @@ function renderNextSessionPreview(prog, todayDayKey) {
     const parts = (ex.reps||'6-15').split('-').map(Number);
     const sug = libEx ? calcSuggestion({...libEx, repMin:parts[0]||6, repMax:parts[1]||15}) : null;
     const sugText = sug
-      ? '<span style="font-family:var(--font-mono);font-size:11px;color:var(--acid);margin-left:8px">▲ '
+      ? '<span style="font-family:var(--font-mono);font-size:12px;color:var(--acid);margin-left:8px">▲ '
         + (sug.type==='weight' ? sug.w+'kg · '+sug.r+' reps' : (sug.perSet?sug.perSet[0].w+'kg · '+sug.perSet[0].r+' reps':''))
         + '</span>'
       : '';
-    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">'
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)">'
       + '<div style="flex:1">'
-      + '<div style="font-size:13px;color:var(--text);font-family:var(--font-condensed);text-transform:uppercase;letter-spacing:.03em">' + ex.name + '</div>'
+      + '<div style="font-size:14px;color:var(--text);font-family:var(--font-condensed);text-transform:uppercase;letter-spacing:.03em">' + ex.name + '</div>'
       + '<div style="display:flex;align-items:center;margin-top:2px">'
       + '<span class="muscle-pill ' + (ex.muscle||'').toLowerCase() + '">' + (ex.muscle||'') + '</span>'
       + sugText
       + '</div>'
       + '</div>'
-      + '<span style="font-family:var(--font-mono);font-size:11px;color:var(--muted);flex-shrink:0;margin-left:8px">' + ex.sets + '×' + ex.reps + '</span>'
+      + '<span style="font-family:var(--font-mono);font-size:13px;color:var(--muted);flex-shrink:0;margin-left:8px">' + ex.sets + '×' + ex.reps + '</span>'
       + '</div>';
   }).join('');
 
   return '<div style="margin:0 16px 12px;background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--accent);overflow:hidden">'
     + '<div style="padding:14px 16px;border-bottom:1px solid var(--border)">'
-    + '<div style="font-family:var(--font-mono);font-size:10px;color:var(--accent);letter-spacing:.12em;margin-bottom:4px">// NEXT SESSION — ' + dayLabel + '</div>'
+    + '<div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);letter-spacing:.1em;margin-bottom:4px">// NEXT SESSION — ' + dayLabel + '</div>'
     + '<div class="card-title" style="color:var(--acid)">' + (nextSession.name||'SESSION') + '</div>'
-    + '<div style="font-size:11px;color:var(--muted);margin-top:2px;font-family:var(--font-body)">' + (nextSession.sub||'') + '</div>'
+    + '<div style="font-size:13px;color:var(--muted);margin-top:2px;font-family:var(--font-body)">' + (nextSession.sub||'') + '</div>'
     + '</div>'
     + '<div style="padding:0 16px 8px">' + exRows + '</div>'
     + '</div>';
@@ -2106,13 +2106,13 @@ function renderExercises() {
   if (!container) return;
   container.innerHTML = sessionExercises.map((ex, ei) => {
     const sug = ex.suggestion;
-    const lastNote = sug ? '<div style="font-size:11px;color:var(--acid);padding:8px 14px;border-bottom:1px solid var(--border);font-family:var(--font-mono);opacity:.75">// ' + sug.msg + '</div>' : '';
+    const lastNote = sug ? '<div style="font-size:13px;color:var(--acid);padding:9px 14px;border-bottom:1px solid var(--border);font-family:var(--font-mono);opacity:.75">// ' + sug.msg + '</div>' : '';
     const progBadge = sug ? (sug.type==='weight'
-      ? '<span style="font-size:11px;font-weight:700;color:#060809;background:var(--acid);padding:3px 10px;margin-right:6px;letter-spacing:.06em;font-family:var(--font-mono)">\u25B2 +2.5KG</span>'
-      : '<span style="font-size:11px;font-weight:700;color:#060809;background:var(--orange);padding:3px 10px;margin-right:6px;letter-spacing:.06em;font-family:var(--font-mono)">\u25B2 +1 REP</span>') : '';
+      ? '<span style="font-size:13px;font-weight:700;color:#060809;background:var(--acid);padding:5px 12px;margin-right:6px;letter-spacing:.06em;font-family:var(--font-mono)">\u25B2 +2.5KG</span>'
+      : '<span style="font-size:13px;font-weight:700;color:#060809;background:var(--orange);padding:5px 12px;margin-right:6px;letter-spacing:.06em;font-family:var(--font-mono)">\u25B2 +1 REP</span>') : '';
     const sets = ex.sets_data.map((set, si) => {
       const hasSug = !set.done && (set.sugW || set.sugR);
-      const sugBar = hasSug ? '<div style="grid-column:2/4;font-size:10px;color:var(--acid);font-family:var(--font-mono);opacity:.65;text-align:center;padding-top:2px">\u25B2 ' + (set.sugW?set.sugW+'kg':'') + (set.sugW&&set.sugR?' \u00B7 ':'') + (set.sugR?set.sugR+' reps':'') + '</div>' : '';
+      const sugBar = hasSug ? '<div style="grid-column:2/4;font-size:12px;color:var(--acid);font-family:var(--font-mono);opacity:.65;text-align:center;padding-top:2px">\u25B2 ' + (set.sugW?set.sugW+'kg':'') + (set.sugW&&set.sugR?' \u00B7 ':'') + (set.sugR?set.sugR+' reps':'') + '</div>' : '';
       return '<div class="set-row' + (set.done?' completed':'') + '" id="sr-' + ei + '-' + si + '">'
         + '<div class="set-num">' + (si+1) + '</div>'
         + '<input class="set-input" type="number" placeholder="' + (set.sugW||'--') + '" value="' + set.w + '" oninput="updSet(' + ei + ',' + si + ',\'w\',this.value)" inputmode="decimal">'
@@ -2123,8 +2123,8 @@ function renderExercises() {
     const lastSess = getLastSession(ex.id);
     const lastBar = lastSess
       ? '<div style="display:flex;align-items:baseline;gap:10px;padding:7px 14px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.2);flex-wrap:wrap">'
-        + '<span style="font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:.12em;flex-shrink:0">LAST \u00B7 ' + fmtDate(lastSess.date) + '</span>'
-        + (lastSess.sets||[]).map((s,i) => '<span style="font-family:var(--font-mono);font-size:11px;color:var(--muted)"><span style="color:var(--text);opacity:.4">' + (i+1) + '</span> ' + (s.w||'\u2014') + 'kg\u00D7' + (s.r||'\u2014') + '</span>').join('<span style="color:var(--border);margin:0 3px">\u00B7</span>')
+        + '<span style="font-family:var(--font-mono);font-size:12px;color:var(--muted);letter-spacing:.08em;flex-shrink:0">LAST \u00B7 ' + fmtDate(lastSess.date) + '</span>'
+        + (lastSess.sets||[]).map((s,i) => '<span style="font-family:var(--font-mono);font-size:13px;color:var(--muted)"><span style="color:var(--text);opacity:.4">' + (i+1) + '</span> ' + (s.w||'\u2014') + 'kg\u00D7' + (s.r||'\u2014') + '</span>').join('<span style="color:var(--border);margin:0 3px">\u00B7</span>')
         + '</div>'
       : '';
     return '<div class="exercise-block">'
@@ -2213,10 +2213,10 @@ function renderSwapList() {
     return '<div class="swap-item" data-exid="' + e.id + '" style="padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;justify-content:space-between;align-items:center">'
       + '<div><div style="font-size:13px;font-weight:700;font-family:var(--font-condensed);text-transform:uppercase;color:var(--text)">' + e.name + '</div>'
       + '<div style="display:flex;gap:6px;margin-top:3px;align-items:center"><span class="muscle-pill ' + e.muscle.toLowerCase() + '">' + e.muscle + '</span>'
-      + '<span style="font-size:10px;color:var(--muted);font-family:var(--font-mono)">' + e.equip + '</span></div></div>'
-      + (isSame ? '<span style="font-size:9px;color:var(--acid);font-family:var(--font-mono);background:rgba(232,255,0,.1);padding:2px 6px">MATCH</span>' : '')
+      + '<span style="font-size:13px;color:var(--muted);font-family:var(--font-mono)">' + e.equip + '</span></div></div>'
+      + (isSame ? '<span style="font-size:11px;color:var(--acid);font-family:var(--font-mono);background:rgba(232,255,0,.1);padding:3px 8px">MATCH</span>' : '')
       + '</div>';
-  }).join('') || '<div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--font-mono);font-size:11px">// no matches</div>';
+  }).join('') || '<div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--font-mono);font-size:13px">// no matches</div>';
   list.querySelectorAll('.swap-item').forEach(item => {
     item.addEventListener('click', () => doSwap(item.getAttribute('data-exid')));
   });
@@ -2281,9 +2281,9 @@ function renderAddExList() {
     '<div class="swap-item" data-exid="' + e.id + '" style="padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;justify-content:space-between;align-items:center">'
     + '<div><div style="font-size:13px;font-weight:700;font-family:var(--font-condensed);text-transform:uppercase;color:var(--text)">' + e.name + '</div>'
     + '<div style="display:flex;gap:6px;margin-top:3px;align-items:center"><span class="muscle-pill ' + e.muscle.toLowerCase() + '">' + e.muscle + '</span>'
-    + '<span style="font-size:10px;color:var(--muted);font-family:var(--font-mono)">' + e.equip + '</span></div></div>'
+    + '<span style="font-size:13px;color:var(--muted);font-family:var(--font-mono)">' + e.equip + '</span></div></div>'
     + '</div>'
-  ).join('') || '<div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--font-mono);font-size:11px">// no matches</div>';
+  ).join('') || '<div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--font-mono);font-size:13px">// no matches</div>';
   list.querySelectorAll('.swap-item').forEach(item =>
     item.addEventListener('click', () => addExToSession(item.getAttribute('data-exid')))
   );
@@ -2426,12 +2426,12 @@ function toggleHistory() {
 function renderLastSession() {
   const panel = document.getElementById('lastSessionPanel');
   if (!panel) return;
-  if (!sessionExercises.length) { panel.innerHTML='<div style="font-size:11px;color:var(--muted);font-family:var(--font-mono)">// no exercises</div>'; return; }
-  let html = '<div style="font-size:10px;color:var(--acid);font-family:var(--font-mono);letter-spacing:.1em;margin-bottom:8px">// LAST SESSION</div><div style="display:flex;flex-direction:column;gap:8px">';
+  if (!sessionExercises.length) { panel.innerHTML='<div style="font-size:13px;color:var(--muted);font-family:var(--font-mono)">// no exercises</div>'; return; }
+  let html = '<div style="font-size:13px;color:var(--acid);font-family:var(--font-mono);letter-spacing:.08em;margin-bottom:8px">// LAST SESSION</div><div style="display:flex;flex-direction:column;gap:8px">';
   sessionExercises.forEach(ex => {
     const last = getLastSession(ex.id);
     if (!last || !last.sets || !last.sets.length) return;
-    html += '<div style="border-left:2px solid var(--border);padding-left:10px"><div style="font-size:11px;font-family:var(--font-condensed);color:var(--text);text-transform:uppercase;margin-bottom:4px">' + ex.name + '</div><div style="display:flex;gap:8px;flex-wrap:wrap">';
+    html += '<div style="border-left:2px solid var(--border);padding-left:10px"><div style="font-size:13px;font-family:var(--font-condensed);color:var(--text);text-transform:uppercase;margin-bottom:4px">' + ex.name + '</div><div style="display:flex;gap:8px;flex-wrap:wrap">';
     last.sets.forEach((s,i) => { html += '<span style="font-family:var(--font-mono);font-size:12px;color:var(--acid)">' + (i+1) + '. ' + (s.w||'?') + 'kg \u00D7 ' + (s.r||'?') + '</span>'; });
     html += '</div></div>';
   });
@@ -2480,12 +2480,12 @@ function renderFbVolumeRec() {
   const ws = getWeeklySetsByMuscle();
   const muscles = Object.keys(VOLUME_LANDMARKS).filter(m => ws[m] > 0);
   if (!muscles.length) { el.innerHTML='<div style="font-size:12px;color:var(--muted)">No volume data yet.</div>'; return; }
-  let html = '<div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-family:var(--font-mono)">// THIS WEEK</div>';
+  let html = '<div style="font-size:13px;color:var(--muted);margin-bottom:8px;font-family:var(--font-mono)">// THIS WEEK</div>';
   muscles.forEach(m => {
     const lm = VOLUME_LANDMARKS[m], sets = ws[m]||0;
     const pct = Math.min(100, Math.round((sets/lm.mrv)*100));
     const color = sets < lm.mev ? 'var(--muted)' : sets <= lm.mav_hi ? 'var(--acid)' : sets <= lm.mrv ? '#ff6a00' : 'var(--danger)';
-    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:10px;color:var(--muted);width:70px;flex-shrink:0;font-family:var(--font-mono)">' + m + '</span><div style="flex:1;height:4px;background:var(--border)"><div style="height:100%;width:' + pct + '%;background:' + color + '"></div></div><span style="font-size:10px;font-family:var(--font-mono);color:' + color + ';width:48px;text-align:right">' + sets + ' sets</span></div>';
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:13px;color:var(--muted);width:80px;flex-shrink:0;font-family:var(--font-mono)">' + m + '</span><div style="flex:1;height:5px;background:var(--border)"><div style="height:100%;width:' + pct + '%;background:' + color + '"></div></div><span style="font-size:13px;font-family:var(--font-mono);color:' + color + ';width:52px;text-align:right">' + sets + ' sets</span></div>';
   });
   el.innerHTML = html;
 }
@@ -2600,7 +2600,7 @@ function renderAnalytics() {
   const entries = Object.entries(log).filter(([k]) => k>=startStr && k<=todayStr);
   entries.sort((a,b) => a[0].localeCompare(b[0]));
   if (!entries.length) {
-    body.innerHTML = '<div style="padding:40px 0;text-align:center"><div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.15em;margin-bottom:10px">// NO DATA</div><div style="font-size:13px;color:var(--muted)">No workouts in this period.</div></div>';
+    body.innerHTML = '<div style="padding:40px 0;text-align:center"><div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);letter-spacing:.1em;margin-bottom:10px">// NO DATA</div><div style="font-size:14px;color:var(--muted)">No workouts in this period.</div></div>';
     return;
   }
   const tS=entries.reduce((s,[,e])=>s+(e.sets||0),0);
@@ -2612,12 +2612,12 @@ function renderAnalytics() {
   const aV=tW?Math.round(tV/tW):0;
   const pL=analyticsPeriod==='week'?'LAST 7 DAYS':analyticsPeriod==='month'?'LAST 4 WEEKS':'ALL TIME';
   const cards=[{l:'WORKOUTS',v:tW,u:''},{l:'TOTAL SETS',v:tS,u:''},{l:'TOTAL VOLUME',v:(tV>=1000?(tV/1000).toFixed(1)+'k':tV),u:'kg'},{l:'AVG SETS/SESSION',v:aS,u:''},{l:'AVG VOLUME',v:(aV>=1000?(aV/1000).toFixed(1)+'k':aV),u:'kg'},{l:'AVG RIR',v:aR||'\u2014',u:''}];
-  let html='<div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.15em;margin-bottom:8px">// '+pL+'</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">';
-  cards.forEach(c=>{html+='<div style="background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--acid);padding:14px;position:relative"><div style="position:absolute;top:0;right:0;width:8px;height:8px;background:var(--acid);clip-path:polygon(100% 0,0 0,100% 100%)"></div><div style="font-size:9px;font-family:var(--font-mono);color:var(--muted);letter-spacing:.12em;margin-bottom:6px">'+c.l+'</div><div style="font-family:var(--font-mono);font-size:24px;color:var(--acid)">'+c.v+'<span style="font-size:12px;color:var(--muted)">'+(c.u?' '+c.u:'')+'</span></div></div>';});
-  html+='</div><div style="background:var(--surface);border:1px solid var(--border);overflow:hidden"><div style="padding:10px 14px;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:10px;color:var(--muted)">// SESSION HISTORY</div>';
+  let html='<div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);letter-spacing:.1em;margin-bottom:8px">// '+pL+'</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">';
+  cards.forEach(c=>{html+='<div style="background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--acid);padding:14px;position:relative"><div style="position:absolute;top:0;right:0;width:8px;height:8px;background:var(--acid);clip-path:polygon(100% 0,0 0,100% 100%)"></div><div style="font-size:12px;font-family:var(--font-mono);color:var(--muted);letter-spacing:.1em;margin-bottom:6px">'+c.l+'</div><div style="font-family:var(--font-mono);font-size:24px;color:var(--acid)">'+c.v+'<span style="font-size:13px;color:var(--muted)">'+(c.u?' '+c.u:'')+'</span></div></div>';});
+  html+='</div><div style="background:var(--surface);border:1px solid var(--border);overflow:hidden"><div style="padding:12px 14px;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:13px;color:var(--muted)">// SESSION HISTORY</div>';
   entries.slice().reverse().forEach(([k,e])=>{
     const vol=(e.volume||0)>=1000?((e.volume||0)/1000).toFixed(1)+'k':(e.volume||0);
-    html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border)"><div><div style="font-family:var(--font-mono);font-size:13px;color:var(--text)">'+k+'</div><div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-top:2px">'+(e.sets||0)+' sets \u00B7 '+vol+' kg'+(e.rir!=null?' \u00B7 RIR '+e.rir:'')+'</div></div><div style="font-family:var(--font-display);font-size:20px;color:var(--acid)">'+(e.sets||0)+'<span style="font-size:11px;color:var(--muted)"> sets</span></div></div>';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border)"><div><div style="font-family:var(--font-mono);font-size:14px;color:var(--text)">'+k+'</div><div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);margin-top:2px">'+(e.sets||0)+' sets \u00B7 '+vol+' kg'+(e.rir!=null?' \u00B7 RIR '+e.rir:'')+'</div></div><div style="font-family:var(--font-display);font-size:20px;color:var(--acid)">'+(e.sets||0)+'<span style="font-size:13px;color:var(--muted)"> sets</span></div></div>';
   });
   html += '</div>';
   body.innerHTML = html;
@@ -2648,7 +2648,7 @@ function renderLibrary() {
   const el = document.getElementById("libraryList"); if(!el) return;
   if (!list.length) { el.innerHTML="<div class='empty-state'><div>No exercises found</div></div>"; return; }
   el.innerHTML = list.map(e => {
-    const customTag = e.custom ? '<span style="color:var(--acid);font-size:9px;font-weight:700"> CUSTOM</span>' : '';
+    const customTag = e.custom ? '<span style="color:var(--acid);font-size:11px;font-weight:700"> CUSTOM</span>' : '';
     const hasDel = e.custom;
     const hist = getHistory(e.id);
     const histBtn = hist.length
@@ -2676,18 +2676,18 @@ function openExHistory(exId, exName) {
   } else {
     contentEl.innerHTML = hist.map(entry => {
       const setsHtml = (entry.sets || []).map((s, i) =>
-        '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">'
-        + '<span style="font-family:var(--font-mono);font-size:11px;color:var(--muted)">SET ' + (i+1) + '</span>'
+        '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">'
+        + '<span style="font-family:var(--font-mono);font-size:13px;color:var(--muted)">SET ' + (i+1) + '</span>'
         + '<div style="display:flex;gap:16px">'
-        + '<span style="font-family:var(--font-mono);font-size:14px;color:var(--text)">' + (s.w||'—') + '<span style="font-size:10px;color:var(--muted)"> kg</span></span>'
-        + '<span style="font-family:var(--font-mono);font-size:14px;color:var(--text)">' + (s.r||'—') + '<span style="font-size:10px;color:var(--muted)"> reps</span></span>'
+        + '<span style="font-family:var(--font-mono);font-size:15px;color:var(--text)">' + (s.w||'—') + '<span style="font-size:13px;color:var(--muted)"> kg</span></span>'
+        + '<span style="font-family:var(--font-mono);font-size:15px;color:var(--text)">' + (s.r||'—') + '<span style="font-size:13px;color:var(--muted)"> reps</span></span>'
         + '</div></div>'
       ).join('');
       const totalVol = (entry.sets || []).reduce((sum, s) => sum + (parseFloat(s.w)||0) * (parseInt(s.r)||0), 0);
       return '<div style="padding:14px 16px;border-bottom:2px solid var(--border)">'
         + '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">'
         + '<span style="font-family:var(--font-display);font-size:18px;letter-spacing:2px;color:var(--acid)">' + fmtDate(entry.date) + '</span>'
-        + '<span style="font-family:var(--font-mono);font-size:10px;color:var(--muted)">' + (entry.sets||[]).length + ' sets · ' + Math.round(totalVol) + 'kg vol</span>'
+        + '<span style="font-family:var(--font-mono);font-size:13px;color:var(--muted)">' + (entry.sets||[]).length + ' sets · ' + Math.round(totalVol) + 'kg vol</span>'
         + '</div>' + setsHtml + '</div>';
     }).join('');
   }
