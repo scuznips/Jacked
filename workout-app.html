@@ -466,6 +466,7 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
     <div class="lib-tab" id="an-tab-volume" onclick="switchAnTab('volume')">Volume</div>
     <div class="lib-tab" id="an-tab-charts" onclick="switchAnTab('charts')">Charts</div>
     <div class="lib-tab" id="an-tab-body" onclick="switchAnTab('body')">Body</div>
+    <div class="lib-tab" id="an-tab-data" onclick="switchAnTab('data')">Data</div>
   </div>
 
   <!-- STATS TAB -->
@@ -517,6 +518,42 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
       </div>
     </div>
     <div id="bwList"></div>
+  </div>
+
+  <!-- DATA TAB -->
+  <div id="an-data" style="display:none">
+    <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+
+      <!-- storage summary -->
+      <div id="dataSummaryCard" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--acid);padding:14px 16px"></div>
+
+      <!-- export -->
+      <div style="background:var(--surface);border:1px solid var(--border);padding:16px">
+        <div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);letter-spacing:.1em;margin-bottom:10px">// EXPORT BACKUP</div>
+        <div style="font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.6">Download all your workouts, program, bodyweight, and history as a JSON file. Keep it somewhere safe.</div>
+        <button onclick="exportBackup()" style="width:100%;padding:14px;background:var(--acid);color:#060809;border:none;font-family:var(--font-display);font-size:18px;letter-spacing:3px;cursor:pointer;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%)">DOWNLOAD BACKUP</button>
+      </div>
+
+      <!-- import -->
+      <div style="background:var(--surface);border:1px solid var(--border);padding:16px">
+        <div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);letter-spacing:.1em;margin-bottom:10px">// RESTORE FROM BACKUP</div>
+        <div style="font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.6">Load a previously exported backup file. This will overwrite your current data.</div>
+        <label style="display:block;width:100%;padding:14px;background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-display);font-size:16px;letter-spacing:2px;cursor:pointer;text-align:center">
+          SELECT BACKUP FILE
+          <input type="file" id="importFileInput" accept=".json" onchange="importBackup(this)" style="display:none">
+        </label>
+        <div id="importStatus" style="margin-top:10px;font-family:var(--font-mono);font-size:13px;display:none"></div>
+      </div>
+
+      <!-- danger zone -->
+      <div style="background:var(--surface);border:1px solid rgba(255,32,32,.3);padding:16px">
+        <div style="font-family:var(--font-mono);font-size:13px;color:var(--danger);letter-spacing:.1em;margin-bottom:10px">// DANGER ZONE</div>
+        <div style="font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.6">Permanently delete all workout logs, program, and history. Cannot be undone.</div>
+        <button onclick="clearAllData()" style="width:100%;padding:14px;background:none;border:1px solid var(--danger);color:var(--danger);font-family:var(--font-display);font-size:16px;letter-spacing:2px;cursor:pointer">CLEAR ALL DATA</button>
+      </div>
+
+    </div>
+    <div class="spacer"></div>
   </div>
 
   <div class="spacer"></div>
@@ -916,6 +953,122 @@ function getDeloadFlag() { try { return JSON.parse(localStorage.getItem('jacked_
 function clearDeloadFlag() { localStorage.removeItem('jacked_deload_flag'); showToast('Deload cleared'); renderDashboard(); }
 function getAwards() { try { return JSON.parse(localStorage.getItem('jacked_awards') || '[]'); } catch(e) { return []; } }
 function saveAwards(a) { localStorage.setItem('jacked_awards', JSON.stringify(a)); }
+
+function collectBackupData() {
+  const data = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k.startsWith('jacked_') || k.startsWith('bloc_')) {
+      try { data[k] = JSON.parse(localStorage.getItem(k)); } catch(e) { data[k] = localStorage.getItem(k); }
+    }
+  }
+  return data;
+}
+
+function exportBackup() {
+  const payload = { version: 1, exportedAt: todayKey(), app: 'JACKED', data: collectBackupData() };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'jacked_backup_' + todayKey() + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Backup downloaded');
+}
+
+function importBackup(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById('importStatus');
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      if (!parsed.data || parsed.app !== 'JACKED') {
+        statusEl.style.display = 'block';
+        statusEl.style.color = 'var(--danger)';
+        statusEl.textContent = 'Invalid backup file.';
+        return;
+      }
+      if (!confirm('This will overwrite your current data with the backup from ' + (parsed.exportedAt || 'unknown date') + '. Continue?')) {
+        input.value = '';
+        return;
+      }
+      Object.entries(parsed.data).forEach(([k, v]) => {
+        localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v));
+      });
+      statusEl.style.display = 'block';
+      statusEl.style.color = 'var(--acid)';
+      const keyCount = Object.keys(parsed.data).length;
+      statusEl.textContent = 'Restored ' + keyCount + ' data keys from ' + (parsed.exportedAt || 'backup') + '.';
+      input.value = '';
+      renderDashboard();
+      renderDataSummary();
+      showToast('Backup restored');
+    } catch(e) {
+      statusEl.style.display = 'block';
+      statusEl.style.color = 'var(--danger)';
+      statusEl.textContent = 'Failed to read file: ' + e.message;
+    }
+  };
+  reader.readAsText(file);
+}
+
+function clearAllData() {
+  if (!confirm('Delete ALL data — workouts, program, history, awards, bodyweight? This cannot be undone.')) return;
+  if (!confirm('Are you sure? This is permanent.')) return;
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k.startsWith('jacked_') || k.startsWith('bloc_')) keys.push(k);
+  }
+  keys.forEach(k => localStorage.removeItem(k));
+  renderDashboard();
+  renderDataSummary();
+  showToast('All data cleared');
+}
+
+function renderDataSummary() {
+  const el = document.getElementById('dataSummaryCard');
+  if (!el) return;
+  const log = getWorkoutLog();
+  const prog = getActiveProgram();
+  const bw = getBodyweightLog();
+  const awards = getAwards();
+  const logKeys = Object.keys(log);
+  let histCount = 0;
+  let totalBytes = 0;
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k.startsWith('jacked_') || k.startsWith('bloc_')) {
+      const v = localStorage.getItem(k);
+      totalBytes += (k.length + (v ? v.length : 0)) * 2;
+      if (k.startsWith('bloc_hist_')) histCount++;
+    }
+  }
+  const kb = (totalBytes / 1024).toFixed(1);
+  const firstDate = logKeys.length ? logKeys.sort()[0] : null;
+  el.innerHTML = '<div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);letter-spacing:.1em;margin-bottom:12px">// YOUR DATA</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+    + _dataRow('Workouts logged', logKeys.length)
+    + _dataRow('Exercises tracked', histCount)
+    + _dataRow('Bodyweight entries', bw.length)
+    + _dataRow('Awards earned', awards.length)
+    + _dataRow('Active program', prog ? prog.splitKey.toUpperCase() : 'None')
+    + _dataRow('Storage used', kb + ' KB')
+    + (firstDate ? _dataRow('Training since', fmtDate(firstDate)) : '')
+    + '</div>';
+}
+
+function _dataRow(label, value) {
+  return '<div style="background:var(--surface2);padding:10px 12px">'
+    + '<div style="font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:.08em;margin-bottom:3px">' + label.toUpperCase() + '</div>'
+    + '<div style="font-family:var(--font-display);font-size:20px;letter-spacing:1px;color:var(--accent)">' + value + '</div>'
+    + '</div>';
+}
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // EXERCISES
@@ -2612,7 +2765,7 @@ function renderBodyweightLog() {
 let analyticsPeriod = 'week';
 
 function switchAnTab(tab) {
-  ['stats','volume','charts','body'].forEach(t => {
+  ['stats','volume','charts','body','data'].forEach(t => {
     const p = document.getElementById('an-'+t);
     const b = document.getElementById('an-tab-'+t);
     if (p) p.style.display = t===tab?'block':'none';
@@ -2621,6 +2774,7 @@ function switchAnTab(tab) {
   if (tab==='volume') renderVolumeLandmarks();
   if (tab==='charts') { renderWeeklyVolumeChart(); renderComplianceGrid(); }
   if (tab==='body') renderBodyweightLog();
+  if (tab==='data') renderDataSummary();
 }
 
 function setAnalyticsPeriod(period, el) {
