@@ -1136,6 +1136,22 @@ let allExercises = loadExercises();
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // EXERCISE HISTORY
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+function generateWarmupSets(workingWeight) {
+  const w = parseFloat(workingWeight);
+  if (!w || w < 25) return [];
+  const sets = [];
+  if (w >= 40) sets.push({ w: 20, r: 10, label: 'BAR' });
+  const w50 = Math.round(w * 0.5 / 2.5) * 2.5;
+  if (w50 >= 25 && w50 < w && w50 !== 20) sets.push({ w: w50, r: 8, label: '50%' });
+  const w70 = Math.round(w * 0.7 / 2.5) * 2.5;
+  if (w70 > w50 && w70 < w) sets.push({ w: w70, r: 5, label: '70%' });
+  if (w >= 60) {
+    const w85 = Math.round(w * 0.85 / 2.5) * 2.5;
+    if (w85 > w70 && w85 < w) sets.push({ w: w85, r: 2, label: '85%' });
+  }
+  return sets.map(s => ({ ...s, done: false }));
+}
+
 function getHistory(exId) { try { return JSON.parse(localStorage.getItem('bloc_hist_' + exId) || '[]'); } catch(e) { return []; } }
 function saveHistory(exId, hist) { localStorage.setItem('bloc_hist_' + exId, JSON.stringify(hist.slice(-20))); }
 function getLastSession(exId) { const h = getHistory(exId); return h.length ? h[h.length-1] : null; }
@@ -2342,15 +2358,19 @@ function startTodaySession() {
   if (titleEl) { titleEl.textContent = session.name; titleEl.style.color = ''; titleEl.style.textShadow = ''; }
   if (subEl) { subEl.textContent = session.sub || ''; subEl.style.color = ''; }
   sessionExercises.length = 0;
+  let exIdx = 0;
   session.exercises.forEach(ex => {
     const libEx = allExercises.find(e => e.name === ex.name) || { id:'tmp_'+Date.now()+'_'+Math.random(), name:ex.name, muscle:ex.muscle||'', equip:ex.equip||'', notes:'' };
     const setsCount = parseInt(ex.sets) || 4;
     const parts = (ex.reps||'6-15').split('-').map(Number);
     const repMin = parts[0] || 6, repMax = parts[1] || 15;
     const sug = calcSuggestion({...libEx, repMin, repMax});
+    const warmupSets = sug && sug.w ? generateWarmupSets(sug.w) : [];
     sessionExercises.push({
       ...libEx, rir: prog.currentRir != null ? prog.currentRir : 2,
       rest: 90, repMin, repMax,
+      warmupSets,
+      warmupOpen: exIdx === 0 && warmupSets.length > 0,
       sets_data: Array.from({length:setsCount}, (_,i) => ({
         w:'', r:'', done:false,
         sugW: sug ? (sug.type==='reps'&&sug.perSet ? (sug.perSet[i]?.w||sug.w) : sug.w) : '',
@@ -2358,6 +2378,7 @@ function startTodaySession() {
       })),
       suggestion: sug
     });
+    exIdx++;
   });
   _activateLogScreen();
   showLogActive();
@@ -2449,6 +2470,32 @@ function renderExercises() {
         + (lastSess.sets||[]).map((s,i) => '<span style="font-family:var(--font-mono);font-size:14px;color:var(--muted)"><span style="color:var(--text);opacity:.4">' + (i+1) + '</span> ' + (s.w||'\u2014') + 'kg\u00D7' + (s.r||'\u2014') + '</span>').join('<span style="color:var(--border);margin:0 3px">\u00B7</span>')
         + '</div>'
       : '';
+    // warm-up section
+    let warmupHtml = '';
+    if (ex.warmupSets && ex.warmupSets.length > 0) {
+      const doneCount = ex.warmupSets.filter(s => s.done).length;
+      const allDone = doneCount === ex.warmupSets.length;
+      const headerColor = allDone ? 'var(--muted)' : 'var(--accent)';
+      warmupHtml = '<div style="border-bottom:1px solid var(--border)">'
+        + '<button onclick="toggleWarmupPanel(' + ei + ')" style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:9px 14px;background:#06090b;border:none;border-bottom:' + (ex.warmupOpen ? '1px solid var(--border)' : 'none') + ';cursor:pointer">'
+        + '<span style="font-family:var(--font-mono);font-size:12px;color:' + headerColor + ';letter-spacing:.12em">WARM-UP ' + (allDone ? '\u2713 DONE' : doneCount + '/' + ex.warmupSets.length) + '</span>'
+        + '<span style="font-size:12px;color:var(--muted)">' + (ex.warmupOpen ? '\u25B2' : '\u25BC') + '</span>'
+        + '</button>';
+      if (ex.warmupOpen) {
+        warmupHtml += ex.warmupSets.map((ws, wi) => {
+          const lineThrough = ws.done ? 'opacity:.4;text-decoration:line-through' : '';
+          return '<div style="display:grid;grid-template-columns:42px 1fr 1fr 46px;gap:8px;align-items:center;padding:10px 12px;background:' + (ws.done ? 'rgba(0,240,208,.03)' : '#080c0f') + ';border-bottom:1px solid var(--border);border-left:2px solid var(--accent)">'
+            + '<div style="font-family:var(--font-mono);font-size:11px;color:var(--accent);text-align:center;letter-spacing:.05em">' + ws.label + '</div>'
+            + '<div style="font-family:var(--font-mono);font-size:20px;color:var(--text);text-align:center;' + lineThrough + '">' + ws.w + '<span style="font-size:11px;color:var(--muted)">kg</span></div>'
+            + '<div style="font-family:var(--font-mono);font-size:20px;color:var(--text);text-align:center;' + lineThrough + '">' + ws.r + '<span style="font-size:11px;color:var(--muted)">r</span></div>'
+            + '<button onclick="togWarmup(' + ei + ',' + wi + ')" style="width:46px;height:46px;background:' + (ws.done ? 'var(--accent)' : 'none') + ';border:2px solid ' + (ws.done ? 'var(--accent)' : '#1a2830') + ';cursor:pointer;display:flex;align-items:center;justify-content:center">'
+            + '<svg viewBox="0 0 24 24" fill="none" stroke="' + (ws.done ? '#060809' : 'var(--muted)') + '" stroke-width="3"><polyline points="20,6 9,17 4,12"/></svg></button>'
+            + '</div>';
+        }).join('');
+      }
+      warmupHtml += '</div>';
+    }
+
     return '<div class="exercise-block">'
       + '<div class="exercise-hdr">'
       + '<div><div class="exercise-name">' + ex.name + '</div>'
@@ -2457,7 +2504,7 @@ function renderExercises() {
       + '<button class="swap-btn" onclick="openSwap(' + ei + ')">SWAP</button>'
       + '<div class="rir-badge" style="' + getRirStyle(ex.rir) + '">RIR ' + ex.rir + '</div>'
       + '</div></div>'
-      + lastBar + lastNote + progBadge
+      + lastBar + lastNote + warmupHtml + progBadge
       + '<div class="col-labels"><span>#</span><span>KG</span><span>REPS</span><span></span></div>'
       + sets
       + '<button class="add-set-btn" onclick="addSet(' + ei + ')">+ ADD SET</button>'
@@ -2498,6 +2545,21 @@ function addSet(ei) {
   ex.sets_data.push({ w: lastSet?.w||'', r:'', done:false,
     sugW: sug?sug.w:'', sugR: sug?sug.r:'' });
   renderExercises();
+}
+
+function toggleWarmupPanel(ei) {
+  if (sessionExercises[ei]) {
+    sessionExercises[ei].warmupOpen = !sessionExercises[ei].warmupOpen;
+    renderExercises();
+  }
+}
+
+function togWarmup(ei, wi) {
+  const ex = sessionExercises[ei];
+  if (ex && ex.warmupSets && ex.warmupSets[wi]) {
+    ex.warmupSets[wi].done = !ex.warmupSets[wi].done;
+    renderExercises();
+  }
 }
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
