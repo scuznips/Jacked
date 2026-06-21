@@ -2967,25 +2967,25 @@ function renderWeeklyVolumeChart() {
     const we = getWeekEndKey(ws);
     const sets = Object.entries(log).filter(([k]) => k >= ws && k <= we).reduce((s,[,e])=>s+(e.sets||0),0);
     const label = ws.slice(5).replace('-','/');
-    weeks.push({ label, sets, ws });
+    weeks.push({ label, sets });
   }
   const maxSets = Math.max(...weeks.map(w => w.sets), 1);
-  const W = 320, H = 140, pad = { l:32, r:10, t:10, b:28 };
+  const W = 320, H = 140, pad = { l:28, r:12, t:16, b:28 };
   const chartW = W - pad.l - pad.r, chartH = H - pad.t - pad.b;
-  const barW = Math.floor(chartW / weeks.length) - 4;
-  let bars = weeks.map((w, i) => {
-    const x = pad.l + i * (chartW / weeks.length) + 2;
-    const barH = w.sets > 0 ? Math.max(4, Math.round((w.sets / maxSets) * chartH)) : 0;
-    const y = pad.t + chartH - barH;
-    const color = w.sets === 0 ? 'var(--border)' : '#e8ff00';
-    return '<rect x="'+x+'" y="'+y+'" width="'+barW+'" height="'+barH+'" fill="'+color+'" opacity="0.85"/>'
-      + (w.sets > 0 ? '<text x="'+(x+barW/2)+'" y="'+(y-4)+'" text-anchor="middle" font-family="monospace" font-size="10" fill="#e8ff00">'+w.sets+'</text>' : '')
-      + '<text x="'+(x+barW/2)+'" y="'+(H-6)+'" text-anchor="middle" font-family="monospace" font-size="9" fill="var(--muted)">'+w.label+'</text>';
-  }).join('');
-  el.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="display:block">'
-    + '<line x1="'+pad.l+'" y1="'+pad.t+'" x2="'+pad.l+'" y2="'+(pad.t+chartH)+'" stroke="var(--border)" stroke-width="1"/>'
-    + '<line x1="'+pad.l+'" y1="'+(pad.t+chartH)+'" x2="'+(W-pad.r)+'" y2="'+(pad.t+chartH)+'" stroke="var(--border)" stroke-width="1"/>'
-    + bars
+  const xs = weeks.map((_, i) => pad.l + i * chartW / (weeks.length - 1));
+  const ys = weeks.map(w => pad.t + chartH - (w.sets / maxSets) * chartH);
+  const polyline = xs.map((x, i) => x + ',' + ys[i]).join(' ');
+  const area = 'M ' + xs[0] + ',' + ys[0] + ' ' + xs.map((x, i) => 'L '+x+','+ys[i]).join(' ') + ' L '+xs[xs.length-1]+','+(pad.t+chartH)+' L '+xs[0]+','+(pad.t+chartH)+' Z';
+  const dots = weeks.map((w, i) => w.sets > 0
+    ? '<circle cx="'+xs[i]+'" cy="'+ys[i]+'" r="3" fill="#e8ff00"/>'
+      + '<text x="'+xs[i]+'" y="'+(ys[i]-8)+'" text-anchor="middle" font-family="monospace" font-size="10" fill="#e8ff00">'+w.sets+'</text>'
+    : '<circle cx="'+xs[i]+'" cy="'+ys[i]+'" r="2" fill="var(--border)"/>'
+  ).join('');
+  const labels = weeks.map((w, i) => '<text x="'+xs[i]+'" y="'+(H-6)+'" text-anchor="middle" font-family="monospace" font-size="9" fill="var(--muted)">'+w.label+'</text>').join('');
+  el.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="display:block;overflow:visible">'
+    + '<path d="'+area+'" fill="rgba(232,255,0,0.07)"/>'
+    + '<polyline points="'+polyline+'" fill="none" stroke="#e8ff00" stroke-width="2"/>'
+    + dots + labels
     + '</svg>';
 }
 
