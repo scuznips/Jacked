@@ -465,6 +465,7 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
     <div class="lib-tab active" id="an-tab-stats" onclick="switchAnTab('stats')">Stats</div>
     <div class="lib-tab" id="an-tab-volume" onclick="switchAnTab('volume')">Volume</div>
     <div class="lib-tab" id="an-tab-charts" onclick="switchAnTab('charts')">Charts</div>
+    <div class="lib-tab" id="an-tab-strength" onclick="switchAnTab('strength')">Strength</div>
     <div class="lib-tab" id="an-tab-body" onclick="switchAnTab('body')">Body</div>
     <div class="lib-tab" id="an-tab-data" onclick="switchAnTab('data')">Data</div>
   </div>
@@ -505,6 +506,12 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
       <div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);letter-spacing:.08em;margin-bottom:12px">// 6-WEEK COMPLIANCE</div>
       <div id="complianceGrid" style="background:var(--surface);border:1px solid var(--border);padding:16px"></div>
     </div>
+  </div>
+
+  <!-- STRENGTH TAB -->
+  <div id="an-strength" style="display:none">
+    <div style="padding:12px 16px 4px;font-family:var(--font-mono);font-size:13px;color:var(--muted);letter-spacing:.08em">// ESTIMATED 1RM PER EXERCISE · EPLEY FORMULA</div>
+    <div id="strengthList" style="padding:0 16px 16px;display:flex;flex-direction:column;gap:8px"></div>
   </div>
 
   <!-- BODYWEIGHT TAB -->
@@ -1098,6 +1105,38 @@ let allExercises = loadExercises();
 function getHistory(exId) { try { return JSON.parse(localStorage.getItem('bloc_hist_' + exId) || '[]'); } catch(e) { return []; } }
 function saveHistory(exId, hist) { localStorage.setItem('bloc_hist_' + exId, JSON.stringify(hist.slice(-20))); }
 function getLastSession(exId) { const h = getHistory(exId); return h.length ? h[h.length-1] : null; }
+
+function calc1RM(w, r) {
+  w = parseFloat(w); r = parseInt(r);
+  if (!w || !r || w <= 0 || r <= 0) return 0;
+  if (r === 1) return w;
+  if (r > 30) return 0;
+  return Math.round(w * (1 + r / 30) * 10) / 10;
+}
+
+function bestE1RM(sessionEntry) {
+  return Math.max(0, ...(sessionEntry.sets || []).map(s => calc1RM(s.w, s.r)));
+}
+
+function getAllE1RMData() {
+  const results = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (!k.startsWith('bloc_hist_')) continue;
+    const exId = k.replace('bloc_hist_', '');
+    const ex = allExercises.find(e => e.id === exId);
+    if (!ex) continue;
+    let hist;
+    try { hist = JSON.parse(localStorage.getItem(k) || '[]'); } catch(e) { continue; }
+    if (!hist.length) continue;
+    const e1rms = hist.map(entry => ({ date: entry.date, e1rm: bestE1RM(entry) })).filter(p => p.e1rm > 0);
+    if (!e1rms.length) continue;
+    const current = e1rms[e1rms.length - 1].e1rm;
+    const best = Math.max(...e1rms.map(p => p.e1rm));
+    results.push({ exId, name: ex.name, muscle: ex.muscle, e1rms, current, best });
+  }
+  return results.sort((a, b) => b.current - a.current);
+}
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // PROGRESSION ENGINE
@@ -2834,7 +2873,7 @@ function renderBodyweightChart(entries, el) {
 let analyticsPeriod = 'week';
 
 function switchAnTab(tab) {
-  ['stats','volume','charts','body','data'].forEach(t => {
+  ['stats','volume','charts','strength','body','data'].forEach(t => {
     const p = document.getElementById('an-'+t);
     const b = document.getElementById('an-tab-'+t);
     if (p) p.style.display = t===tab?'block':'none';
@@ -2842,6 +2881,7 @@ function switchAnTab(tab) {
   });
   if (tab==='volume') renderVolumeLandmarks();
   if (tab==='charts') { renderWeeklyVolumeChart(); renderComplianceGrid(); }
+  if (tab==='strength') renderStrengthTab();
   if (tab==='body') renderBodyweightLog();
   if (tab==='data') renderDataSummary();
 }
@@ -2941,7 +2981,7 @@ function openExHistory(exId, exName) {
     contentEl.innerHTML = '<div class="empty-state"><div>No history yet</div></div>';
   } else {
     const sparkId = 'spark_' + exId;
-    contentEl.innerHTML = '<div id="'+sparkId+'" style="padding:14px 16px;border-bottom:2px solid var(--border)"></div>'
+    contentEl.innerHTML = '<div style="padding:14px 16px 0;border-bottom:2px solid var(--border)"><div style="font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:.1em;margin-bottom:6px">EST. 1RM TREND</div><div id="'+sparkId+'"></div></div>'
       + hist.map(entry => {
       const setsHtml = (entry.sets || []).map((s, i) =>
         '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">'
@@ -2958,7 +2998,10 @@ function openExHistory(exId, exName) {
         + '<span style="font-family:var(--font-mono);font-size:14px;color:var(--muted)">' + (entry.sets||[]).length + ' sets Â· ' + Math.round(totalVol) + 'kg vol</span>'
         + '</div>' + setsHtml + '</div>';
     }).join('');
-    renderWeightSparkline(getHistory(exId), sparkId);
+    const histFwd = getHistory(exId);
+    const e1rmPoints = histFwd.map(entry => ({ date: entry.date, e1rm: bestE1RM(entry) })).filter(p => p.e1rm > 0);
+    if (e1rmPoints.length >= 2) render1RMSparkline(e1rmPoints, sparkId);
+    else renderWeightSparkline(histFwd, sparkId);
   }
   document.getElementById('historyModal').classList.add('show');
 }
@@ -3234,6 +3277,71 @@ function renderWeightSparkline(hist, containerId) {
     + dots
     + '<text x="'+xs[0]+'" y="'+(H-2)+'" text-anchor="start" font-family="monospace" font-size="9" fill="var(--muted)">'+minW+'kg</text>'
     + '<text x="'+xs[xs.length-1]+'" y="'+(H-2)+'" text-anchor="end" font-family="monospace" font-size="9" fill="var(--muted)">'+maxW+'kg</text>'
+    + '</svg>';
+}
+
+function renderStrengthTab() {
+  const el = document.getElementById('strengthList');
+  if (!el) return;
+  const data = getAllE1RMData();
+  if (!data.length) {
+    el.innerHTML = '<div style="padding:40px 0;text-align:center;font-family:var(--font-mono);font-size:14px;color:var(--muted)">// No exercise history yet.<br>Complete a session to start tracking.</div>';
+    return;
+  }
+  el.innerHTML = data.map(ex => {
+    const isPR = ex.current >= ex.best;
+    const delta = ex.e1rms.length >= 2 ? ex.current - ex.e1rms[0].e1rm : 0;
+    const deltaSign = delta >= 0 ? '+' : '';
+    const deltaColor = delta > 0 ? 'var(--acid)' : delta < 0 ? 'var(--danger)' : 'var(--muted)';
+    const mc = MUSCLE_PILL_COLORS[ex.muscle] || 'var(--muted)';
+    const sparkId = 'e1rm_spark_' + ex.exId;
+    return '<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid ' + mc + ';padding:14px 16px">'
+      + '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">'
+      + '<div style="flex:1;min-width:0">'
+      + '<div style="font-family:var(--font-condensed);font-size:17px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.03em;line-height:1.3">' + ex.name + '</div>'
+      + '<div style="font-family:var(--font-mono);font-size:12px;color:' + mc + ';margin-top:2px">' + ex.muscle.toUpperCase() + '</div>'
+      + '</div>'
+      + '<div style="text-align:right;flex-shrink:0;margin-left:12px">'
+      + '<div style="font-family:var(--font-display);font-size:26px;letter-spacing:2px;color:var(--acid);line-height:1">' + ex.current + '<span style="font-size:14px;color:var(--muted)"> kg</span></div>'
+      + (isPR ? '<div style="font-family:var(--font-mono);font-size:11px;color:var(--acid);letter-spacing:.1em;margin-top:2px">▲ CURRENT PR</div>'
+              : '<div style="font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-top:2px">BEST ' + ex.best + ' kg</div>')
+      + '</div></div>'
+      + (ex.e1rms.length >= 2
+        ? '<div id="' + sparkId + '"></div>'
+          + '<div style="display:flex;justify-content:space-between;margin-top:6px">'
+          + '<div style="font-family:var(--font-mono);font-size:12px;color:var(--muted)">' + ex.e1rms.length + ' sessions</div>'
+          + '<div style="font-family:var(--font-mono);font-size:12px;color:' + deltaColor + '">' + deltaSign + delta.toFixed(1) + ' kg since first</div>'
+          + '</div>'
+        : '<div style="font-family:var(--font-mono);font-size:12px;color:var(--muted)">1 session logged — train again to see trend</div>')
+      + '</div>';
+  }).join('');
+
+  // render sparklines after DOM is set
+  data.forEach(ex => {
+    if (ex.e1rms.length < 2) return;
+    const sparkEl = document.getElementById('e1rm_spark_' + ex.exId);
+    if (!sparkEl) return;
+    render1RMSparkline(ex.e1rms, sparkEl);
+  });
+}
+
+function render1RMSparkline(e1rms, el) {
+  const W = 300, H = 50, padX = 4, padY = 6;
+  const vals = e1rms.map(p => p.e1rm);
+  const minV = Math.min(...vals), maxV = Math.max(...vals);
+  const range = maxV - minV || 1;
+  const n = vals.length;
+  const xs = vals.map((_, i) => padX + i * (W - 2 * padX) / Math.max(n - 1, 1));
+  const ys = vals.map(v => padY + (H - 2 * padY) * (1 - (v - minV) / range));
+  const polyline = xs.map((x, i) => x + ',' + ys[i]).join(' ');
+  const area = 'M ' + xs[0] + ',' + (H - padY)
+    + ' L ' + xs.map((x, i) => x + ',' + ys[i]).join(' L ')
+    + ' L ' + xs[n - 1] + ',' + (H - padY) + ' Z';
+  const lastX = xs[n - 1], lastY = ys[n - 1];
+  el.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="display:block;overflow:visible">'
+    + '<path d="' + area + '" fill="rgba(232,255,0,0.06)"/>'
+    + '<polyline points="' + polyline + '" fill="none" stroke="#e8ff00" stroke-width="1.5" opacity="0.7"/>'
+    + '<circle cx="' + lastX + '" cy="' + lastY + '" r="3" fill="#e8ff00"/>'
     + '</svg>';
 }
 
