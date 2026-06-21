@@ -414,6 +414,7 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
         <button onclick="openPlates()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:13px;padding:7px 12px;cursor:pointer;letter-spacing:.06em">PLATES</button>
       </div>
     </div>
+    <div id="deloadBand" style="display:none;background:rgba(157,92,255,.12);border-bottom:2px solid #9d5cff;padding:8px 16px;font-family:var(--font-mono);font-size:13px;color:#9d5cff;letter-spacing:.08em">DELOAD WEEK · 60% LOAD · RIR 4 · RECOVERY SESSION</div>
     <div id="lastSessionPanel" style="display:none;background:#080e12;border-bottom:1px solid var(--border);padding:10px 14px;overflow-x:auto"></div>
     <div id="exercisesContainer"></div>
     <button onclick="openAddExModal()" style="display:block;width:calc(100% - 32px);margin:8px 16px 0;padding:13px;background:none;border:1px dashed var(--accent);color:var(--accent);font-family:var(--font-display);font-size:16px;letter-spacing:3px;cursor:pointer;text-align:center">+ ADD EXERCISE</button>
@@ -1852,11 +1853,14 @@ function renderDashboard() {
     const flag = getDeloadFlag();
     if (flag) {
       deloadEl.style.display = 'block';
-      deloadEl.innerHTML = '<div style="margin:0 16px 8px;background:rgba(157,92,255,.1);border:1px solid #9d5cff;border-left:3px solid #9d5cff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">'
-        + '<div><div style="font-family:var(--font-display);font-size:16px;letter-spacing:2px;color:#9d5cff">DELOAD RECOMMENDED</div>'
-        + '<div style="font-size:14px;color:var(--muted);margin-top:3px;font-family:var(--font-mono)">' + (flag.reason||'') + '</div></div>'
-        + '<button onclick="clearDeloadFlag()" style="background:none;border:1px solid #9d5cff;color:#9d5cff;padding:8px 14px;font-size:13px;cursor:pointer;font-family:var(--font-mono)">CLEAR</button>'
-        + '</div>';
+      deloadEl.innerHTML = '<div style="margin:0 16px 8px;background:rgba(157,92,255,.1);border:1px solid #9d5cff;border-left:3px solid #9d5cff;padding:14px 16px">'
+        + '<div style="font-family:var(--font-display);font-size:18px;letter-spacing:2px;color:#9d5cff;margin-bottom:4px">DELOAD RECOMMENDED</div>'
+        + '<div style="font-size:14px;color:var(--muted);font-family:var(--font-mono);margin-bottom:4px">' + (flag.reason||'') + '</div>'
+        + '<div style="font-size:14px;color:var(--muted);line-height:1.5;margin-bottom:14px">Same exercises · 40% fewer sets · 60% of normal weight · RIR 4. One session is enough.</div>'
+        + '<div style="display:flex;gap:8px">'
+        + '<button onclick="startDeloadSession()" style="flex:1;padding:12px;background:#9d5cff;color:#000;border:none;font-family:var(--font-display);font-size:16px;letter-spacing:2px;cursor:pointer">START DELOAD SESSION</button>'
+        + '<button onclick="clearDeloadFlag()" style="padding:12px 16px;background:none;border:1px solid #9d5cff;color:#9d5cff;font-family:var(--font-mono);font-size:13px;cursor:pointer;letter-spacing:.06em">DISMISS</button>'
+        + '</div></div>';
     } else {
       deloadEl.style.display = 'none';
     }
@@ -1931,7 +1935,7 @@ function renderDashboard() {
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // WORKOUT LOG
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-let sessionExercises = [], workoutActive = false, workoutSecs = 0, workoutInt = null, workoutTimerStarted = false, currentSessionIdx = -1;
+let sessionExercises = [], workoutActive = false, workoutSecs = 0, workoutInt = null, workoutTimerStarted = false, currentSessionIdx = -1, isDeloadSession = false;
 
 // â”€â”€ PROGRAM MIGRATION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Ensures prog.sessions have exercises copied from SPLITS (one-time migration)
@@ -2271,7 +2275,54 @@ function renderNextSessionPreview(prog, todayDayKey) {
     + '</div>';
 }
 
+function startDeloadSession() {
+  workoutTimerStarted = false; workoutSecs = 0;
+  const el = document.getElementById('workoutTimer');
+  if (el) { el.textContent = 'READY'; el.style.color = 'var(--muted)'; }
+  const prog = getActiveProgram();
+  if (!prog) { showToast('No active program — build one first'); return; }
+  migrateProgramIfNeeded(prog);
+  const log = getWorkoutLog();
+  const nextInfo = getNextSession(prog, log);
+  if (!nextInfo || !nextInfo.session) { showToast('No session found — rebuild your program'); return; }
+  const session = nextInfo.session;
+  currentSessionIdx = nextInfo.weekCount % prog.sessions.length;
+
+  const titleEl = document.getElementById('logTitle');
+  const subEl = document.getElementById('logSub');
+  if (titleEl) { titleEl.textContent = 'DELOAD'; titleEl.style.color = '#9d5cff'; titleEl.style.textShadow = '0 0 16px rgba(157,92,255,.5)'; }
+  if (subEl) { subEl.textContent = session.name + ' · REDUCED LOAD · RIR 4'; subEl.style.color = '#9d5cff'; }
+
+  sessionExercises.length = 0;
+  session.exercises.forEach(ex => {
+    const libEx = allExercises.find(e => e.name === ex.name) || { id:'tmp_'+Date.now()+'_'+Math.random(), name:ex.name, muscle:ex.muscle||'', equip:ex.equip||'', notes:'' };
+    const normalSets = parseInt(ex.sets) || 4;
+    const deloadSets = Math.max(2, Math.floor(normalSets * 0.6));
+    const parts = (ex.reps||'6-15').split('-').map(Number);
+    const repMin = parts[0] || 6, repMax = parts[1] || 15;
+    const repMid = Math.round((repMin + repMax) / 2);
+    const hist = getHistory(libEx.id);
+    let sugW = '';
+    if (hist.length) {
+      const lastW = (hist[hist.length-1].sets || []).reduce((mx,s) => Math.max(mx, parseFloat(s.w)||0), 0);
+      if (lastW > 0) sugW = Math.round(lastW * 0.6 / 2.5) * 2.5;
+    }
+    sessionExercises.push({
+      ...libEx, rir: 4,
+      rest: 90, repMin, repMax,
+      sets_data: Array.from({length:deloadSets}, () => ({ w:'', r:'', done:false, sugW: sugW||'', sugR: repMid })),
+      suggestion: null
+    });
+  });
+
+  isDeloadSession = true;
+  _activateLogScreen();
+  showLogActive();
+  startWorkout();
+}
+
 function startTodaySession() {
+  isDeloadSession = false;
   workoutTimerStarted = false; workoutSecs = 0;
   const el = document.getElementById('workoutTimer');
   if (el) { el.textContent = 'READY'; el.style.color = 'var(--muted)'; }
@@ -2288,8 +2339,8 @@ function startTodaySession() {
   currentSessionIdx = nextInfo.weekCount % prog.sessions.length;
   const titleEl = document.getElementById('logTitle');
   const subEl = document.getElementById('logSub');
-  if (titleEl) titleEl.textContent = session.name;
-  if (subEl) subEl.textContent = session.sub || '';
+  if (titleEl) { titleEl.textContent = session.name; titleEl.style.color = ''; titleEl.style.textShadow = ''; }
+  if (subEl) { subEl.textContent = session.sub || ''; subEl.style.color = ''; }
   sessionExercises.length = 0;
   session.exercises.forEach(ex => {
     const libEx = allExercises.find(e => e.name === ex.name) || { id:'tmp_'+Date.now()+'_'+Math.random(), name:ex.name, muscle:ex.muscle||'', equip:ex.equip||'', notes:'' };
@@ -2315,6 +2366,8 @@ function startTodaySession() {
 
 function startWorkout() {
   workoutActive = true; workoutSecs = 0; workoutTimerStarted = false;
+  const band = document.getElementById('deloadBand');
+  if (band) band.style.display = isDeloadSession ? 'block' : 'none';
   renderExercises();
 }
 
@@ -2357,8 +2410,9 @@ function finishWorkout() {
       saveHistory(ex.id, hist);
     }
   });
-  log[tk] = { sets: totalSets, volume: Math.round(totalVol), rir: rirCount>0 ? Math.round((rirTotal/rirCount)*10)/10 : null, muscleBreakdown, duration: workoutSecs };
+  log[tk] = { sets: totalSets, volume: Math.round(totalVol), rir: rirCount>0 ? Math.round((rirTotal/rirCount)*10)/10 : null, muscleBreakdown, duration: workoutSecs, deload: isDeloadSession || undefined };
   saveWorkoutLog(log);
+  if (isDeloadSession) { localStorage.removeItem('jacked_deload_flag'); isDeloadSession = false; }
   checkAndAwardSession();
   showFeedback({ sets: totalSets, volume: totalVol, duration: workoutSecs });
 }
@@ -2956,7 +3010,8 @@ function renderAnalytics() {
   html+='</div><div style="background:var(--surface);border:1px solid var(--border);overflow:hidden"><div style="padding:12px 14px;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:14px;color:var(--muted)">// SESSION HISTORY</div>';
   entries.slice().reverse().forEach(([k,e])=>{
     const vol=(e.volume||0)>=1000?((e.volume||0)/1000).toFixed(1)+'k':(e.volume||0);
-    html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border)"><div><div style="font-family:var(--font-mono);font-size:14px;color:var(--text)">'+k+'</div><div style="font-family:var(--font-mono);font-size:14px;color:var(--muted);margin-top:2px">'+(e.sets||0)+' sets \u00B7 '+vol+' kg'+(e.rir!=null?' \u00B7 RIR '+e.rir:'')+'</div></div><div style="font-family:var(--font-display);font-size:20px;color:var(--acid)">'+(e.sets||0)+'<span style="font-size:14px;color:var(--muted)"> sets</span></div></div>';
+    const deloadTag = e.deload ? '<span style="font-family:var(--font-mono);font-size:11px;color:#9d5cff;border:1px solid #9d5cff;padding:1px 6px;margin-left:6px">DELOAD</span>' : '';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border)'+(e.deload?';border-left:2px solid #9d5cff':'')+'"><div><div style="font-family:var(--font-mono);font-size:14px;color:var(--text);display:flex;align-items:center">'+k+deloadTag+'</div><div style="font-family:var(--font-mono);font-size:14px;color:var(--muted);margin-top:2px">'+(e.sets||0)+' sets \u00B7 '+vol+' kg'+(e.rir!=null?' \u00B7 RIR '+e.rir:'')+'</div></div><div style="font-family:var(--font-display);font-size:20px;color:'+(e.deload?'#9d5cff':'var(--acid)')+'">'+(e.sets||0)+'<span style="font-size:14px;color:var(--muted)"> sets</span></div></div>';
   });
   html += '</div>';
   body.innerHTML = html;
