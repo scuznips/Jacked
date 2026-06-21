@@ -265,6 +265,13 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
 <body>
 
 <div class="toast" id="toast"></div>
+<div id="awardToast" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9998;pointer-events:none">
+  <div id="awardToastInner" style="margin:12px 16px;background:#060809;border:1px solid #e8ff00;border-top:3px solid #e8ff00;padding:16px 20px;transform:translateY(-120px);transition:transform .35s ease;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%)">
+    <div style="font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:.15em;margin-bottom:4px">ACHIEVEMENT UNLOCKED</div>
+    <div id="awardToastName" style="font-family:var(--font-display);font-size:22px;letter-spacing:4px;color:#e8ff00"></div>
+    <div id="awardToastDesc" style="font-family:var(--font-mono);font-size:13px;color:var(--muted);margin-top:4px"></div>
+  </div>
+</div>
 
 <!-- REST -->
 <div class="rest-overlay" id="restOverlay">
@@ -345,6 +352,9 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
     <div class="stat-box"><div class="stat-label">Streak</div><div class="stat-val" id="statStreak">â€”</div></div>
     <div class="stat-box"><div class="stat-label">Avg RIR</div><div class="stat-val" id="statAvgRir">â€”</div></div>
   </div>
+
+  <!-- awards -->
+  <div id="dashAwardsStrip"></div>
 
   <!-- active program -->
   <div id="dashProgramSection"></div>
@@ -454,7 +464,8 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
   <div class="lib-tabs">
     <div class="lib-tab active" id="an-tab-stats" onclick="switchAnTab('stats')">Stats</div>
     <div class="lib-tab" id="an-tab-volume" onclick="switchAnTab('volume')">Volume</div>
-    <div class="lib-tab" id="an-tab-body" onclick="switchAnTab('body')">Bodyweight</div>
+    <div class="lib-tab" id="an-tab-charts" onclick="switchAnTab('charts')">Charts</div>
+    <div class="lib-tab" id="an-tab-body" onclick="switchAnTab('body')">Body</div>
   </div>
 
   <!-- STATS TAB -->
@@ -480,6 +491,18 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
     <div class="vl-grid" id="vlGrid"></div>
     <div style="margin:0 16px 12px;background:var(--surface);border:1px solid var(--border);border-left:2px solid var(--acid);padding:12px 14px;font-size:14px;color:var(--muted);line-height:1.7;font-family:var(--font-mono)">
       MEV = Minimum Effective Volume &nbsp;|&nbsp; MAV = Maximum Adaptive Volume &nbsp;|&nbsp; MRV = Maximum Recoverable Volume
+    </div>
+  </div>
+
+  <!-- CHARTS TAB -->
+  <div id="an-charts" style="display:none">
+    <div style="padding:14px 16px 8px">
+      <div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);letter-spacing:.08em;margin-bottom:12px">// WEEKLY SETS — LAST 8 WEEKS</div>
+      <div id="chartVolumeCanvas" style="background:var(--surface);border:1px solid var(--border);padding:12px 10px 4px"></div>
+    </div>
+    <div style="padding:0 16px 14px">
+      <div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);letter-spacing:.08em;margin-bottom:12px">// 6-WEEK COMPLIANCE</div>
+      <div id="complianceGrid" style="background:var(--surface);border:1px solid var(--border);padding:16px"></div>
     </div>
   </div>
 
@@ -891,6 +914,8 @@ function getBodyweightLog() { try { return JSON.parse(localStorage.getItem('jack
 function saveBodyweightLog(log) { localStorage.setItem('jacked_bw', JSON.stringify(log)); }
 function getDeloadFlag() { try { return JSON.parse(localStorage.getItem('jacked_deload_flag') || 'null'); } catch(e) { return null; } }
 function clearDeloadFlag() { localStorage.removeItem('jacked_deload_flag'); showToast('Deload cleared'); renderDashboard(); }
+function getAwards() { try { return JSON.parse(localStorage.getItem('jacked_awards') || '[]'); } catch(e) { return []; } }
+function saveAwards(a) { localStorage.setItem('jacked_awards', JSON.stringify(a)); }
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // EXERCISES
@@ -978,7 +1003,7 @@ function showScreen(id) {
 // SPLITS
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const SPLITS = {
-  ppl: { name:'Push / Pull / Legs', days:6, minDays:3, maxDays:6, desc:'2x frequency per muscle â€” best for intermediate+',
+  ppl: { name:'Push / Pull / Legs', days:6, recMin:4, desc:'2x frequency per muscle â€” best for intermediate+',
     sessions:[
       {id:'pushA',name:'CHEST & PRESS',sub:'Compound push Â· Chest primary Â· Shoulders Â· Triceps',exercises:[
         {name:'Smith Machine Press (Low Incline, Wide Grip)',muscle:'Chest',sets:'4',reps:'6-10'},
@@ -1034,7 +1059,7 @@ const SPLITS = {
     ],
     priority:['pushA','pullA','legsA','pushB','pullB','legsB'],
   },
-  ul: { name:'Upper / Lower', days:4, minDays:2, maxDays:5, desc:'2x frequency â€” great for all levels',
+  ul: { name:'Upper / Lower', days:4, recMin:3, desc:'2x frequency â€” great for all levels',
     sessions:[
       {id:'upperA',name:'STRENGTH UPPER',sub:'Compound dominant Â· Heavy loads Â· Chest Â· Back Â· Arms',exercises:[
         {name:'Smith Machine Press (Low Incline, Wide Grip)',muscle:'Chest',sets:'4',reps:'6-10'},
@@ -1074,7 +1099,7 @@ const SPLITS = {
     ],
     priority:['upperA','lowerA','upperB','lowerB'],
   },
-  fb: { name:'Full Body', days:3, minDays:2, maxDays:4, desc:'3x frequency per muscle â€” ideal for 2-4 days',
+  fb: { name:'Full Body', days:3, recMin:2, desc:'3x frequency per muscle â€” ideal for 2-4 days',
     sessions:[
       {id:'fbA',name:'FULL BODY A',sub:'Squat Â· Press Â· Row Â· Arms â€” compound + arm work',exercises:[
         {name:'High Bar Squat',muscle:'Legs',sets:'4',reps:'6-10'},
@@ -1106,7 +1131,7 @@ const SPLITS = {
     ],
     priority:['fbA','fbB','fbC'],
   },
-  gzclp: { name:'GZCLP', days:3, minDays:3, maxDays:5, desc:'Tier 1/2/3 structure â€” strength & size for beginners/intermediates',
+  gzclp: { name:'GZCLP', days:3, recMin:3, desc:'Tier 1/2/3 structure â€” strength & size for beginners/intermediates',
     sessions:[
       {id:'gzclpA',name:'GZCLP A',sub:'Squat Â· Bench Â· Pulldown Â· Accessories',exercises:[
         {name:'High Bar Squat',muscle:'Legs',sets:'5',reps:'3'},
@@ -1132,7 +1157,7 @@ const SPLITS = {
     ],
     priority:['gzclpA','gzclpB','gzclpC'],
   },
-  bbb: { name:'5/3/1 BBB', days:4, minDays:3, maxDays:4, desc:'Boring But Big â€” strength top sets + 5x10 volume work',
+  bbb: { name:'5/3/1 BBB', days:4, recMin:3, desc:'Boring But Big â€” strength top sets + 5x10 volume work',
     sessions:[
       {id:'bbbPress',name:'PRESS DAY',sub:'OHP top set + Bench 5x10 + Assistance',exercises:[
         {name:'Barbell Shoulder Press (Standing)',muscle:'Shoulders',sets:'3',reps:'3-5'},
@@ -1165,7 +1190,7 @@ const SPLITS = {
     ],
     priority:['bbbPress','bbbDeadlift','bbbBench','bbbSquat'],
   },
-  rpHyp: { name:'RP Hypertrophy', days:4, minDays:3, maxDays:5, desc:'Dr Mike Israetel â€” MEV to MAV progression, RIR-based',
+  rpHyp: { name:'RP Hypertrophy', days:4, recMin:3, desc:'Dr Mike Israetel â€” MEV to MAV progression, RIR-based',
     sessions:[
       {id:'rpPush',name:'RP PUSH',sub:'Chest Â· Shoulders Â· Triceps â€” MAV sets, RIR 3â†’0',exercises:[
         {name:'Smith Machine Press (Low Incline, Wide Grip)',muscle:'Chest',sets:'4',reps:'8-12'},
@@ -1204,7 +1229,7 @@ const SPLITS = {
     ],
     priority:['rpPush','rpPull','rpLegsQ','rpPush','rpPull','rpLegsH'],
   },
-  dup: { name:'DUP Upper/Lower', days:4, minDays:3, maxDays:5, desc:'Daily undulating periodization â€” strength & hypertrophy alternated each session',
+  dup: { name:'DUP Upper/Lower', days:4, recMin:3, desc:'Daily undulating periodization â€” strength & hypertrophy alternated each session',
     sessions:[
       {id:'dupUpperS',name:'UPPER STRENGTH',sub:'Heavy compounds Â· chest Â· back Â· shoulders Â· 3-6 reps',exercises:[
         {name:'Flat Bench Press',muscle:'Chest',sets:'4',reps:'3-5'},
@@ -1245,7 +1270,7 @@ const SPLITS = {
     priority:['dupUpperS','dupLowerS','dupUpperH','dupLowerH'],
   },
   // â”€â”€ PHAT (Layne Norton) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  phat: { name:'PHAT', days:5, minDays:4, maxDays:5, desc:'Layne Norton â€” Power Hypertrophy Adaptive Training, 5-day strength & size',
+  phat: { name:'PHAT', days:5, recMin:4, desc:'Layne Norton â€” Power Hypertrophy Adaptive Training, 5-day strength & size',
     sessions:[
       {id:'phatUpperPow',name:'UPPER POWER',sub:'Heavy compounds Â· chest Â· back Â· shoulders Â· 3-5 reps',exercises:[
         {name:'Flat Bench Press',muscle:'Chest',sets:'3',reps:'3-5'},
@@ -1294,7 +1319,7 @@ const SPLITS = {
   },
 
   // â”€â”€ Stronger by Science Intermediate (Greg Nuckols) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  sbs: { name:'SBS Intermediate', days:3, minDays:3, maxDays:5, desc:'Stronger by Science â€” high frequency compounds trained at varying intensity each session',
+  sbs: { name:'SBS Intermediate', days:3, recMin:3, desc:'Stronger by Science â€” high frequency compounds trained at varying intensity each session',
     sessions:[
       {id:'sbsA',name:'SESSION A â€” HEAVY',sub:'Squat Â· bench Â· deadlift heavy top sets + arm accessories',exercises:[
         {name:'High Bar Squat',muscle:'Legs',sets:'4',reps:'3-5'},
@@ -1325,7 +1350,7 @@ const SPLITS = {
   },
 
   // â”€â”€ RP Strength (Renaissance Periodization / Dr. Mike Israetel) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  rpStr: { name:'RP Strength', days:4, minDays:3, maxDays:4, desc:'Dr Mike Israetel â€” strength-focused MEVâ†’MRV, RIR 4â†’1 progression across the mesocycle',
+  rpStr: { name:'RP Strength', days:4, recMin:3, desc:'Dr Mike Israetel â€” strength-focused MEVâ†’MRV, RIR 4â†’1 progression across the mesocycle',
     sessions:[
       {id:'rpStrSquat',name:'SQUAT DAY',sub:'Squat strength Â· posterior chain Â· quad accessories',exercises:[
         {name:'High Bar Squat',muscle:'Legs',sets:'4',reps:'3-6'},
@@ -1376,10 +1401,8 @@ const DAYS_OF_WEEK = [
 let weeklyTarget = 3, selectedSplit = null, recommendedSplit = null;
 
 function getRecommendedSplit(n) {
-  if (n <= 2) return 'beginner';
-  if (n === 3) return 'fb';
-  if (n === 4) return 'phul';
-  if (n === 5) return 'bro';
+  if (n <= 3) return 'fb';
+  if (n === 4) return 'ul';
   return 'ppl';
 }
 
@@ -1422,17 +1445,17 @@ function renderSplitOptions() {
   const n = weeklyTarget;
   container.innerHTML = Object.entries(SPLITS).map(([key, split]) => {
     const isSel = key === (selectedSplit || recommendedSplit);
-    const incompatible = n < split.minDays;
-    const borderColor = isSel ? 'var(--acid)' : (incompatible ? 'var(--border)' : 'var(--border)');
+    const caution = split.recMin && n < split.recMin;
+    const borderColor = isSel ? 'var(--acid)' : 'var(--border)';
     const bg = isSel ? 'rgba(232,255,0,.05)' : 'var(--surface)';
-    const nameColor = isSel ? 'var(--acid)' : (incompatible ? 'var(--muted)' : 'var(--text)');
+    const nameColor = isSel ? 'var(--acid)' : 'var(--text)';
     const radioStyle = isSel ? 'background:var(--acid);border-color:var(--acid)' : 'background:none;border:2px solid var(--border)';
     const recTag = key === recommendedSplit ? '<span style="font-size:11px;font-family:var(--font-mono);color:#060809;background:var(--acid);padding:3px 10px;margin-left:auto;flex-shrink:0">REC</span>' : '';
-    return '<div data-split="' + key + '" class="split-opt-btn" style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:' + bg + ';border:1px solid ' + borderColor + ';border-left:3px solid ' + borderColor + ';cursor:pointer;margin-bottom:6px;opacity:' + (incompatible?'.45':'1') + '">'
+    return '<div data-split="' + key + '" class="split-opt-btn" style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:' + bg + ';border:1px solid ' + borderColor + ';border-left:3px solid ' + borderColor + ';cursor:pointer;margin-bottom:6px">'
       + '<div style="width:14px;height:14px;flex-shrink:0;margin-top:3px;' + radioStyle + '"></div>'
       + '<div style="flex:1;min-width:0">'
       + '<div style="font-family:var(--font-condensed);font-size:18px;font-weight:700;color:' + nameColor + ';text-transform:uppercase">' + split.name + '</div>'
-      + '<div style="font-size:14px;color:var(--muted);margin-top:3px;line-height:1.4">' + split.desc + (incompatible?' <span style="color:var(--danger)">\u2014 needs '+split.minDays+'+/week</span>':'') + '</div>'
+      + '<div style="font-size:14px;color:var(--muted);margin-top:3px;line-height:1.4">' + split.desc + (caution?' <span style="color:#ff6a00">\u00b7 best at '+split.recMin+'+\u00d7/week</span>':'') + '</div>'
       + '</div>' + recTag + '</div>';
   }).join('');
   container.querySelectorAll('.split-opt-btn').forEach(el => {
@@ -1578,6 +1601,24 @@ function renderDashboard() {
   if (volEl) volEl.innerHTML = weeklyVol > 0 ? (weeklyVol >= 1000 ? (weeklyVol/1000).toFixed(1) + '<span>k kg</span>' : weeklyVol + '<span> kg</span>') : NO;
   if (streakEl) streakEl.innerHTML = streak + '<span> days</span>';
   if (rirEl) rirEl.innerHTML = rirCount > 0 ? (rirTotal/rirCount).toFixed(1) : NO;
+
+  // Awards strip
+  const awardsStrip = document.getElementById('dashAwardsStrip');
+  if (awardsStrip) {
+    const awards = getAwards();
+    if (awards.length) {
+      const recent = awards.slice(0, 3);
+      awardsStrip.innerHTML = '<div style="padding:10px 16px 4px;font-family:var(--font-mono);font-size:12px;color:var(--muted);letter-spacing:.1em">ACHIEVEMENTS</div>'
+        + '<div style="display:flex;gap:6px;padding:0 16px 10px;overflow-x:auto;scrollbar-width:none">'
+        + recent.map(a => '<div style="flex-shrink:0;background:rgba(232,255,0,.05);border:1px solid rgba(232,255,0,.3);padding:8px 14px;white-space:nowrap">'
+          + '<div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:#e8ff00">' + a.name + '</div>'
+          + '<div style="font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-top:2px">' + a.date + '</div>'
+          + '</div>').join('')
+        + '</div>';
+    } else {
+      awardsStrip.innerHTML = '';
+    }
+  }
 
   // Deload banner
   const deloadEl = document.getElementById('dashDeloadBanner');
@@ -2092,6 +2133,7 @@ function finishWorkout() {
   });
   log[tk] = { sets: totalSets, volume: Math.round(totalVol), rir: rirCount>0 ? Math.round((rirTotal/rirCount)*10)/10 : null, muscleBreakdown, duration: workoutSecs };
   saveWorkoutLog(log);
+  checkAndAwardSession();
   showFeedback({ sets: totalSets, volume: totalVol, duration: workoutSecs });
 }
 
@@ -2570,13 +2612,14 @@ function renderBodyweightLog() {
 let analyticsPeriod = 'week';
 
 function switchAnTab(tab) {
-  ['stats','volume','body'].forEach(t => {
+  ['stats','volume','charts','body'].forEach(t => {
     const p = document.getElementById('an-'+t);
     const b = document.getElementById('an-tab-'+t);
     if (p) p.style.display = t===tab?'block':'none';
     if (b) b.className = 'lib-tab'+(t===tab?' active':'');
   });
   if (tab==='volume') renderVolumeLandmarks();
+  if (tab==='charts') { renderWeeklyVolumeChart(); renderComplianceGrid(); }
   if (tab==='body') renderBodyweightLog();
 }
 
@@ -2674,7 +2717,9 @@ function openExHistory(exId, exName) {
   if (!hist.length) {
     contentEl.innerHTML = '<div class="empty-state"><div>No history yet</div></div>';
   } else {
-    contentEl.innerHTML = hist.map(entry => {
+    const sparkId = 'spark_' + exId;
+    contentEl.innerHTML = '<div id="'+sparkId+'" style="padding:14px 16px;border-bottom:2px solid var(--border)"></div>'
+      + hist.map(entry => {
       const setsHtml = (entry.sets || []).map((s, i) =>
         '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">'
         + '<span style="font-family:var(--font-mono);font-size:14px;color:var(--muted)">SET ' + (i+1) + '</span>'
@@ -2690,6 +2735,7 @@ function openExHistory(exId, exName) {
         + '<span style="font-family:var(--font-mono);font-size:14px;color:var(--muted)">' + (entry.sets||[]).length + ' sets Â· ' + Math.round(totalVol) + 'kg vol</span>'
         + '</div>' + setsHtml + '</div>';
     }).join('');
+    renderWeightSparkline(getHistory(exId), sparkId);
   }
   document.getElementById('historyModal').classList.add('show');
 }
@@ -2783,6 +2829,234 @@ function showToast(msg) {
   t.classList.add("show");
   clearTimeout(toastTmr);
   toastTmr = setTimeout(() => t.classList.remove("show"), 2400);
+}
+
+function showAwardToast(name, desc) {
+  const wrap = document.getElementById("awardToast");
+  const inner = document.getElementById("awardToastInner");
+  if (!wrap || !inner) return;
+  document.getElementById("awardToastName").textContent = name;
+  document.getElementById("awardToastDesc").textContent = desc;
+  wrap.style.display = 'block';
+  requestAnimationFrame(() => requestAnimationFrame(() => { inner.style.transform = 'translateY(0)'; }));
+  clearTimeout(window._awardTmr);
+  window._awardTmr = setTimeout(() => {
+    inner.style.transform = 'translateY(-120px)';
+    setTimeout(() => { wrap.style.display = 'none'; }, 400);
+  }, 3500);
+}
+
+function grantAward(id, name, desc) {
+  const awards = getAwards();
+  const already = awards.find(a => a.id === id);
+  if (already) return false;
+  awards.unshift({ id, name, desc, date: todayKey() });
+  if (awards.length > 50) awards.length = 50;
+  saveAwards(awards);
+  showAwardToast(name, desc);
+  return true;
+}
+
+function checkAndAwardSession() {
+  const log = getWorkoutLog();
+  const prog = getActiveProgram();
+  const tk = todayKey();
+  const allKeys = Object.keys(log).sort();
+  const totalSessions = allKeys.length;
+
+  // First session ever
+  if (totalSessions === 1) grantAward('FIRST_SESSION', 'FIRST REP', 'You started. That\'s the hardest part.');
+
+  // Perfect session (5% random)
+  if (Math.random() < 0.05) grantAward('PERFECT_SESSION_' + tk, 'PERFECT SESSION', 'Flawless execution today.');
+
+  // Volume PR — compare this week total sets vs best prior week
+  const wd = getWeekDates();
+  const weekStart = wd[0].key, weekEnd = wd[6].key;
+  const thisWeekEntries = Object.entries(log).filter(([k]) => k >= weekStart && k <= weekEnd);
+  const thisWeekSets = thisWeekEntries.reduce((s, [,e]) => s + (e.sets||0), 0);
+  const pastWeekSets = getPastBestWeekSets(log, weekStart);
+  if (thisWeekSets > 0 && thisWeekSets > pastWeekSets) {
+    grantAward('VOL_PR_' + weekStart, 'VOLUME PR', 'New weekly sets record: ' + thisWeekSets + ' sets.');
+  }
+
+  // Week complete
+  if (prog) {
+    const target = prog.weeklyTarget || prog.sessions.length;
+    const weekDone = thisWeekEntries.length;
+    if (weekDone >= target) {
+      grantAward('WEEK_' + weekStart, 'WEEK COMPLETE', 'Hit ' + target + '×/week target.');
+
+      // Consecutive week streak awards
+      const completedWeeks = countConsecWeeksHit(log, target, weekStart);
+      if (completedWeeks >= 8) grantAward('IRON_WILL', 'IRON WILL', '8 consecutive weeks on target. Unstoppable.');
+      else if (completedWeeks >= 4) grantAward('LOCKED_IN', 'LOCKED IN', '4 weeks straight on target. You\'re locked in.');
+    }
+
+    // 6-week cycle complete
+    if (prog.startDate) {
+      const start = new Date(prog.startDate);
+      const startKey = start.getFullYear() + '-' + String(start.getMonth()+1).padStart(2,'0') + '-' + String(start.getDate()).padStart(2,'0');
+      const cycleKeys = allKeys.filter(k => k >= startKey);
+      const cycleSessions = cycleKeys.length;
+      const msElapsed = new Date(tk) - start;
+      const daysElapsed = Math.floor(msElapsed / 86400000);
+      if (daysElapsed >= 41 && cycleSessions >= target * 5) {
+        grantAward('CYCLE_' + startKey, 'CYCLE WARRIOR', '6-week mesocycle complete. Time to recharge.');
+      }
+    }
+  }
+}
+
+function getPastBestWeekSets(log, beforeWeekStart) {
+  const keys = Object.keys(log).filter(k => k < beforeWeekStart).sort();
+  if (!keys.length) return 0;
+  let best = 0;
+  for (let i = 0; i < keys.length; i++) {
+    const weekStart = getWeekStartKey(keys[i]);
+    const weekEnd = getWeekEndKey(weekStart);
+    const weekSets = Object.entries(log).filter(([k]) => k >= weekStart && k < beforeWeekStart && k <= weekEnd).reduce((s,[,e])=>s+(e.sets||0),0);
+    if (weekSets > best) best = weekSets;
+  }
+  return best;
+}
+
+function getWeekStartKey(dateKey) {
+  const d = new Date(dateKey + 'T00:00:00');
+  const day = d.getDay();
+  const diff = (day === 0 ? -6 : 1 - day);
+  d.setDate(d.getDate() + diff);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function getWeekEndKey(weekStartKey) {
+  const d = new Date(weekStartKey + 'T00:00:00');
+  d.setDate(d.getDate() + 6);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function countConsecWeeksHit(log, target, currentWeekStart) {
+  let count = 0;
+  let ws = currentWeekStart;
+  for (let i = 0; i < 52; i++) {
+    const we = getWeekEndKey(ws);
+    const done = Object.keys(log).filter(k => k >= ws && k <= we).length;
+    if (done >= target) count++;
+    else break;
+    // go back one week
+    const d = new Date(ws + 'T00:00:00');
+    d.setDate(d.getDate() - 7);
+    ws = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+  return count;
+}
+
+// ══════════════════════════════════════════════════════
+// CHARTS
+// ══════════════════════════════════════════════════════
+function renderWeeklyVolumeChart() {
+  const el = document.getElementById('chartVolumeCanvas');
+  if (!el) return;
+  const log = getWorkoutLog();
+  const weeks = [];
+  const today = new Date();
+  for (let i = 7; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i * 7);
+    const ws = getWeekStartKey(d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'));
+    const we = getWeekEndKey(ws);
+    const sets = Object.entries(log).filter(([k]) => k >= ws && k <= we).reduce((s,[,e])=>s+(e.sets||0),0);
+    const label = ws.slice(5).replace('-','/');
+    weeks.push({ label, sets, ws });
+  }
+  const maxSets = Math.max(...weeks.map(w => w.sets), 1);
+  const W = 320, H = 140, pad = { l:32, r:10, t:10, b:28 };
+  const chartW = W - pad.l - pad.r, chartH = H - pad.t - pad.b;
+  const barW = Math.floor(chartW / weeks.length) - 4;
+  let bars = weeks.map((w, i) => {
+    const x = pad.l + i * (chartW / weeks.length) + 2;
+    const barH = w.sets > 0 ? Math.max(4, Math.round((w.sets / maxSets) * chartH)) : 0;
+    const y = pad.t + chartH - barH;
+    const color = w.sets === 0 ? 'var(--border)' : '#e8ff00';
+    return '<rect x="'+x+'" y="'+y+'" width="'+barW+'" height="'+barH+'" fill="'+color+'" opacity="0.85"/>'
+      + (w.sets > 0 ? '<text x="'+(x+barW/2)+'" y="'+(y-4)+'" text-anchor="middle" font-family="monospace" font-size="10" fill="#e8ff00">'+w.sets+'</text>' : '')
+      + '<text x="'+(x+barW/2)+'" y="'+(H-6)+'" text-anchor="middle" font-family="monospace" font-size="9" fill="var(--muted)">'+w.label+'</text>';
+  }).join('');
+  el.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="display:block">'
+    + '<line x1="'+pad.l+'" y1="'+pad.t+'" x2="'+pad.l+'" y2="'+(pad.t+chartH)+'" stroke="var(--border)" stroke-width="1"/>'
+    + '<line x1="'+pad.l+'" y1="'+(pad.t+chartH)+'" x2="'+(W-pad.r)+'" y2="'+(pad.t+chartH)+'" stroke="var(--border)" stroke-width="1"/>'
+    + bars
+    + '</svg>';
+}
+
+function renderWeightSparkline(hist, containerId) {
+  const el = document.getElementById(containerId);
+  if (!el || !hist || hist.length < 2) { if(el) el.innerHTML=''; return; }
+  const points = hist.slice(-12).map(entry => {
+    const topSet = (entry.sets||[]).reduce((best,s) => (parseFloat(s.w)||0) > (parseFloat(best.w)||0) ? s : best, {w:0});
+    return { date: fmtDate(entry.date), w: parseFloat(topSet.w)||0 };
+  }).filter(p => p.w > 0);
+  if (points.length < 2) { el.innerHTML=''; return; }
+  const W = 300, H = 60, padX = 10, padY = 8;
+  const minW = Math.min(...points.map(p=>p.w));
+  const maxW = Math.max(...points.map(p=>p.w));
+  const range = maxW - minW || 1;
+  const xs = points.map((p,i) => padX + i * (W - 2*padX) / (points.length-1));
+  const ys = points.map(p => padY + (H - 2*padY) * (1 - (p.w - minW) / range));
+  const polyline = xs.map((x,i) => x+','+ys[i]).join(' ');
+  const dots = points.map((p,i) => '<circle cx="'+xs[i]+'" cy="'+ys[i]+'" r="3" fill="#e8ff00"/><title>'+p.date+' · '+p.w+'kg</title>').join('');
+  el.innerHTML = '<div style="font-family:var(--font-mono);font-size:12px;color:var(--muted);margin-bottom:4px">TOP SET WEIGHT TREND</div>'
+    + '<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="display:block;overflow:visible">'
+    + '<polyline points="'+polyline+'" fill="none" stroke="#e8ff00" stroke-width="2" opacity="0.8"/>'
+    + dots
+    + '<text x="'+xs[0]+'" y="'+(H-2)+'" text-anchor="start" font-family="monospace" font-size="9" fill="var(--muted)">'+minW+'kg</text>'
+    + '<text x="'+xs[xs.length-1]+'" y="'+(H-2)+'" text-anchor="end" font-family="monospace" font-size="9" fill="var(--muted)">'+maxW+'kg</text>'
+    + '</svg>';
+}
+
+function renderComplianceGrid() {
+  const el = document.getElementById('complianceGrid');
+  if (!el) return;
+  const log = getWorkoutLog();
+  const prog = getActiveProgram();
+  const target = prog ? (prog.weeklyTarget || prog.sessions.length) : 3;
+  const today = new Date();
+  let html = '<div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);letter-spacing:.08em;margin-bottom:12px">// LAST 6 WEEKS · TARGET '+target+'×/WEEK</div>';
+  html += '<div style="display:flex;gap:2px;margin-bottom:6px">';
+  ['M','T','W','T','F','S','S'].forEach(d => { html += '<div style="flex:1;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--muted)">'+d+'</div>'; });
+  html += '</div>';
+  for (let w = 5; w >= 0; w--) {
+    const weekDays = [];
+    let sessionsDone = 0;
+    for (let d = 0; d < 7; d++) {
+      const day = new Date(today);
+      day.setDate(today.getDate() - w*7 - (today.getDay()===0?6:today.getDay()-1) + d);
+      const key = day.getFullYear() + '-' + String(day.getMonth()+1).padStart(2,'0') + '-' + String(day.getDate()).padStart(2,'0');
+      const isFuture = day > today;
+      const trained = !!log[key];
+      if (trained) sessionsDone++;
+      const isToday = key === todayKey();
+      let bg, border;
+      if (isFuture) { bg='var(--bg)'; border='var(--border)'; }
+      else if (trained) { bg='#e8ff00'; border='#e8ff00'; }
+      else { bg='var(--surface)'; border='var(--border)'; }
+      weekDays.push('<div style="flex:1;aspect-ratio:1;background:'+bg+';border:1px solid '+border+';'+(isToday?'box-shadow:0 0 0 2px var(--accent);':'')+'"></div>');
+    }
+    const hitTarget = sessionsDone >= target;
+    const ringColor = sessionsDone === 0 ? 'var(--border)' : hitTarget ? '#e8ff00' : '#ff6a00';
+    html += '<div style="display:flex;gap:2px;align-items:center;margin-bottom:3px">';
+    html += weekDays.join('');
+    html += '<div style="width:8px;height:8px;background:'+ringColor+';margin-left:6px;flex-shrink:0"></div>';
+    html += '<div style="font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-left:4px;width:22px;flex-shrink:0">'+sessionsDone+'/'+target+'</div>';
+    html += '</div>';
+  }
+  html += '<div style="display:flex;gap:16px;margin-top:12px;font-family:var(--font-mono);font-size:12px;color:var(--muted)">';
+  html += '<span><span style="display:inline-block;width:8px;height:8px;background:#e8ff00;margin-right:4px"></span>Trained</span>';
+  html += '<span><span style="display:inline-block;width:8px;height:8px;background:var(--surface);border:1px solid var(--border);margin-right:4px"></span>Rest</span>';
+  html += '<span><span style="display:inline-block;width:8px;height:8px;background:#e8ff00;margin-right:4px"></span>Target hit</span>';
+  html += '<span><span style="display:inline-block;width:8px;height:8px;background:#ff6a00;margin-right:4px"></span>Partial</span>';
+  html += '</div>';
+  el.innerHTML = html;
 }
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
