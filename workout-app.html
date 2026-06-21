@@ -509,6 +509,7 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
 
   <!-- BODYWEIGHT TAB -->
   <div id="an-body" style="display:none">
+    <div id="bwChart" style="display:none;margin:12px 16px 4px;background:var(--surface);border:1px solid var(--border);padding:14px 12px 8px"></div>
     <div style="padding:16px 16px 8px">
       <div style="font-size:14px;font-family:var(--font-mono);color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">// log bodyweight</div>
       <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px">
@@ -2748,15 +2749,83 @@ function logBodyweight() {
 
 function renderBodyweightLog() {
   const el = document.getElementById('bwList');
+  const chartEl = document.getElementById('bwChart');
   if (!el) return;
   const log = getBodyweightLog().slice().reverse();
-  if (!log.length) { el.innerHTML='<div class="an-empty">No entries yet.</div>'; return; }
+  if (!log.length) {
+    el.innerHTML = '<div class="an-empty">No entries yet.</div>';
+    if (chartEl) chartEl.style.display = 'none';
+    return;
+  }
   el.innerHTML = log.map((e,i) => {
     const prev = log[i+1];
     const diff = prev ? (e.kg - prev.kg) : null;
     const dh = diff !== null ? '<span class="bw-change '+(diff>0?'up':'down')+'">'+(diff>0?'+':'')+diff.toFixed(1)+' kg</span>' : '';
     return '<div class="bw-entry"><div><div class="bw-date">'+e.date+'</div>'+dh+'</div><div class="bw-val">'+e.kg+'<span style="font-size:14px;color:var(--muted)"> kg</span></div></div>';
   }).join('');
+  if (chartEl && log.length >= 2) {
+    chartEl.style.display = 'block';
+    renderBodyweightChart(log.slice().reverse(), chartEl);
+  } else if (chartEl) {
+    chartEl.style.display = 'none';
+  }
+}
+
+function renderBodyweightChart(entries, el) {
+  const W = 320, H = 120, padL = 40, padR = 12, padT = 18, padB = 24;
+  const chartW = W - padL - padR, chartH = H - padT - padB;
+  const weights = entries.map(e => e.kg);
+  const minW = Math.min(...weights), maxW = Math.max(...weights);
+  const range = maxW - minW || 0.5;
+  const padRange = range * 0.15;
+  const lo = minW - padRange, hi = maxW + padRange;
+  const n = entries.length;
+  const xs = entries.map((_, i) => padL + i * chartW / Math.max(n - 1, 1));
+  const ys = entries.map(e => padT + chartH - ((e.kg - lo) / (hi - lo)) * chartH);
+
+  const polyline = xs.map((x, i) => x + ',' + ys[i]).join(' ');
+  const area = 'M ' + padL + ',' + (padT + chartH)
+    + ' L ' + xs.map((x, i) => x + ',' + ys[i]).join(' L ')
+    + ' L ' + xs[xs.length - 1] + ',' + (padT + chartH) + ' Z';
+
+  const first = entries[0].kg, last = entries[n - 1].kg;
+  const delta = last - first;
+  const trendColor = delta < -0.1 ? '#00f0d0' : delta > 0.1 ? '#ff6a00' : '#e8ff00';
+  const trendSign = delta > 0 ? '+' : '';
+
+  // y-axis ticks
+  const ticks = [minW, (minW + maxW) / 2, maxW].map(v => {
+    const y = padT + chartH - ((v - lo) / (hi - lo)) * chartH;
+    return '<line x1="' + (padL - 4) + '" y1="' + y + '" x2="' + padL + '" y2="' + y + '" stroke="var(--border)" stroke-width="1"/>'
+      + '<text x="' + (padL - 6) + '" y="' + (y + 4) + '" text-anchor="end" font-family="monospace" font-size="9" fill="var(--muted)">' + v.toFixed(1) + '</text>';
+  }).join('');
+
+  // x-axis labels: first, mid, last
+  const xLabels = [0, Math.floor((n - 1) / 2), n - 1].filter((v, i, a) => a.indexOf(v) === i).map(i => {
+    return '<text x="' + xs[i] + '" y="' + (H - 4) + '" text-anchor="middle" font-family="monospace" font-size="9" fill="var(--muted)">' + fmtDate(entries[i].date) + '</text>';
+  }).join('');
+
+  // dots: first, last, and any personal best
+  const pbIdx = weights.indexOf(maxW);
+  const dotIdxs = new Set([0, n - 1, pbIdx]);
+  const dots = [...dotIdxs].map(i => {
+    const isLast = i === n - 1;
+    return '<circle cx="' + xs[i] + '" cy="' + ys[i] + '" r="' + (isLast ? 4 : 3) + '" fill="' + (isLast ? trendColor : 'var(--muted)') + '"/>';
+  }).join('');
+
+  el.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">'
+    + '<div style="font-family:var(--font-mono);font-size:12px;color:var(--muted);letter-spacing:.08em">BODYWEIGHT TREND</div>'
+    + '<div style="font-family:var(--font-display);font-size:18px;letter-spacing:2px;color:' + trendColor + '">'
+    + last.toFixed(1) + ' kg <span style="font-size:13px">' + trendSign + delta.toFixed(1) + '</span></div>'
+    + '</div>'
+    + '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="display:block;overflow:visible">'
+    + '<line x1="' + padL + '" y1="' + padT + '" x2="' + padL + '" y2="' + (padT + chartH) + '" stroke="var(--border)" stroke-width="1"/>'
+    + '<line x1="' + padL + '" y1="' + (padT + chartH) + '" x2="' + (W - padR) + '" y2="' + (padT + chartH) + '" stroke="var(--border)" stroke-width="1"/>'
+    + ticks
+    + '<path d="' + area + '" fill="rgba(232,255,0,0.05)"/>'
+    + '<polyline points="' + polyline + '" fill="none" stroke="' + trendColor + '" stroke-width="2"/>'
+    + dots + xLabels
+    + '</svg>';
 }
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
