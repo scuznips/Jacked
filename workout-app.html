@@ -569,6 +569,12 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
       <!-- storage summary -->
       <div id="dataSummaryCard" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--acid);padding:14px 16px"></div>
 
+      <!-- notifications -->
+      <div style="background:var(--surface);border:1px solid var(--border);padding:16px">
+        <div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);letter-spacing:.1em;margin-bottom:12px">// TRAINING REMINDERS</div>
+        <div id="notifCardInner"><div style="font-size:14px;color:var(--muted);font-family:var(--font-mono)">Loading...</div></div>
+      </div>
+
       <!-- export -->
       <div style="background:var(--surface);border:1px solid var(--border);padding:16px">
         <div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);letter-spacing:.1em;margin-bottom:10px">// EXPORT BACKUP</div>
@@ -2433,6 +2439,7 @@ function finishWorkout() {
   });
   log[tk] = { sets: totalSets, volume: Math.round(totalVol), rir: rirCount>0 ? Math.round((rirTotal/rirCount)*10)/10 : null, muscleBreakdown, duration: workoutSecs, deload: isDeloadSession || undefined };
   saveWorkoutLog(log);
+  saveReminderWorkoutDate(tk);
   if (isDeloadSession) { localStorage.removeItem('jacked_deload_flag'); isDeloadSession = false; }
   checkAndAwardSession();
   showFeedback({ sets: totalSets, volume: totalVol, duration: workoutSecs });
@@ -3032,7 +3039,7 @@ function switchAnTab(tab) {
   if (tab==='charts') { renderWeeklyVolumeChart(); renderComplianceGrid(); }
   if (tab==='strength') renderStrengthTab();
   if (tab==='body') renderBodyweightLog();
-  if (tab==='data') renderDataSummary();
+  if (tab==='data') { renderDataSummary(); renderNotifSettings(); }
 }
 
 function setAnalyticsPeriod(period, el) {
@@ -3682,11 +3689,209 @@ function renderComplianceGrid() {
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // INIT
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ════════════════ NOTIFICATIONS / REMINDERS ════════════════
+
+function openJackedDB() {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open('jacked-settings', 1);
+    req.onupgradeneeded = e => e.target.result.createObjectStore('kv', { keyPath: 'k' });
+    req.onsuccess = e => res(e.target.result);
+    req.onerror = rej;
+  });
+}
+function jackedDbGet(db, key) {
+  return new Promise((res, rej) => {
+    const req = db.transaction('kv', 'readonly').objectStore('kv').get(key);
+    req.onsuccess = () => res(req.result ? req.result.v : null);
+    req.onerror = rej;
+  });
+}
+function jackedDbSet(db, key, val) {
+  return new Promise((res, rej) => {
+    const req = db.transaction('kv', 'readwrite').objectStore('kv').put({ k: key, v: val });
+    req.onsuccess = res;
+    req.onerror = rej;
+  });
+}
+
+async function saveReminderWorkoutDate(dateStr) {
+  try {
+    const db = await openJackedDB();
+    await jackedDbSet(db, 'last-workout-date', dateStr);
+  } catch(e) {}
+}
+
+let _reminderDraft = null;
+
+async function renderNotifSettings() {
+  const el = document.getElementById('notifCardInner');
+  if (!el) return;
+  if (!('Notification' in window)) {
+    el.innerHTML = '<div style="font-size:14px;color:var(--muted);font-family:var(--font-mono)">Notifications not supported in this browser.</div>';
+    return;
+  }
+  if (Notification.permission === 'denied') {
+    el.innerHTML = '<div style="font-size:14px;color:var(--danger);font-family:var(--font-mono)">Notifications blocked. Enable in your browser or phone settings, then reload the app.</div>';
+    return;
+  }
+  if (Notification.permission === 'default') {
+    el.innerHTML = '<div style="font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.6">Get notified when it\'s time to train. Works in the background when installed as a PWA on Android Chrome.</div>'
+      + '<button onclick="requestNotifPermission()" style="width:100%;padding:14px;background:var(--accent);color:#060809;border:none;font-family:var(--font-display);font-size:18px;letter-spacing:3px;cursor:pointer;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%)">ENABLE REMINDERS</button>';
+    return;
+  }
+  if (!_reminderDraft) {
+    try {
+      const db = await openJackedDB();
+      const saved = await jackedDbGet(db, 'reminder');
+      _reminderDraft = saved || { enabled: false, days: ['mon','tue','wed','thu','fri','sat','sun'], gapDays: 2 };
+    } catch(e) {
+      _reminderDraft = { enabled: false, days: ['mon','tue','wed','thu','fri','sat','sun'], gapDays: 2 };
+    }
+  }
+  const s = _reminderDraft;
+  const allDays = ['mon','tue','wed','thu','fri','sat','sun'];
+  const dayLabels = ['M','T','W','T','F','S','S'];
+  let html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">'
+    + '<span style="font-size:14px;font-family:var(--font-mono);color:var(--text)">REMINDERS <span style="color:' + (s.enabled ? 'var(--acid)' : 'var(--muted)') + '">' + (s.enabled ? 'ON' : 'OFF') + '</span></span>'
+    + '<button onclick="toggleReminderEnabled()" style="width:48px;height:26px;background:' + (s.enabled ? 'var(--acid)' : 'var(--surface)') + ';border:1px solid ' + (s.enabled ? 'var(--acid)' : 'var(--border)') + ';cursor:pointer;position:relative;flex-shrink:0">'
+    + '<div style="position:absolute;top:4px;' + (s.enabled ? 'right' : 'left') + ':4px;width:16px;height:16px;background:' + (s.enabled ? '#060809' : 'var(--muted)') + '"></div>'
+    + '</button></div>';
+  if (s.enabled) {
+    const dayChips = allDays.map((d, i) => {
+      const on = s.days.includes(d);
+      return '<button onclick="toggleReminderDay(\'' + d + '\')" style="width:34px;height:34px;border:1px solid '
+        + (on ? 'var(--acid)' : 'var(--border)') + ';background:' + (on ? 'rgba(232,255,0,.12)' : 'none')
+        + ';color:' + (on ? 'var(--acid)' : 'var(--muted)') + ';font-family:var(--font-mono);font-size:12px;cursor:pointer;letter-spacing:0">'
+        + dayLabels[i] + '</button>';
+    }).join('');
+    const gapChips = [1, 2, 3].map(g => {
+      const on = s.gapDays === g;
+      return '<button onclick="setReminderGap(' + g + ')" style="padding:8px 14px;border:1px solid '
+        + (on ? 'var(--acid)' : 'var(--border)') + ';background:' + (on ? 'rgba(232,255,0,.12)' : 'none')
+        + ';color:' + (on ? 'var(--acid)' : 'var(--muted)') + ';font-family:var(--font-mono);font-size:13px;cursor:pointer">'
+        + g + (g === 1 ? ' day' : ' days') + '</button>';
+    }).join('');
+    const hasBgSync = 'serviceWorker' in navigator && typeof ServiceWorkerRegistration !== 'undefined' && 'periodicSync' in ServiceWorkerRegistration.prototype;
+    html += '<div style="margin-bottom:14px"><div style="font-family:var(--font-mono);font-size:12px;color:var(--muted);letter-spacing:.08em;margin-bottom:8px">ACTIVE DAYS</div>'
+      + '<div style="display:flex;gap:5px">' + dayChips + '</div></div>'
+      + '<div><div style="font-family:var(--font-mono);font-size:12px;color:var(--muted);letter-spacing:.08em;margin-bottom:8px">REMIND AFTER</div>'
+      + '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">' + gapChips
+      + '<span style="font-family:var(--font-mono);font-size:12px;color:var(--muted)">days without training</span></div></div>'
+      + '<div style="margin-top:14px;font-family:var(--font-mono);font-size:11px;color:var(--muted);opacity:.55;line-height:1.5">'
+      + (hasBgSync
+        ? 'Background sync active. Reminders fire even when the app is closed.'
+        : 'Install as PWA on Android Chrome for background reminders. Opening the app checks for missed reminders.')
+      + '</div>';
+  }
+  el.innerHTML = html;
+}
+
+async function requestNotifPermission() {
+  const perm = await Notification.requestPermission();
+  if (perm === 'granted') {
+    _reminderDraft = { enabled: true, days: ['mon','tue','wed','thu','fri','sat','sun'], gapDays: 2 };
+    try {
+      const db = await openJackedDB();
+      await jackedDbSet(db, 'reminder', _reminderDraft);
+      await _registerReminderSync();
+    } catch(e) {}
+  }
+  renderNotifSettings();
+}
+
+async function toggleReminderEnabled() {
+  if (!_reminderDraft) return;
+  _reminderDraft = { ..._reminderDraft, enabled: !_reminderDraft.enabled };
+  await _saveReminderDraft();
+  renderNotifSettings();
+}
+
+async function toggleReminderDay(day) {
+  if (!_reminderDraft) return;
+  const days = [..._reminderDraft.days];
+  const idx = days.indexOf(day);
+  if (idx >= 0) days.splice(idx, 1); else days.push(day);
+  _reminderDraft = { ..._reminderDraft, days };
+  await _saveReminderDraft();
+  renderNotifSettings();
+}
+
+async function setReminderGap(n) {
+  if (!_reminderDraft) return;
+  _reminderDraft = { ..._reminderDraft, gapDays: n };
+  await _saveReminderDraft();
+  renderNotifSettings();
+}
+
+async function _saveReminderDraft() {
+  try {
+    const db = await openJackedDB();
+    await jackedDbSet(db, 'reminder', _reminderDraft);
+    await _registerReminderSync();
+  } catch(e) {}
+}
+
+async function _registerReminderSync() {
+  if (!('serviceWorker' in navigator)) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    if (!('periodicSync' in reg)) return;
+    if (_reminderDraft && _reminderDraft.enabled && Notification.permission === 'granted') {
+      await reg.periodicSync.register('training-reminder', { minInterval: 12 * 60 * 60 * 1000 });
+    } else {
+      try { await reg.periodicSync.unregister('training-reminder'); } catch(e) {}
+    }
+  } catch(e) {}
+}
+
+async function checkOpenNotification() {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  try {
+    const db = await openJackedDB();
+    const settings = await jackedDbGet(db, 'reminder');
+    if (!settings || !settings.enabled) return;
+    const today = new Date();
+    const todayStr = todayKey();
+    const lastNotified = await jackedDbGet(db, 'last-notified');
+    if (lastNotified === todayStr) return;
+    const dayNames = ['sun','mon','tue','wed','thu','fri','sat'];
+    if (settings.days && settings.days.length && !settings.days.includes(dayNames[today.getDay()])) return;
+    const lastWorkout = await jackedDbGet(db, 'last-workout-date');
+    if (lastWorkout === todayStr) return;
+    if (lastWorkout) {
+      const daysSince = Math.floor((today - new Date(lastWorkout + 'T00:00:00')) / 86400000);
+      if (daysSince < (settings.gapDays || 2)) return;
+    }
+    new Notification('JACKED', {
+      body: lastWorkout
+        ? 'Last session ' + Math.floor((today - new Date(lastWorkout + 'T00:00:00')) / 86400000) + ' days ago. Your next session is ready.'
+        : 'No sessions logged yet. Start your first session.',
+      icon: './icon-192.png',
+      tag: 'training-reminder'
+    });
+    await jackedDbSet(db, 'last-notified', todayStr);
+  } catch(e) {}
+}
+
 renderDashboard();
 document.addEventListener('click', function(e) {
   const btn = e.target.closest('[data-goto]');
   if (btn) showScreen(btn.getAttribute('data-goto'));
 });
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').then(reg => {
+    if (Notification.permission === 'granted') {
+      openJackedDB().then(db => jackedDbGet(db, 'reminder')).then(s => {
+        if (s && s.enabled && 'periodicSync' in reg) {
+          reg.periodicSync.register('training-reminder', { minInterval: 12 * 60 * 60 * 1000 }).catch(() => {});
+        }
+      }).catch(() => {});
+    }
+  }).catch(() => {});
+}
+
+checkOpenNotification().catch(() => {});
 
 </script>
 </body>
