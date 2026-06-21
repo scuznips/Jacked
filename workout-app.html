@@ -224,6 +224,7 @@ input[type=range].feedback-range{width:100%;-webkit-appearance:none;height:6px;b
 input[type=range].feedback-range::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:var(--accent);border-radius:0;cursor:pointer;box-shadow:0 0 10px rgba(0,240,208,.5)}
 input[type=range].feedback-range.orange::-webkit-slider-thumb{background:#ff6a00;box-shadow:0 0 10px rgba(255,106,0,.5)}
 input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff;box-shadow:0 0 10px rgba(157,92,255,.5)}
+input[type=range].feedback-range.acid::-webkit-slider-thumb{background:var(--acid);box-shadow:0 0 10px rgba(232,255,0,.5)}
 .slider-val-row{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);margin-top:6px;letter-spacing:.04em}
 .slider-current{font-family:var(--font-mono);font-size:18px;text-align:center;margin-top:6px}
 .feedback-save-btn{padding:16px;background:var(--accent);color:#080b0d;border:none;font-family:var(--font-display);font-size:22px;letter-spacing:3px;cursor:pointer;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);width:100%}
@@ -729,6 +730,16 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
         <span>Much worse</span><span>Worse</span><span>Same</span><span>Better</span><span>Much better</span>
       </div>
       <div class="slider-current" id="fbPerfVal" style="color:#9d5cff">3 â€” Same</div>
+    </div>
+
+    <div class="feedback-section" style="border-top-color:var(--acid)">
+      <div class="feedback-label">SESSION INTENSITY</div>
+      <div class="feedback-desc">How hard did this session feel overall? Used to calibrate load progression and flag deload needs.</div>
+      <input type="range" class="feedback-range acid" id="fbRpe" min="1" max="5" value="3" oninput="updateFbLabel('fbRpe','fbRpeVal','acid')">
+      <div class="slider-val-row">
+        <span>Easy</span><span>Moderate</span><span>Hard</span><span>Very Hard</span><span>Max</span>
+      </div>
+      <div class="slider-current" id="fbRpeVal" style="color:var(--acid)">3 &mdash; RIR 2 &middot; RPE 8 &mdash; Hard</div>
     </div>
 
     <div class="feedback-section">
@@ -2444,7 +2455,8 @@ function finishWorkout() {
   saveReminderWorkoutDate(tk);
   if (isDeloadSession) { localStorage.removeItem('jacked_deload_flag'); isDeloadSession = false; }
   checkAndAwardSession();
-  showFeedback({ sets: totalSets, volume: totalVol, duration: workoutSecs });
+  const avgRir = rirCount > 0 ? Math.round((rirTotal / rirCount) * 10) / 10 : null;
+  showFeedback({ sets: totalSets, volume: totalVol, duration: workoutSecs, avgRir });
 }
 
 function getRirStyle(rir) {
@@ -2848,10 +2860,15 @@ function updateFbLabel(sid, lid, color) {
   const val = parseInt(document.getElementById(sid)?.value);
   const el = document.getElementById(lid);
   if (!el) return;
-  const type = sid==='fbSoreness'?'soreness':sid==='fbPump'?'pump':'perf';
-  const L = {soreness:['','None','Mild','Moderate','High','Severe'],pump:['','None','Mild','Good','Great','Insane'],perf:['','Much worse','Worse','Same','Better','Much better']};
-  el.textContent = val + ' \u2014 ' + L[type][val];
-  el.style.color = color==='orange'?'#ff6a00':color==='purple'?'#9d5cff':'var(--accent)';
+  const type = sid==='fbSoreness'?'soreness':sid==='fbPump'?'pump':sid==='fbRpe'?'rpe':'perf';
+  const L = {
+    soreness:['','None','Mild','Moderate','High','Severe'],
+    pump:['','None','Mild','Good','Great','Insane'],
+    perf:['','Much worse','Worse','Same','Better','Much better'],
+    rpe:['','RIR 4 \u00b7 RPE 6 \u2014 Easy','RIR 3 \u00b7 RPE 7 \u2014 Moderate','RIR 2 \u00b7 RPE 8 \u2014 Hard','RIR 1 \u00b7 RPE 9 \u2014 Very Hard','RIR 0 \u00b7 RPE 10 \u2014 Max Effort']
+  };
+  el.textContent = L[type][val] || (val + ' \u2014 ' + (L[type][val]||''));
+  el.style.color = color==='orange'?'#ff6a00':color==='purple'?'#9d5cff':color==='acid'?'var(--acid)':'var(--accent)';
 }
 
 let currentSessionData = null;
@@ -2861,6 +2878,13 @@ function showFeedback(sessionData) {
   updateFbLabel('fbSoreness','fbSorenessVal');
   updateFbLabel('fbPump','fbPumpVal','orange');
   updateFbLabel('fbPerf','fbPerfVal','purple');
+  const rpeEl = document.getElementById('fbRpe');
+  if (rpeEl) {
+    const avgRir = sessionData.avgRir;
+    const sliderVal = (avgRir == null) ? 3 : avgRir >= 4 ? 1 : avgRir >= 3 ? 2 : avgRir >= 2 ? 3 : avgRir >= 1 ? 4 : 5;
+    rpeEl.value = sliderVal;
+    updateFbLabel('fbRpe','fbRpeVal','acid');
+  }
   const bw = document.getElementById('fbBodyweight');
   if (bw) bw.value = '';
   renderFbVolumeRec();
@@ -2888,13 +2912,16 @@ function saveFeedback() {
   const s = parseInt(document.getElementById('fbSoreness')?.value)||3;
   const p = parseInt(document.getElementById('fbPump')?.value)||3;
   const f = parseInt(document.getElementById('fbPerf')?.value)||3;
+  const r = parseInt(document.getElementById('fbRpe')?.value)||3;
+  const sessionRir = 5 - r; // slider 1=RIR4, 5=RIR0
   const b = parseFloat(document.getElementById('fbBodyweight')?.value);
   const fl = getFeedbackLog();
-  fl.push({date:todayKey(),soreness:s,pump:p,perf:f,session:currentSessionData});
+  fl.push({date:todayKey(),soreness:s,pump:p,perf:f,rpe:r,sessionRir,session:currentSessionData});
   if (fl.length > 60) fl.splice(0, fl.length-60);
   saveFeedbackLog(fl);
   if (!isNaN(b) && b > 0) { const bl = getBodyweightLog(); bl.push({date:todayKey(),kg:b}); saveBodyweightLog(bl); }
-  if (s >= 4 || f <= 2) localStorage.setItem('jacked_deload_flag', JSON.stringify({date:todayKey(),reason:s>=4?'High soreness ('+s+'/5)':'Performance declining ('+f+'/5)'}));
+  const deloadReason = s>=4 ? 'High soreness ('+s+'/5)' : f<=2 ? 'Performance declining ('+f+'/5)' : (r>=5&&f<=3) ? 'Max effort + flat performance' : null;
+  if (deloadReason) localStorage.setItem('jacked_deload_flag', JSON.stringify({date:todayKey(),reason:deloadReason}));
   const ov = document.getElementById('feedbackOverlay');
   if (ov) ov.classList.remove('show');
   showToast('Session saved!');
