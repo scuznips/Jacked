@@ -295,6 +295,38 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
   </div>
 </div>
 
+<div class="modal-overlay" id="platesModal">
+  <div class="modal-sheet" style="max-height:90dvh">
+    <div class="modal-hdr">
+      <div class="modal-title">PLATE CALC</div>
+      <button class="modal-close" onclick="closePlates()">&#x2715;</button>
+    </div>
+    <div style="padding:16px;overflow-y:auto">
+
+      <!-- bar selector -->
+      <div style="font-family:var(--font-mono);font-size:12px;color:var(--muted);letter-spacing:.1em;margin-bottom:8px">BAR WEIGHT</div>
+      <div style="display:flex;gap:6px;margin-bottom:16px" id="barBtns">
+        <button onclick="setBar(15)" data-bar="15" style="flex:1;padding:10px;background:var(--surface);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:14px;cursor:pointer">15 kg</button>
+        <button onclick="setBar(20)" data-bar="20" style="flex:1;padding:10px;background:var(--acid);border:1px solid var(--acid);color:#060809;font-family:var(--font-mono);font-size:14px;font-weight:700;cursor:pointer">20 kg</button>
+        <button onclick="setBar(10)" data-bar="10" style="flex:1;padding:10px;background:var(--surface);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:14px;cursor:pointer">10 kg</button>
+        <button onclick="setBar(0)" data-bar="0" style="flex:1;padding:10px;background:var(--surface);border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:14px;cursor:pointer">None</button>
+      </div>
+
+      <!-- target weight input -->
+      <div style="font-family:var(--font-mono);font-size:12px;color:var(--muted);letter-spacing:.1em;margin-bottom:8px">TARGET WEIGHT (KG)</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:20px">
+        <button onclick="nudgePlates(-2.5)" style="width:48px;height:48px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:22px;cursor:pointer;font-family:var(--font-mono)">−</button>
+        <input id="platesTarget" type="number" inputmode="decimal" placeholder="e.g. 100" oninput="calcPlates()"
+          style="flex:1;background:var(--surface);border:1px solid var(--border);border-bottom:2px solid var(--acid);padding:12px;color:var(--text);font-family:var(--font-mono);font-size:24px;text-align:center">
+        <button onclick="nudgePlates(2.5)" style="width:48px;height:48px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:22px;cursor:pointer;font-family:var(--font-mono)">+</button>
+      </div>
+
+      <!-- result -->
+      <div id="platesResult"></div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="addExModal">
   <div class="modal-sheet">
     <div class="modal-hdr">
@@ -376,9 +408,10 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
         <div><div class="workout-title" id="logTitle">SESSION</div><div class="workout-sub" id="logSub">Starting...</div></div>
         <button onclick="_goToDash()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:4px">&#x2715;</button>
       </div>
-      <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+      <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
         <div class="timer-badge" id="workoutTimer" style="color:var(--muted)">READY</div>
-        <button id="histToggle" onclick="toggleHistory()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:13px;padding:7px 12px;cursor:pointer;letter-spacing:.06em">LAST SESSION &#x25BC;</button>
+        <button id="histToggle" onclick="toggleHistory()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:13px;padding:7px 12px;cursor:pointer;letter-spacing:.06em">LAST &#x25BC;</button>
+        <button onclick="openPlates()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:13px;padding:7px 12px;cursor:pointer;letter-spacing:.06em">PLATES</button>
       </div>
     </div>
     <div id="lastSessionPanel" style="display:none;background:#080e12;border-bottom:1px solid var(--border);padding:10px 14px;overflow-x:auto"></div>
@@ -3088,6 +3121,145 @@ function restartCycle() {
 // TOAST
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 let toastTmr;
+// ══════════════════════════════════════════════════════
+// PLATE CALCULATOR
+// ══════════════════════════════════════════════════════
+const PLATE_SIZES = [25, 20, 15, 10, 5, 2.5, 1.25];
+const PLATE_COLORS = { 25: '#ff2020', 20: '#1a6eff', 15: '#ffcc00', 10: '#00c853', 5: '#ffffff', 2.5: '#ff6a00', 1.25: '#aaaaaa' };
+let barWeight = 20;
+
+function openPlates(prefillKg) {
+  if (prefillKg) document.getElementById('platesTarget').value = prefillKg;
+  document.getElementById('platesModal').classList.add('show');
+  calcPlates();
+}
+
+function closePlates() {
+  document.getElementById('platesModal').classList.remove('show');
+}
+
+function setBar(kg) {
+  barWeight = kg;
+  document.querySelectorAll('#barBtns button').forEach(b => {
+    const active = parseInt(b.getAttribute('data-bar')) === kg;
+    b.style.background = active ? 'var(--acid)' : 'var(--surface)';
+    b.style.color = active ? '#060809' : 'var(--muted)';
+    b.style.borderColor = active ? 'var(--acid)' : 'var(--border)';
+    b.style.fontWeight = active ? '700' : '400';
+  });
+  calcPlates();
+}
+
+function nudgePlates(delta) {
+  const inp = document.getElementById('platesTarget');
+  const cur = parseFloat(inp.value) || 0;
+  inp.value = Math.max(0, Math.round((cur + delta) * 4) / 4);
+  calcPlates();
+}
+
+function calcPlates() {
+  const el = document.getElementById('platesResult');
+  if (!el) return;
+  const target = parseFloat(document.getElementById('platesTarget')?.value) || 0;
+
+  if (target <= 0) { el.innerHTML = ''; return; }
+
+  const perSide = (target - barWeight) / 2;
+
+  if (perSide < 0) {
+    el.innerHTML = '<div style="font-family:var(--font-mono);font-size:13px;color:var(--danger);padding:12px 0">Target is less than bar weight (' + barWeight + ' kg).</div>';
+    return;
+  }
+
+  // greedily pick plates
+  let remaining = perSide;
+  const plates = [];
+  for (const size of PLATE_SIZES) {
+    while (remaining >= size - 0.001) {
+      plates.push(size);
+      remaining = Math.round((remaining - size) * 1000) / 1000;
+    }
+  }
+
+  const totalLoaded = barWeight + plates.reduce((s, p) => s + p, 0) * 2;
+  const isExact = Math.abs(totalLoaded - target) < 0.01;
+
+  // group plates for display
+  const grouped = {};
+  plates.forEach(p => { grouped[p] = (grouped[p] || 0) + 1; });
+
+  // bar visual
+  const barSvg = renderBarSvg(plates);
+
+  let html = barSvg;
+
+  // plate list
+  if (plates.length === 0) {
+    html += '<div style="font-family:var(--font-mono);font-size:14px;color:var(--muted);padding:12px 0;text-align:center">Just the bar</div>';
+  } else {
+    html += '<div style="margin-top:16px">'
+      + '<div style="font-family:var(--font-mono);font-size:12px;color:var(--muted);letter-spacing:.1em;margin-bottom:8px">EACH SIDE</div>'
+      + '<div style="display:flex;flex-direction:column;gap:6px">'
+      + Object.entries(grouped).sort((a,b) => b[0]-a[0]).map(([size, count]) =>
+          '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border-left:4px solid ' + PLATE_COLORS[size] + '">'
+          + '<div style="display:flex;align-items:center;gap:10px">'
+          + '<span style="display:inline-block;width:10px;height:10px;background:' + PLATE_COLORS[size] + ';border-radius:50%"></span>'
+          + '<span style="font-family:var(--font-display);font-size:18px;letter-spacing:1px;color:var(--text)">' + size + ' kg</span>'
+          + '</div>'
+          + '<span style="font-family:var(--font-mono);font-size:16px;color:var(--acid)">×' + count + '</span>'
+          + '</div>'
+        ).join('')
+      + '</div></div>';
+  }
+
+  // total
+  html += '<div style="margin-top:14px;padding:14px;background:var(--surface);border:1px solid ' + (isExact ? 'var(--acid)' : 'var(--orange)') + ';display:flex;justify-content:space-between;align-items:center">'
+    + '<div style="font-family:var(--font-mono);font-size:13px;color:var(--muted)">TOTAL ON BAR</div>'
+    + '<div style="font-family:var(--font-display);font-size:22px;letter-spacing:2px;color:' + (isExact ? 'var(--acid)' : 'var(--orange)') + '">'
+    + totalLoaded + ' kg' + (isExact ? '' : ' <span style="font-size:13px">(nearest)</span>') + '</div>'
+    + '</div>';
+
+  el.innerHTML = html;
+}
+
+function renderBarSvg(plates) {
+  const W = 300, H = 56;
+  const barY = H / 2, barH = 10, barX = 20, barW = W - 40;
+  const plateGap = 2;
+  let svgParts = [];
+
+  // bar
+  svgParts.push('<rect x="' + barX + '" y="' + (barY - barH/2) + '" width="' + barW + '" height="' + barH + '" fill="#444" rx="2"/>');
+  // collar marks
+  const collarX = barX + barW * 0.18;
+  const rCollarX = barX + barW * 0.82;
+  svgParts.push('<rect x="' + (collarX-3) + '" y="' + (barY-barH/2-2) + '" width="6" height="' + (barH+4) + '" fill="#888"/>');
+  svgParts.push('<rect x="' + (rCollarX-3) + '" y="' + (barY-barH/2-2) + '" width="6" height="' + (barH+4) + '" fill="#888"/>');
+
+  // plates left side (largest outermost from collar going left)
+  const maxPlateH = 44;
+  let lx = collarX - 6;
+  [...plates].reverse().forEach(size => {
+    const ph = Math.round(8 + (size / 25) * (maxPlateH - 8));
+    const pw = Math.max(7, Math.round(size / 25 * 14) + 5);
+    const color = PLATE_COLORS[size];
+    svgParts.push('<rect x="' + (lx - pw) + '" y="' + (barY - ph/2) + '" width="' + pw + '" height="' + ph + '" fill="' + color + '" rx="1"/>');
+    lx -= pw + plateGap;
+  });
+
+  // plates right side
+  let rx = rCollarX + 6;
+  plates.forEach(size => {
+    const ph = Math.round(8 + (size / 25) * (maxPlateH - 8));
+    const pw = Math.max(7, Math.round(size / 25 * 14) + 5);
+    const color = PLATE_COLORS[size];
+    svgParts.push('<rect x="' + rx + '" y="' + (barY - ph/2) + '" width="' + pw + '" height="' + ph + '" fill="' + color + '" rx="1"/>');
+    rx += pw + plateGap;
+  });
+
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="display:block;margin-bottom:4px">' + svgParts.join('') + '</svg>';
+}
+
 function showToast(msg) {
   const t = document.getElementById("toast");
   if (!t) return;
