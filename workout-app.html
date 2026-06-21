@@ -412,6 +412,7 @@ input[type=range].feedback-range.purple::-webkit-slider-thumb{background:#9d5cff
         <div class="timer-badge" id="workoutTimer" style="color:var(--muted)">READY</div>
         <button id="histToggle" onclick="toggleHistory()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:13px;padding:7px 12px;cursor:pointer;letter-spacing:.06em">LAST &#x25BC;</button>
         <button onclick="openPlates()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:13px;padding:7px 12px;cursor:pointer;letter-spacing:.06em">PLATES</button>
+        <button id="sfxBtn" onclick="toggleSfx()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:13px;padding:7px 10px;cursor:pointer;letter-spacing:.06em">SFX</button>
       </div>
     </div>
     <div id="deloadBand" style="display:none;background:rgba(157,92,255,.12);border-bottom:2px solid #9d5cff;padding:8px 16px;font-family:var(--font-mono);font-size:13px;color:#9d5cff;letter-spacing:.08em">DELOAD WEEK · 60% LOAD · RIR 4 · RECOVERY SESSION</div>
@@ -2363,6 +2364,7 @@ function startTodaySession() {
   const subEl = document.getElementById('logSub');
   if (titleEl) { titleEl.textContent = session.name; titleEl.style.color = ''; titleEl.style.textShadow = ''; }
   if (subEl) { subEl.textContent = session.sub || ''; subEl.style.color = ''; }
+  _syncSfxBtn();
   sessionExercises.length = 0;
   let exIdx = 0;
   session.exercises.forEach(ex => {
@@ -2540,6 +2542,7 @@ function togSet(ei, si) {
       row.style.background = 'rgba(232,255,0,0.06)';
       setTimeout(() => { row.style.background=''; row.style.transition='background .6s'; }, 150);
       startWorkoutTimer();
+      playSetComplete();
       startRest(sessionExercises[ei].rest || 90);
     }
   }
@@ -2785,7 +2788,7 @@ function startRest(secs) {
   restInt = setInterval(() => {
     restRem--;
     updRest();
-    if (restRem <= 0) { clearInterval(restInt); const o = document.getElementById('restOverlay'); if (o) o.classList.remove('show'); }
+    if (restRem <= 0) { clearInterval(restInt); const o = document.getElementById('restOverlay'); if (o) o.classList.remove('show'); playRestEnd(); }
   }, 1000);
 }
 
@@ -3689,6 +3692,70 @@ function renderComplianceGrid() {
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // INIT
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ════════════════ SOUND / VIBRATION ════════════════
+
+function getSfxPref() {
+  try { const v = localStorage.getItem('jacked_sound'); return v === null ? true : JSON.parse(v); } catch(e) { return true; }
+}
+
+function _syncSfxBtn() {
+  const on = getSfxPref();
+  const btn = document.getElementById('sfxBtn');
+  if (!btn) return;
+  btn.textContent = on ? 'SFX ON' : 'SFX OFF';
+  btn.style.color = on ? 'var(--acid)' : 'var(--muted)';
+  btn.style.borderColor = on ? 'var(--acid)' : 'var(--border)';
+}
+
+function toggleSfx() {
+  const on = !getSfxPref();
+  localStorage.setItem('jacked_sound', JSON.stringify(on));
+  _syncSfxBtn();
+  if (on) playSetComplete();
+}
+
+function playSetComplete() {
+  if (!getSfxPref()) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine';
+    const t = ctx.currentTime;
+    osc.frequency.setValueAtTime(660, t);
+    osc.frequency.setValueAtTime(880, t + 0.08);
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.2, t + 0.01);
+    gain.gain.setValueAtTime(0.15, t + 0.07);
+    gain.gain.linearRampToValueAtTime(0, t + 0.09);
+    gain.gain.linearRampToValueAtTime(0.2, t + 0.10);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.26);
+    osc.start(t); osc.stop(t + 0.28);
+  } catch(e) {}
+  try { if (navigator.vibrate) navigator.vibrate(40); } catch(e) {}
+}
+
+function playRestEnd() {
+  if (!getSfxPref()) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [440, 660, 880].forEach((f, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      const t = ctx.currentTime + i * 0.18;
+      osc.frequency.setValueAtTime(f, t);
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.28, t + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.32);
+      osc.start(t); osc.stop(t + 0.35);
+    });
+  } catch(e) {}
+  try { if (navigator.vibrate) navigator.vibrate([100, 60, 200]); } catch(e) {}
+}
+
 // ════════════════ NOTIFICATIONS / REMINDERS ════════════════
 
 function openJackedDB() {
