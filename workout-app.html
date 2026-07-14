@@ -1648,6 +1648,40 @@ const SPLITS = {
     priority:['rpStrSquat','rpStrBench','rpStrDeadlift','rpStrUpper'],
   },
 
+  // ── Full Body Upper Focus ──────────────────────────────────────────────────
+  fbUpper: { name:'Full Body – Upper Focus', days:3, recMin:2, desc:'3x frequency per muscle · Max upper body volume · Legs at maintenance only · Any session hits everything',
+    sessions:[
+      {id:'fbuA',name:'FULL BODY · COMPOUND',sub:'Legs opener · Chest press · Back row · Shoulders · Arms',exercises:[
+        {name:'Leg Press',muscle:'Legs',sets:'2',reps:'10-15'},
+        {name:'Romanian DL',muscle:'Legs',sets:'2',reps:'10-12'},
+        {name:'Smith Machine Press (Low Incline, Wide Grip)',muscle:'Chest',sets:'3',reps:'8-12'},
+        {name:'T-Bar Row',muscle:'Back',sets:'3',reps:'8-12'},
+        {name:'DB Lateral Raise',muscle:'Shoulders',sets:'3',reps:'12-15'},
+        {name:'Incline DB Curl',muscle:'Biceps',sets:'3',reps:'10-12'},
+        {name:'Cable Triceps Pushdown (Rope)',muscle:'Triceps',sets:'3',reps:'12-15'},
+      ]},
+      {id:'fbuB',name:'FULL BODY · VERTICAL',sub:'Legs brief · Bench & Pulldown · Rear delt · Arms',exercises:[
+        {name:'Leg Extension',muscle:'Legs',sets:'2',reps:'12-15'},
+        {name:'Leg Curl',muscle:'Legs',sets:'2',reps:'12-15'},
+        {name:'Flat Bench Press',muscle:'Chest',sets:'3',reps:'8-12'},
+        {name:'Lat Pulldown',muscle:'Back',sets:'3',reps:'10-12'},
+        {name:'Face Pull',muscle:'Shoulders',sets:'3',reps:'15-20'},
+        {name:'Cable Curl',muscle:'Biceps',sets:'3',reps:'12-15'},
+        {name:'Overhead Tri Extension',muscle:'Triceps',sets:'3',reps:'12-15'},
+      ]},
+      {id:'fbuC',name:'FULL BODY · ISOLATION',sub:'Unilateral legs · Cable & DB upper · Volume arms',exercises:[
+        {name:'Bulgarian Split Squat',muscle:'Legs',sets:'2',reps:'10-12'},
+        {name:'Stiff-Legged Deadlift',muscle:'Legs',sets:'2',reps:'10-12'},
+        {name:'Incline DB Press',muscle:'Chest',sets:'3',reps:'10-12'},
+        {name:'Seated Cable Row',muscle:'Back',sets:'3',reps:'10-12'},
+        {name:'Cable Lateral Raise',muscle:'Shoulders',sets:'3',reps:'12-15'},
+        {name:'Hammer Curl',muscle:'Biceps',sets:'3',reps:'10-12'},
+        {name:'Smith Machine Skullcrusher',muscle:'Triceps',sets:'3',reps:'10-15'},
+      ]},
+    ],
+    priority:['fbuA','fbuB','fbuC'],
+  },
+
 };
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -2726,7 +2760,14 @@ function addExToSession(exId) {
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // REST TIMER
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-let restInt = null, restRem = 0;
+let restInt = null, restRem = 0, _wakeLock = null;
+
+async function _acquireWakeLock() {
+  try { if ('wakeLock' in navigator) _wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
+}
+function _releaseWakeLock() {
+  try { if (_wakeLock) { _wakeLock.release(); _wakeLock = null; } } catch(e) {}
+}
 const QUOTES = [
   "The body achieves what the mind believes.",
   "One more rep. That's where growth lives.",
@@ -2796,11 +2837,13 @@ function startRest(secs) {
   const overlay = document.getElementById('restOverlay');
   if (overlay) overlay.classList.add('show');
   updRest();
+  _acquireWakeLock();
   clearInterval(restInt);
   restInt = setInterval(() => {
     restRem--;
     updRest();
-    if (restRem <= 0) { clearInterval(restInt); const o = document.getElementById('restOverlay'); if (o) o.classList.remove('show'); playRestEnd(); }
+    if (restRem > 0 && restRem <= 5) playCountdownTick(restRem);
+    if (restRem <= 0) { clearInterval(restInt); const o = document.getElementById('restOverlay'); if (o) o.classList.remove('show'); playRestEnd(); _releaseWakeLock(); }
   }, 1000);
 }
 
@@ -2813,6 +2856,7 @@ function skipRest() {
   clearInterval(restInt);
   const o = document.getElementById('restOverlay');
   if (o) o.classList.remove('show');
+  _releaseWakeLock();
 }
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -3781,6 +3825,24 @@ function playRestEnd() {
     });
   } catch(e) {}
   try { if (navigator.vibrate) navigator.vibrate([100, 60, 200]); } catch(e) {}
+}
+
+function playCountdownTick(n) {
+  if (!getSfxPref()) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine';
+    const t = ctx.currentTime;
+    osc.frequency.setValueAtTime(n === 1 ? 1200 : 880, t);
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(n === 1 ? 0.3 : 0.18, t + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.13);
+    osc.start(t); osc.stop(t + 0.14);
+  } catch(e) {}
+  try { if (navigator.vibrate) navigator.vibrate(25); } catch(e) {}
 }
 
 // ════════════════ NOTIFICATIONS / REMINDERS ════════════════
