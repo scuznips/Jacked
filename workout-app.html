@@ -1266,7 +1266,7 @@ function showScreen(id) {
 const SPLITS = {
   ppl: { name:'Push · Pull · Legs', days:6, recMin:4, desc:'2x frequency per muscle â€” best for intermediate+',
     sessions:[
-      {id:'pushA',name:'CHEST & PRESS',sub:'Compound push Â· Chest primary Â· Shoulders Â· Triceps',exercises:[
+      {id:'pushA',name:'CHEST & PRESS',sub:'Compound push · Chest primary · Shoulders · Triceps',exercises:[
         {name:'Smith Machine Press (Low Incline, Wide Grip)',muscle:'Chest',sets:'4',reps:'6-10'},
         {name:'Incline DB Press',muscle:'Chest',sets:'3',reps:'10-12'},
         {name:'Smith Machine Shoulder Press (Seated)',muscle:'Shoulders',sets:'3',reps:'8-12'},
@@ -1275,7 +1275,7 @@ const SPLITS = {
         {name:'Smith Machine Skullcrusher',muscle:'Triceps',sets:'3',reps:'10-15'},
         {name:'Cable Triceps Pushdown (Rope)',muscle:'Triceps',sets:'3',reps:'12-15'},
       ]},
-      {id:'pullA',name:'BACK & PULL',sub:'Vertical & horizontal pull Â· Biceps Â· Rear Delt',exercises:[
+      {id:'pullA',name:'BACK & PULL',sub:'Vertical & horizontal pull · Biceps · Rear Delt',exercises:[
         {name:'Lat Pulldown',muscle:'Back',sets:'4',reps:'8-12'},
         {name:'Smith Machine Row',muscle:'Back',sets:'4',reps:'8-12'},
         {name:'Chest Supported Row',muscle:'Back',sets:'3',reps:'10-12'},
@@ -1283,7 +1283,7 @@ const SPLITS = {
         {name:'Incline DB Curl',muscle:'Biceps',sets:'3',reps:'10-12'},
         {name:'Hammer Curl',muscle:'Biceps',sets:'3',reps:'10-12'},
       ]},
-      {id:'legsA',name:'SQUAT DAY',sub:'Quad dominant Â· Hamstring Â· Glutes Â· Calves',exercises:[
+      {id:'legsA',name:'SQUAT DAY',sub:'Quad dominant · Hamstring · Glutes · Calves',exercises:[
         {name:'High Bar Squat',muscle:'Legs',sets:'4',reps:'6-10'},
         {name:'Leg Press',muscle:'Legs',sets:'3',reps:'10-12'},
         {name:'Walking Lunges (Quad-Focused, Barbell)',muscle:'Legs',sets:'3',reps:'10-15'},
@@ -1291,7 +1291,7 @@ const SPLITS = {
         {name:'Leg Curl',muscle:'Legs',sets:'3',reps:'10-15'},
         {name:'Calf Raise',muscle:'Calves',sets:'4',reps:'12-15'},
       ]},
-      {id:'pushB',name:'SHOULDER & FLY',sub:'Shoulder dominant push Â· Chest isolation Â· Triceps volume',exercises:[
+      {id:'pushB',name:'SHOULDER & FLY',sub:'Shoulder dominant push · Chest isolation · Triceps volume',exercises:[
         {name:'Flat Bench Press',muscle:'Chest',sets:'4',reps:'8-12'},
         {name:'Smith Machine Press (Medium Incline, Narrow Grip)',muscle:'Chest',sets:'3',reps:'10-12'},
         {name:'Cable Fly',muscle:'Chest',sets:'3',reps:'12-15'},
@@ -1300,7 +1300,7 @@ const SPLITS = {
         {name:'Overhead Tri Extension',muscle:'Triceps',sets:'3',reps:'10-15'},
         {name:'Cable Triceps Pushdown (Bar)',muscle:'Triceps',sets:'3',reps:'12-15'},
       ]},
-      {id:'pullB',name:'ROW & CURL',sub:'Horizontal pull dominant Â· Rear Delt Â· Biceps peak',exercises:[
+      {id:'pullB',name:'ROW & CURL',sub:'Horizontal pull dominant · Rear Delt · Biceps peak',exercises:[
         {name:'T-Bar Row',muscle:'Back',sets:'4',reps:'8-12'},
         {name:'Seated Cable Row',muscle:'Back',sets:'4',reps:'10-12'},
         {name:'Lat Pulldown',muscle:'Back',sets:'3',reps:'10-15'},
@@ -1308,7 +1308,7 @@ const SPLITS = {
         {name:'Cable Curl',muscle:'Biceps',sets:'3',reps:'12-15'},
         {name:'Concentration Curl',muscle:'Biceps',sets:'3',reps:'10-12'},
       ]},
-      {id:'legsB',name:'HINGE DAY',sub:'Hip dominant Â· Glutes & hamstrings Â· Quad accessory',exercises:[
+      {id:'legsB',name:'HINGE DAY',sub:'Hip dominant · Glutes & hamstrings · Quad accessory',exercises:[
         {name:'Trap Bar Deadlift',muscle:'Legs',sets:'4',reps:'6-10'},
         {name:'Stiff-Legged Deadlift',muscle:'Legs',sets:'3',reps:'8-12'},
         {name:'Walking Lunges (Glute-Focused, Dumbbell)',muscle:'Legs',sets:'3',reps:'10-15'},
@@ -1322,7 +1322,7 @@ const SPLITS = {
   },
   ul: { name:'Upper · Lower', days:4, recMin:3, desc:'2x frequency â€” great for all levels',
     sessions:[
-      {id:'upperA',name:'STRENGTH UPPER',sub:'Compound dominant Â· Heavy loads Â· Chest Â· Back Â· Arms',exercises:[
+      {id:'upperA',name:'STRENGTH UPPER',sub:'Compound dominant · Heavy loads · Chest · Back · Arms',exercises:[
         {name:'Smith Machine Press (Low Incline, Wide Grip)',muscle:'Chest',sets:'4',reps:'6-10'},
         {name:'Barbell Row',muscle:'Back',sets:'4',reps:'6-10'},
         {name:'Smith Machine Shoulder Press (Seated)',muscle:'Shoulders',sets:'3',reps:'8-12'},
@@ -1331,7 +1331,7 @@ const SPLITS = {
         {name:'Close Grip Bench',muscle:'Triceps',sets:'3',reps:'8-12'},
         {name:'Incline DB Curl',muscle:'Biceps',sets:'3',reps:'10-12'},
       ]},
-      {id:'lowerA',name:'SQUAT & HINGE',sub:'Quad dominant Â· Hip hinge Â· Full leg development',exercises:[
+      {id:'lowerA',name:'SQUAT & HINGE',sub:'Quad dominant · Hip hinge · Full leg development',exercises:[
         {name:'High Bar Squat',muscle:'Legs',sets:'4',reps:'6-10'},
         {name:'Walking Lunges (Quad-Focused, Dumbbell)',muscle:'Legs',sets:'3',reps:'10-15'},
         {name:'Romanian DL',muscle:'Legs',sets:'3',reps:'8-12'},
@@ -1339,7 +1339,7 @@ const SPLITS = {
         {name:'Leg Extension',muscle:'Legs',sets:'3',reps:'12-15'},
         {name:'Calf Raise',muscle:'Calves',sets:'4',reps:'12-15'},
       ]},
-      {id:'upperB',name:'VOLUME UPPER',sub:'Hypertrophy focus Â· Higher reps Â· Chest Â· Back Â· Arms',exercises:[
+      {id:'upperB',name:'VOLUME UPPER',sub:'Hypertrophy focus · Higher reps · Chest · Back · Arms',exercises:[
         {name:'Flat Bench Press',muscle:'Chest',sets:'4',reps:'10-12'},
         {name:'Smith Machine Press (Medium Incline, Narrow Grip)',muscle:'Chest',sets:'3',reps:'10-12'},
         {name:'T-Bar Row',muscle:'Back',sets:'4',reps:'10-12'},
@@ -1349,7 +1349,7 @@ const SPLITS = {
         {name:'Smith Machine Skullcrusher',muscle:'Triceps',sets:'3',reps:'12-15'},
         {name:'Cable Curl',muscle:'Biceps',sets:'3',reps:'12-15'},
       ]},
-      {id:'lowerB',name:'DEADLIFT DAY',sub:'Hip dominant Â· Glutes & hams primary Â· Quad finishers',exercises:[
+      {id:'lowerB',name:'DEADLIFT DAY',sub:'Hip dominant · Glutes & hams primary · Quad finishers',exercises:[
         {name:'Trap Bar Deadlift',muscle:'Legs',sets:'4',reps:'6-10'},
         {name:'Leg Press',muscle:'Legs',sets:'3',reps:'10-15'},
         {name:'Walking Lunges (Glute-Focused, Dumbbell)',muscle:'Legs',sets:'3',reps:'10-15'},
@@ -1362,7 +1362,7 @@ const SPLITS = {
   },
   fb: { name:'Full Body · Classic', days:3, recMin:2, desc:'3x frequency per muscle â€” ideal for 2-4 days',
     sessions:[
-      {id:'fbA',name:'FULL BODY A',sub:'Squat Â· Press Â· Row Â· Arms â€” compound + arm work',exercises:[
+      {id:'fbA',name:'FULL BODY A',sub:'Squat · Press · Row · Arms â€” compound + arm work',exercises:[
         {name:'High Bar Squat',muscle:'Legs',sets:'4',reps:'6-10'},
         {name:'Smith Machine Press (Low Incline, Wide Grip)',muscle:'Chest',sets:'4',reps:'8-12'},
         {name:'Barbell Row',muscle:'Back',sets:'4',reps:'8-12'},
@@ -1371,7 +1371,7 @@ const SPLITS = {
         {name:'Barbell Curl',muscle:'Biceps',sets:'3',reps:'10-12'},
         {name:'Cable Triceps Pushdown (Rope)',muscle:'Triceps',sets:'3',reps:'12-15'},
       ]},
-      {id:'fbB',name:'FULL BODY B',sub:'Deadlift Â· Upper variation Â· Arms Â· moderate volume',exercises:[
+      {id:'fbB',name:'FULL BODY B',sub:'Deadlift · Upper variation · Arms · moderate volume',exercises:[
         {name:'Trap Bar Deadlift',muscle:'Legs',sets:'4',reps:'6-10'},
         {name:'Flat Bench Press',muscle:'Chest',sets:'4',reps:'8-12'},
         {name:'Lat Pulldown',muscle:'Back',sets:'3',reps:'10-12'},
@@ -1380,7 +1380,7 @@ const SPLITS = {
         {name:'Incline DB Curl',muscle:'Biceps',sets:'3',reps:'10-12'},
         {name:'Smith Machine Skullcrusher',muscle:'Triceps',sets:'3',reps:'10-15'},
       ]},
-      {id:'fbC',name:'FULL BODY C',sub:'Leg press Â· Cable work Â· isolation + arms',exercises:[
+      {id:'fbC',name:'FULL BODY C',sub:'Leg press · Cable work · isolation + arms',exercises:[
         {name:'Bulgarian Split Squat',muscle:'Legs',sets:'4',reps:'10-12'},
         {name:'Smith Machine Press (Medium Incline, Narrow Grip)',muscle:'Chest',sets:'3',reps:'10-12'},
         {name:'Seated Cable Row',muscle:'Back',sets:'4',reps:'10-12'},
@@ -1394,21 +1394,21 @@ const SPLITS = {
   },
   gzclp: { name:'GZCLP · Linear', days:3, recMin:3, desc:'Tier 1/2/3 structure â€” strength & size for beginners/intermediates',
     sessions:[
-      {id:'gzclpA',name:'GZCLP A',sub:'Squat Â· Bench Â· Pulldown Â· Accessories',exercises:[
+      {id:'gzclpA',name:'GZCLP A',sub:'Squat · Bench · Pulldown · Accessories',exercises:[
         {name:'High Bar Squat',muscle:'Legs',sets:'5',reps:'3'},
         {name:'Flat Bench Press',muscle:'Chest',sets:'3',reps:'10'},
         {name:'Lat Pulldown',muscle:'Back',sets:'3',reps:'15'},
         {name:'DB Lateral Raise',muscle:'Shoulders',sets:'3',reps:'15'},
         {name:'Incline DB Curl',muscle:'Biceps',sets:'3',reps:'15'},
       ]},
-      {id:'gzclpB',name:'GZCLP B',sub:'Deadlift Â· OHP Â· Row Â· Accessories',exercises:[
+      {id:'gzclpB',name:'GZCLP B',sub:'Deadlift · OHP · Row · Accessories',exercises:[
         {name:'Conventional Deadlift',muscle:'Legs',sets:'5',reps:'3'},
         {name:'Barbell Shoulder Press (Standing)',muscle:'Shoulders',sets:'3',reps:'10'},
         {name:'Barbell Row',muscle:'Back',sets:'3',reps:'15'},
         {name:'Smith Machine Skullcrusher',muscle:'Triceps',sets:'3',reps:'15'},
         {name:'Leg Extension',muscle:'Legs',sets:'3',reps:'15'},
       ]},
-      {id:'gzclpC',name:'GZCLP C',sub:'Squat Â· Bench Â· Pulldown variation',exercises:[
+      {id:'gzclpC',name:'GZCLP C',sub:'Squat · Bench · Pulldown variation',exercises:[
         {name:'High Bar Squat',muscle:'Legs',sets:'5',reps:'3'},
         {name:'Flat Bench Press',muscle:'Chest',sets:'3',reps:'10'},
         {name:'Seated Cable Row',muscle:'Back',sets:'3',reps:'15'},
@@ -1453,7 +1453,7 @@ const SPLITS = {
   },
   rpHyp: { name:'RP · Hypertrophy', days:4, recMin:3, desc:'Dr Mike Israetel â€” MEV to MAV progression, RIR-based',
     sessions:[
-      {id:'rpPush',name:'RP PUSH',sub:'Chest Â· Shoulders Â· Triceps â€” MAV sets, RIR 3â†’0',exercises:[
+      {id:'rpPush',name:'RP PUSH',sub:'Chest · Shoulders · Triceps â€” MAV sets, RIR 3→0',exercises:[
         {name:'Smith Machine Press (Low Incline, Wide Grip)',muscle:'Chest',sets:'4',reps:'8-12'},
         {name:'Incline DB Press',muscle:'Chest',sets:'3',reps:'10-15'},
         {name:'Smith Machine Shoulder Press (Seated)',muscle:'Shoulders',sets:'3',reps:'8-12'},
@@ -1462,7 +1462,7 @@ const SPLITS = {
         {name:'Smith Machine Skullcrusher',muscle:'Triceps',sets:'3',reps:'10-15'},
         {name:'Cable Triceps Pushdown (Rope)',muscle:'Triceps',sets:'3',reps:'15-20'},
       ]},
-      {id:'rpPull',name:'RP PULL',sub:'Back Â· Biceps Â· Rear Delt â€” MAV sets, RIR 3â†’0',exercises:[
+      {id:'rpPull',name:'RP PULL',sub:'Back · Biceps · Rear Delt â€” MAV sets, RIR 3→0',exercises:[
         {name:'Lat Pulldown',muscle:'Back',sets:'4',reps:'8-12'},
         {name:'Seated Cable Row',muscle:'Back',sets:'4',reps:'10-15'},
         {name:'Chest Supported Row',muscle:'Back',sets:'3',reps:'10-12'},
@@ -1471,7 +1471,7 @@ const SPLITS = {
         {name:'Cable Curl',muscle:'Biceps',sets:'3',reps:'12-15'},
         {name:'Hammer Curl',muscle:'Biceps',sets:'2',reps:'10-15'},
       ]},
-      {id:'rpLegsQ',name:'RP LEGS â€” QUAD',sub:'Quad dominant Â· Hamstring Â· Calves â€” MAV sets',exercises:[
+      {id:'rpLegsQ',name:'RP LEGS â€” QUAD',sub:'Quad dominant · Hamstring · Calves â€” MAV sets',exercises:[
         {name:'High Bar Squat',muscle:'Legs',sets:'4',reps:'6-10'},
         {name:'Leg Press',muscle:'Legs',sets:'3',reps:'10-15'},
         {name:'Bulgarian Split Squat',muscle:'Legs',sets:'3',reps:'10-12'},
@@ -1479,7 +1479,7 @@ const SPLITS = {
         {name:'Leg Extension',muscle:'Legs',sets:'3',reps:'12-15'},
         {name:'Calf Raise',muscle:'Calves',sets:'5',reps:'10-15'},
       ]},
-      {id:'rpLegsH',name:'RP LEGS â€” HINGE',sub:'Hip hinge Â· Glute dominant Â· Quad accessory',exercises:[
+      {id:'rpLegsH',name:'RP LEGS â€” HINGE',sub:'Hip hinge · Glute dominant · Quad accessory',exercises:[
         {name:'Romanian DL',muscle:'Legs',sets:'4',reps:'8-12'},
         {name:'Hip Thrust',muscle:'Legs',sets:'4',reps:'10-15'},
         {name:'Leg Curl',muscle:'Legs',sets:'4',reps:'10-15'},
@@ -1492,7 +1492,7 @@ const SPLITS = {
   },
   dup: { name:'Undulating · Upper Lower', days:4, recMin:3, desc:'Daily undulating periodization â€” strength & hypertrophy alternated each session',
     sessions:[
-      {id:'dupUpperS',name:'UPPER STRENGTH',sub:'Heavy compounds Â· chest Â· back Â· shoulders Â· 3-6 reps',exercises:[
+      {id:'dupUpperS',name:'UPPER STRENGTH',sub:'Heavy compounds · chest · back · shoulders · 3-6 reps',exercises:[
         {name:'Flat Bench Press',muscle:'Chest',sets:'4',reps:'3-5'},
         {name:'Barbell Row',muscle:'Back',sets:'4',reps:'3-5'},
         {name:'Barbell Shoulder Press (Standing)',muscle:'Shoulders',sets:'3',reps:'4-6'},
@@ -1500,14 +1500,14 @@ const SPLITS = {
         {name:'Close Grip Bench',muscle:'Triceps',sets:'3',reps:'4-6'},
         {name:'Incline DB Curl',muscle:'Biceps',sets:'3',reps:'6-8'},
       ]},
-      {id:'dupLowerS',name:'LOWER STRENGTH',sub:'Heavy squat Â· hinge Â· 3-6 reps â€” max force development',exercises:[
+      {id:'dupLowerS',name:'LOWER STRENGTH',sub:'Heavy squat · hinge · 3-6 reps â€” max force development',exercises:[
         {name:'High Bar Squat',muscle:'Legs',sets:'4',reps:'3-5'},
         {name:'Conventional Deadlift',muscle:'Legs',sets:'3',reps:'3-5'},
         {name:'Leg Press',muscle:'Legs',sets:'3',reps:'6-8'},
         {name:'Romanian DL',muscle:'Legs',sets:'3',reps:'6-8'},
         {name:'Calf Raise',muscle:'Calves',sets:'4',reps:'6-8'},
       ]},
-      {id:'dupUpperH',name:'UPPER HYPERTROPHY',sub:'Moderate load Â· chest Â· back Â· shoulders Â· arms Â· 8-15 reps',exercises:[
+      {id:'dupUpperH',name:'UPPER HYPERTROPHY',sub:'Moderate load · chest · back · shoulders · arms · 8-15 reps',exercises:[
         {name:'Incline DB Press',muscle:'Chest',sets:'4',reps:'8-12'},
         {name:'Smith Machine Press (Low Incline, Wide Grip)',muscle:'Chest',sets:'3',reps:'10-12'},
         {name:'Cable Fly',muscle:'Chest',sets:'3',reps:'12-15'},
@@ -1518,7 +1518,7 @@ const SPLITS = {
         {name:'Smith Machine Skullcrusher',muscle:'Triceps',sets:'3',reps:'10-15'},
         {name:'Cable Curl',muscle:'Biceps',sets:'3',reps:'12-15'},
       ]},
-      {id:'dupLowerH',name:'LOWER HYPERTROPHY',sub:'Moderate load Â· quad Â· ham Â· glute Â· calves Â· 8-15 reps',exercises:[
+      {id:'dupLowerH',name:'LOWER HYPERTROPHY',sub:'Moderate load · quad · ham · glute · calves · 8-15 reps',exercises:[
         {name:'High Bar Squat',muscle:'Legs',sets:'4',reps:'8-12'},
         {name:'Romanian DL',muscle:'Legs',sets:'4',reps:'8-12'},
         {name:'Walking Lunges (Quad-Focused, Dumbbell)',muscle:'Legs',sets:'3',reps:'10-15'},
@@ -1533,7 +1533,7 @@ const SPLITS = {
   // â”€â”€ PHAT (Layne Norton) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   phat: { name:'PHAT · Power & Size', days:5, recMin:4, desc:'Layne Norton â€” Power Hypertrophy Adaptive Training, 5-day strength & size',
     sessions:[
-      {id:'phatUpperPow',name:'UPPER POWER',sub:'Heavy compounds Â· chest Â· back Â· shoulders Â· 3-5 reps',exercises:[
+      {id:'phatUpperPow',name:'UPPER POWER',sub:'Heavy compounds · chest · back · shoulders · 3-5 reps',exercises:[
         {name:'Flat Bench Press',muscle:'Chest',sets:'3',reps:'3-5'},
         {name:'Barbell Row',muscle:'Back',sets:'3',reps:'3-5'},
         {name:'Barbell Shoulder Press (Standing)',muscle:'Shoulders',sets:'3',reps:'6-10'},
@@ -1541,14 +1541,14 @@ const SPLITS = {
         {name:'Close Grip Bench',muscle:'Triceps',sets:'2',reps:'6-10'},
         {name:'Barbell Curl',muscle:'Biceps',sets:'2',reps:'6-10'},
       ]},
-      {id:'phatLowerPow',name:'LOWER POWER',sub:'Heavy squat Â· deadlift Â· leg accessories Â· 3-5 reps',exercises:[
+      {id:'phatLowerPow',name:'LOWER POWER',sub:'Heavy squat · deadlift · leg accessories · 3-5 reps',exercises:[
         {name:'High Bar Squat',muscle:'Legs',sets:'3',reps:'3-5'},
         {name:'Conventional Deadlift',muscle:'Legs',sets:'3',reps:'3-5'},
         {name:'Leg Press',muscle:'Legs',sets:'2',reps:'6-10'},
         {name:'Leg Curl',muscle:'Legs',sets:'2',reps:'6-10'},
         {name:'Calf Raise',muscle:'Calves',sets:'3',reps:'6-10'},
       ]},
-      {id:'phatBackShouHyp',name:'BACK & SHOULDERS',sub:'Hypertrophy focus Â· back width & thickness Â· rear delt Â· traps Â· 8-15 reps',exercises:[
+      {id:'phatBackShouHyp',name:'BACK & SHOULDERS',sub:'Hypertrophy focus · back width & thickness · rear delt · traps · 8-15 reps',exercises:[
         {name:'Seated Cable Row',muscle:'Back',sets:'3',reps:'8-12'},
         {name:'T-Bar Row',muscle:'Back',sets:'3',reps:'8-12'},
         {name:'Chest Supported Row',muscle:'Back',sets:'3',reps:'10-15'},
@@ -1557,7 +1557,7 @@ const SPLITS = {
         {name:'Face Pull',muscle:'Shoulders',sets:'3',reps:'15'},
         {name:'Barbell Shrug',muscle:'Traps',sets:'3',reps:'10-15'},
       ]},
-      {id:'phatLowerHyp',name:'LOWER HYPERTROPHY',sub:'Quad Â· hamstring Â· glute Â· calf volume Â· 8-15 reps',exercises:[
+      {id:'phatLowerHyp',name:'LOWER HYPERTROPHY',sub:'Quad · hamstring · glute · calf volume · 8-15 reps',exercises:[
         {name:'High Bar Squat',muscle:'Legs',sets:'3',reps:'8-12'},
         {name:'Leg Press',muscle:'Legs',sets:'3',reps:'10-15'},
         {name:'Walking Lunges (Quad-Focused, Dumbbell)',muscle:'Legs',sets:'3',reps:'10-15'},
@@ -1566,7 +1566,7 @@ const SPLITS = {
         {name:'Leg Extension',muscle:'Legs',sets:'3',reps:'12-15'},
         {name:'Calf Raise',muscle:'Calves',sets:'4',reps:'10-15'},
       ]},
-      {id:'phatChestArmsHyp',name:'CHEST & ARMS',sub:'Chest Â· biceps Â· triceps hypertrophy volume Â· 8-15 reps',exercises:[
+      {id:'phatChestArmsHyp',name:'CHEST & ARMS',sub:'Chest · biceps · triceps hypertrophy volume · 8-15 reps',exercises:[
         {name:'Incline DB Press',muscle:'Chest',sets:'3',reps:'8-12'},
         {name:'Smith Machine Press (Low Incline, Wide Grip)',muscle:'Chest',sets:'3',reps:'10-15'},
         {name:'Cable Fly',muscle:'Chest',sets:'3',reps:'12-15'},
@@ -1582,14 +1582,14 @@ const SPLITS = {
   // â”€â”€ Stronger by Science Intermediate (Greg Nuckols) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   sbs: { name:'Stronger By Science', days:3, recMin:3, desc:'Stronger by Science â€” high frequency compounds trained at varying intensity each session',
     sessions:[
-      {id:'sbsA',name:'SESSION A â€” HEAVY',sub:'Squat Â· bench Â· deadlift heavy top sets + arm accessories',exercises:[
+      {id:'sbsA',name:'SESSION A â€” HEAVY',sub:'Squat · bench · deadlift heavy top sets + arm accessories',exercises:[
         {name:'High Bar Squat',muscle:'Legs',sets:'4',reps:'3-5'},
         {name:'Flat Bench Press',muscle:'Chest',sets:'4',reps:'3-5'},
         {name:'Conventional Deadlift',muscle:'Legs',sets:'3',reps:'3-5'},
         {name:'Barbell Curl',muscle:'Biceps',sets:'3',reps:'8-12'},
         {name:'Cable Triceps Pushdown (Rope)',muscle:'Triceps',sets:'3',reps:'8-12'},
       ]},
-      {id:'sbsB',name:'SESSION B â€” MODERATE',sub:'OHP Â· squat moderate Â· row Â· moderate load, higher rep',exercises:[
+      {id:'sbsB',name:'SESSION B â€” MODERATE',sub:'OHP · squat moderate · row · moderate load, higher rep',exercises:[
         {name:'Barbell Shoulder Press (Standing)',muscle:'Shoulders',sets:'4',reps:'4-6'},
         {name:'High Bar Squat',muscle:'Legs',sets:'4',reps:'6-8'},
         {name:'Barbell Row',muscle:'Back',sets:'4',reps:'6-8'},
@@ -1597,7 +1597,7 @@ const SPLITS = {
         {name:'Romanian DL',muscle:'Legs',sets:'3',reps:'6-10'},
         {name:'Face Pull',muscle:'Shoulders',sets:'4',reps:'15'},
       ]},
-      {id:'sbsC',name:'SESSION C â€” VOLUME',sub:'Bench volume Â· squat technique Â· deadlift accessory Â· hypertrophy rep ranges',exercises:[
+      {id:'sbsC',name:'SESSION C â€” VOLUME',sub:'Bench volume · squat technique · deadlift accessory · hypertrophy rep ranges',exercises:[
         {name:'Flat Bench Press',muscle:'Chest',sets:'4',reps:'8-10'},
         {name:'High Bar Squat',muscle:'Legs',sets:'4',reps:'8-10'},
         {name:'Seated Cable Row',muscle:'Back',sets:'4',reps:'8-12'},
@@ -1611,16 +1611,16 @@ const SPLITS = {
   },
 
   // â”€â”€ RP Strength (Renaissance Periodization / Dr. Mike Israetel) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  rpStr: { name:'RP · Strength', days:4, recMin:3, desc:'Dr Mike Israetel â€” strength-focused MEVâ†’MRV, RIR 4â†’1 progression across the mesocycle',
+  rpStr: { name:'RP · Strength', days:4, recMin:3, desc:'Dr Mike Israetel â€” strength-focused MEV→MRV, RIR 4→1 progression across the mesocycle',
     sessions:[
-      {id:'rpStrSquat',name:'SQUAT DAY',sub:'Squat strength Â· posterior chain Â· quad accessories',exercises:[
+      {id:'rpStrSquat',name:'SQUAT DAY',sub:'Squat strength · posterior chain · quad accessories',exercises:[
         {name:'High Bar Squat',muscle:'Legs',sets:'4',reps:'3-6'},
         {name:'Romanian DL',muscle:'Legs',sets:'3',reps:'5-8'},
         {name:'Leg Press',muscle:'Legs',sets:'3',reps:'8-12'},
         {name:'Leg Curl',muscle:'Legs',sets:'3',reps:'10-15'},
         {name:'Calf Raise',muscle:'Calves',sets:'4',reps:'10-15'},
       ]},
-      {id:'rpStrBench',name:'BENCH DAY',sub:'Bench strength Â· shoulder press Â· chest isolation Â· arm work',exercises:[
+      {id:'rpStrBench',name:'BENCH DAY',sub:'Bench strength · shoulder press · chest isolation · arm work',exercises:[
         {name:'Flat Bench Press',muscle:'Chest',sets:'4',reps:'3-6'},
         {name:'Barbell Shoulder Press (Standing)',muscle:'Shoulders',sets:'3',reps:'4-6'},
         {name:'Incline DB Press',muscle:'Chest',sets:'3',reps:'8-12'},
@@ -1628,7 +1628,7 @@ const SPLITS = {
         {name:'Close Grip Bench',muscle:'Triceps',sets:'3',reps:'6-10'},
         {name:'Incline DB Curl',muscle:'Biceps',sets:'3',reps:'10-15'},
       ]},
-      {id:'rpStrDeadlift',name:'DEADLIFT DAY',sub:'Deadlift strength Â· back volume Â· RIR-based intensity',exercises:[
+      {id:'rpStrDeadlift',name:'DEADLIFT DAY',sub:'Deadlift strength · back volume · RIR-based intensity',exercises:[
         {name:'Conventional Deadlift',muscle:'Legs',sets:'4',reps:'3-5'},
         {name:'Barbell Row',muscle:'Back',sets:'4',reps:'4-6'},
         {name:'Lat Pulldown',muscle:'Back',sets:'3',reps:'8-12'},
@@ -1636,7 +1636,7 @@ const SPLITS = {
         {name:'Face Pull',muscle:'Shoulders',sets:'4',reps:'15-20'},
         {name:'Hammer Curl',muscle:'Biceps',sets:'3',reps:'10-15'},
       ]},
-      {id:'rpStrUpper',name:'UPPER ACCESSORY',sub:'Volume upper day Â· hypertrophy rep ranges Â· chest Â· back Â· arms',exercises:[
+      {id:'rpStrUpper',name:'UPPER ACCESSORY',sub:'Volume upper day · hypertrophy rep ranges · chest · back · arms',exercises:[
         {name:'Smith Machine Press (Low Incline, Wide Grip)',muscle:'Chest',sets:'4',reps:'8-12'},
         {name:'T-Bar Row',muscle:'Back',sets:'4',reps:'8-12'},
         {name:'Cable Fly',muscle:'Chest',sets:'3',reps:'12-15'},
@@ -2050,7 +2050,7 @@ function renderLogStaticView(prog) {
   const tk = todayKey();
   const todayLogged = !!log[tk];
 
-  // Days left in week (Monâ€“Sun, including today)
+  // Days left in week (Mon—Sun, including today)
   const dow = today.getDay(); // 0=Sun
   const daysLeft = dow === 0 ? 1 : (8 - dow);
   const daysText = daysLeft === 1 ? '1 DAY LEFT' : daysLeft + ' DAYS LEFT';
@@ -2083,7 +2083,7 @@ function renderLogStaticView(prog) {
     + '<div style="display:flex;justify-content:space-between;align-items:flex-start">'
     + '<div>'
     + '<div style="font-family:var(--font-display);font-size:32px;letter-spacing:4px;color:var(--acid);text-shadow:0 0 16px rgba(232,255,0,.4);line-height:1">' + daysText + '</div>'
-    + '<div style="font-family:var(--font-mono);font-size:14px;color:var(--muted);margin-top:6px;letter-spacing:.08em">' + sessText + (sessionsLeft !== null ? ' Â· ' + sessionsLeft + ' TO GO' : '') + '</div>'
+    + '<div style="font-family:var(--font-mono);font-size:14px;color:var(--muted);margin-top:6px;letter-spacing:.08em">' + sessText + (sessionsLeft !== null ? ' · ' + sessionsLeft + ' TO GO' : '') + '</div>'
     + '</div>'
     + '<button onclick="_goToDash()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:4px">&#x2715;</button>'
     + '</div></div>';
@@ -2105,7 +2105,7 @@ function renderLogStaticView(prog) {
     }
     lastSessionHtml = '<div style="margin:14px 16px 0">'
       + '<div style="font-family:var(--font-mono);font-size:14px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px">'
-      + '<span style="display:block;width:2px;height:10px;background:var(--acid)"></span>LAST SESSION Â· ' + fmtDate(lastKey)
+      + '<span style="display:block;width:2px;height:10px;background:var(--acid)"></span>LAST SESSION · ' + fmtDate(lastKey)
       + '</div>'
       + '<div style="background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);padding:14px">'
       + '<div style="font-family:var(--font-display);font-size:20px;letter-spacing:2px;color:var(--acid);margin-bottom:10px">' + sessionName + '</div>'
@@ -2153,7 +2153,7 @@ function renderNextSessionInfo(prog, log) {
     const sug = libEx ? calcSuggestion({...libEx, repMin: parts[0]||6, repMax: parts[1]||15}) : null;
     const sugText = sug
       ? '<span style="font-family:var(--font-mono);font-size:14px;color:var(--acid);margin-left:8px">â–² '
-        + (sug.type==='weight' ? sug.w+'kg Â· '+sug.r+' reps' : (sug.perSet ? sug.perSet[0].w+'kg Â· '+sug.perSet[0].r+' reps' : ''))
+        + (sug.type==='weight' ? sug.w+'kg · '+sug.r+' reps' : (sug.perSet ? sug.perSet[0].w+'kg · '+sug.perSet[0].r+' reps' : ''))
         + '</span>'
       : '';
     return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)">'
@@ -2318,7 +2318,7 @@ function renderNextSessionPreview(prog, todayDayKey) {
     const sug = libEx ? calcSuggestion({...libEx, repMin:parts[0]||6, repMax:parts[1]||15}) : null;
     const sugText = sug
       ? '<span style="font-family:var(--font-mono);font-size:14px;color:var(--acid);margin-left:8px">â–² '
-        + (sug.type==='weight' ? sug.w+'kg Â· '+sug.r+' reps' : (sug.perSet?sug.perSet[0].w+'kg Â· '+sug.perSet[0].r+' reps':''))
+        + (sug.type==='weight' ? sug.w+'kg · '+sug.r+' reps' : (sug.perSet?sug.perSet[0].w+'kg · '+sug.perSet[0].r+' reps':''))
         + '</span>'
       : '';
     return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)">'
@@ -3226,7 +3226,7 @@ function openExHistory(exId, exName) {
       return '<div style="padding:14px 16px;border-bottom:2px solid var(--border)">'
         + '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">'
         + '<span style="font-family:var(--font-display);font-size:18px;letter-spacing:2px;color:var(--acid)">' + fmtDate(entry.date) + '</span>'
-        + '<span style="font-family:var(--font-mono);font-size:14px;color:var(--muted)">' + (entry.sets||[]).length + ' sets Â· ' + Math.round(totalVol) + 'kg vol</span>'
+        + '<span style="font-family:var(--font-mono);font-size:14px;color:var(--muted)">' + (entry.sets||[]).length + ' sets · ' + Math.round(totalVol) + 'kg vol</span>'
         + '</div>' + setsHtml + '</div>';
     }).join('');
     const histFwd = getHistory(exId);
