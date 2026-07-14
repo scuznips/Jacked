@@ -1264,7 +1264,7 @@ function showScreen(id) {
 // SPLITS
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const SPLITS = {
-  ppl: { name:'Push / Pull / Legs', days:6, recMin:4, desc:'2x frequency per muscle â€” best for intermediate+',
+  ppl: { name:'Push · Pull · Legs', days:6, recMin:4, desc:'2x frequency per muscle â€” best for intermediate+',
     sessions:[
       {id:'pushA',name:'CHEST & PRESS',sub:'Compound push Â· Chest primary Â· Shoulders Â· Triceps',exercises:[
         {name:'Smith Machine Press (Low Incline, Wide Grip)',muscle:'Chest',sets:'4',reps:'6-10'},
@@ -1320,7 +1320,7 @@ const SPLITS = {
     ],
     priority:['pushA','pullA','legsA','pushB','pullB','legsB'],
   },
-  ul: { name:'Upper / Lower', days:4, recMin:3, desc:'2x frequency â€” great for all levels',
+  ul: { name:'Upper · Lower', days:4, recMin:3, desc:'2x frequency â€” great for all levels',
     sessions:[
       {id:'upperA',name:'STRENGTH UPPER',sub:'Compound dominant Â· Heavy loads Â· Chest Â· Back Â· Arms',exercises:[
         {name:'Smith Machine Press (Low Incline, Wide Grip)',muscle:'Chest',sets:'4',reps:'6-10'},
@@ -1360,7 +1360,7 @@ const SPLITS = {
     ],
     priority:['upperA','lowerA','upperB','lowerB'],
   },
-  fb: { name:'Full Body', days:3, recMin:2, desc:'3x frequency per muscle â€” ideal for 2-4 days',
+  fb: { name:'Full Body · Classic', days:3, recMin:2, desc:'3x frequency per muscle â€” ideal for 2-4 days',
     sessions:[
       {id:'fbA',name:'FULL BODY A',sub:'Squat Â· Press Â· Row Â· Arms â€” compound + arm work',exercises:[
         {name:'High Bar Squat',muscle:'Legs',sets:'4',reps:'6-10'},
@@ -1392,7 +1392,7 @@ const SPLITS = {
     ],
     priority:['fbA','fbB','fbC'],
   },
-  gzclp: { name:'GZCLP', days:3, recMin:3, desc:'Tier 1/2/3 structure â€” strength & size for beginners/intermediates',
+  gzclp: { name:'GZCLP · Linear', days:3, recMin:3, desc:'Tier 1/2/3 structure â€” strength & size for beginners/intermediates',
     sessions:[
       {id:'gzclpA',name:'GZCLP A',sub:'Squat Â· Bench Â· Pulldown Â· Accessories',exercises:[
         {name:'High Bar Squat',muscle:'Legs',sets:'5',reps:'3'},
@@ -1418,7 +1418,7 @@ const SPLITS = {
     ],
     priority:['gzclpA','gzclpB','gzclpC'],
   },
-  bbb: { name:'5/3/1 BBB', days:4, recMin:3, desc:'Boring But Big â€” strength top sets + 5x10 volume work',
+  bbb: { name:'5/3/1 · Boring But Big', days:4, recMin:3, desc:'Boring But Big â€” strength top sets + 5x10 volume work',
     sessions:[
       {id:'bbbPress',name:'PRESS DAY',sub:'OHP top set + Bench 5x10 + Assistance',exercises:[
         {name:'Barbell Shoulder Press (Standing)',muscle:'Shoulders',sets:'3',reps:'3-5'},
@@ -1451,7 +1451,7 @@ const SPLITS = {
     ],
     priority:['bbbPress','bbbDeadlift','bbbBench','bbbSquat'],
   },
-  rpHyp: { name:'RP Hypertrophy', days:4, recMin:3, desc:'Dr Mike Israetel â€” MEV to MAV progression, RIR-based',
+  rpHyp: { name:'RP · Hypertrophy', days:4, recMin:3, desc:'Dr Mike Israetel â€” MEV to MAV progression, RIR-based',
     sessions:[
       {id:'rpPush',name:'RP PUSH',sub:'Chest Â· Shoulders Â· Triceps â€” MAV sets, RIR 3â†’0',exercises:[
         {name:'Smith Machine Press (Low Incline, Wide Grip)',muscle:'Chest',sets:'4',reps:'8-12'},
@@ -1490,7 +1490,7 @@ const SPLITS = {
     ],
     priority:['rpPush','rpPull','rpLegsQ','rpPush','rpPull','rpLegsH'],
   },
-  dup: { name:'DUP Upper/Lower', days:4, recMin:3, desc:'Daily undulating periodization â€” strength & hypertrophy alternated each session',
+  dup: { name:'Undulating · Upper Lower', days:4, recMin:3, desc:'Daily undulating periodization â€” strength & hypertrophy alternated each session',
     sessions:[
       {id:'dupUpperS',name:'UPPER STRENGTH',sub:'Heavy compounds Â· chest Â· back Â· shoulders Â· 3-6 reps',exercises:[
         {name:'Flat Bench Press',muscle:'Chest',sets:'4',reps:'3-5'},
@@ -1531,7 +1531,7 @@ const SPLITS = {
     priority:['dupUpperS','dupLowerS','dupUpperH','dupLowerH'],
   },
   // â”€â”€ PHAT (Layne Norton) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  phat: { name:'PHAT', days:5, recMin:4, desc:'Layne Norton â€” Power Hypertrophy Adaptive Training, 5-day strength & size',
+  phat: { name:'PHAT · Power & Size', days:5, recMin:4, desc:'Layne Norton â€” Power Hypertrophy Adaptive Training, 5-day strength & size',
     sessions:[
       {id:'phatUpperPow',name:'UPPER POWER',sub:'Heavy compounds Â· chest Â· back Â· shoulders Â· 3-5 reps',exercises:[
         {name:'Flat Bench Press',muscle:'Chest',sets:'3',reps:'3-5'},
@@ -1580,7 +1580,7 @@ const SPLITS = {
   },
 
   // â”€â”€ Stronger by Science Intermediate (Greg Nuckols) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  sbs: { name:'SBS Intermediate', days:3, recMin:3, desc:'Stronger by Science â€” high frequency compounds trained at varying intensity each session',
+  sbs: { name:'Stronger By Science', days:3, recMin:3, desc:'Stronger by Science â€” high frequency compounds trained at varying intensity each session',
     sessions:[
       {id:'sbsA',name:'SESSION A â€” HEAVY',sub:'Squat Â· bench Â· deadlift heavy top sets + arm accessories',exercises:[
         {name:'High Bar Squat',muscle:'Legs',sets:'4',reps:'3-5'},
@@ -1611,7 +1611,7 @@ const SPLITS = {
   },
 
   // â”€â”€ RP Strength (Renaissance Periodization / Dr. Mike Israetel) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  rpStr: { name:'RP Strength', days:4, recMin:3, desc:'Dr Mike Israetel â€” strength-focused MEVâ†’MRV, RIR 4â†’1 progression across the mesocycle',
+  rpStr: { name:'RP · Strength', days:4, recMin:3, desc:'Dr Mike Israetel â€” strength-focused MEVâ†’MRV, RIR 4â†’1 progression across the mesocycle',
     sessions:[
       {id:'rpStrSquat',name:'SQUAT DAY',sub:'Squat strength Â· posterior chain Â· quad accessories',exercises:[
         {name:'High Bar Squat',muscle:'Legs',sets:'4',reps:'3-6'},
@@ -1649,7 +1649,7 @@ const SPLITS = {
   },
 
   // ── Full Body Upper Focus ──────────────────────────────────────────────────
-  fbUpper: { name:'Full Body – Upper Focus', days:3, recMin:2, desc:'3x frequency per muscle · Max upper body volume · Legs at maintenance only · Any session hits everything',
+  fbUpper: { name:'Full Body · Upper Focus', days:3, recMin:2, desc:'3x frequency per muscle · Max upper body volume · Legs at maintenance only · Any session hits everything',
     sessions:[
       {id:'fbuA',name:'FULL BODY · COMPOUND',sub:'Legs opener · Chest press · Back row · Shoulders · Arms',exercises:[
         {name:'Leg Press',muscle:'Legs',sets:'2',reps:'10-15'},
@@ -1749,8 +1749,8 @@ function renderSplitOptions() {
     return '<div data-split="' + key + '" class="split-opt-btn" style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:' + bg + ';border:1px solid ' + borderColor + ';border-left:3px solid ' + borderColor + ';cursor:pointer;margin-bottom:6px">'
       + '<div style="width:14px;height:14px;flex-shrink:0;margin-top:3px;' + radioStyle + '"></div>'
       + '<div style="flex:1;min-width:0">'
-      + '<div style="font-family:var(--font-condensed);font-size:18px;font-weight:700;color:' + nameColor + ';text-transform:uppercase">' + split.name + '</div>'
-      + '<div style="font-size:14px;color:var(--muted);margin-top:3px;line-height:1.4">' + split.desc + (caution?' <span style="color:#ff6a00">\u00b7 best at '+split.recMin+'+\u00d7/week</span>':'') + '</div>'
+      + '<div style="font-family:var(--font-condensed);font-size:21px;font-weight:700;color:' + nameColor + ';text-transform:uppercase">' + split.name + '</div>'
+      + '<div style="font-size:15px;color:#8a9ba8;margin-top:3px;line-height:1.4">' + split.desc + (caution?' <span style="color:#ff6a00">\u00b7 best at '+split.recMin+'+\u00d7/week</span>':'') + '</div>'
       + '</div>' + recTag + '</div>';
   }).join('');
   container.querySelectorAll('.split-opt-btn').forEach(el => {
