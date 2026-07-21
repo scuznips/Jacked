@@ -1,0 +1,14 @@
+{
+  "name": "jacked",
+  "private": true,
+  "version": "1.0.0",
+  "description": "JACKED hypertrophy training PWA",
+  "scripts": {
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "eslint": "^9.19.0",
+    "eslint-plugin-html": "^8.1.1",
+    "globals": "^15.14.0"
+  }
+}
