@@ -83,6 +83,19 @@ body::before{animation:scanpulse 3s ease-in-out infinite}
 .meso-fill{height:100%;background:var(--acid);border-radius:0;box-shadow:0 0 8px rgba(232,255,0,.4)}
 .start-btn{display:block;width:calc(100% - 32px);margin:4px 16px 12px;padding:16px;background:var(--orange);color:#05080a;border:none;border-radius:0;font-family:var(--font-display);font-size:22px;letter-spacing:5px;cursor:pointer;transition:opacity .15s,box-shadow .15s;box-shadow:0 0 32px rgba(255,106,0,0.6),inset 0 0 20px rgba(255,130,0,0.15);clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%)}
 .start-btn:active{opacity:.85}
+/* dashboard: compact secondary block (week/stats/program-footer, demoted below Today) */
+.dash-compact{margin-top:6px}
+.dash-compact-row{display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+.week-strip.mini{padding:8px 0;gap:6px;flex:0 0 auto}
+.week-strip.mini .day-dot{width:26px;gap:3px;font-size:10px}
+.week-strip.mini .day-dot .dot{width:22px;height:22px;font-size:10px}
+.week-strip.mini .day-abbr-label{display:none}
+.stat-line{display:flex;flex-wrap:wrap;gap:8px;margin:8px 16px 10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--accent);letter-spacing:.02em}
+.stat-line span span{font-size:12px;font-weight:400;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-family:var(--font-body);margin-left:3px}
+.stat-line>span+span::before{content:"\00b7";margin-right:8px;color:var(--border);font-weight:400}
+.dash-footer-line{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 16px;font-size:13px;color:var(--muted);font-family:var(--font-condensed);letter-spacing:.03em}
+.dash-footer-line .clear-link{background:none;border:none;color:var(--muted);font-size:12px;font-family:var(--font-body);text-decoration:underline;cursor:pointer;padding:0}
+.footer-award{font-family:var(--font-mono);font-size:12px;color:var(--acid);letter-spacing:.03em;white-space:nowrap}
 .workout-header{background:#0a0f12;padding:18px 16px 14px;border-bottom:2px solid var(--border)}
 .workout-title{font-family:var(--font-display);font-size:32px;letter-spacing:4px;color:var(--acid);text-shadow:0 0 16px rgba(232,255,0,.5)}
 .workout-sub{font-size:15px;color:var(--accent);margin-top:4px;font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;opacity:.8}
@@ -371,30 +384,33 @@ input[type=range].feedback-range.acid::-webkit-slider-thumb{background:var(--aci
     </div>
   </div>
 
-  <!-- week strip -->
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0">
-    <div style="font-family:var(--font-mono);font-size:14px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase">THIS WEEK</div>
-    <div style="font-family:var(--font-display);font-size:18px;letter-spacing:2px;color:var(--acid)" id="dashWeekCounter"></div>
-  </div>
-  <div class="week-strip" id="dashWeekStrip"></div>
-
-  <!-- stats -->
-  <div class="stat-grid" style="margin-top:4px">
-    <div class="stat-box"><div class="stat-label">Weekly Sets</div><div class="stat-val" id="statWeeklySets">—</div></div>
-    <div class="stat-box"><div class="stat-label">Weekly Vol</div><div class="stat-val" id="statWeeklyVol">—</div></div>
-    <div class="stat-box"><div class="stat-label">Streak</div><div class="stat-val" id="statStreak">—</div></div>
-    <div class="stat-box"><div class="stat-label">Avg RIR</div><div class="stat-val" id="statAvgRir">—</div></div>
-  </div>
-
-  <!-- awards -->
-  <div id="dashAwardsStrip"></div>
-
-  <!-- active program -->
-  <div id="dashProgramSection"></div>
+  <!-- alerts: no active program / cycle complete (mutually exclusive, actionable) -->
+  <div id="dashProgramAlert"></div>
+  <!-- deload (actionable, independent of the above) -->
   <div id="dashDeloadBanner"></div>
 
-  <!-- today -->
+  <!-- today: the primary action -->
   <div id="dashTodaySection"></div>
+
+  <!-- compact secondary block: week progress, stats, program/awards footer -->
+  <div class="dash-compact">
+    <div class="dash-compact-row">
+      <div style="font-family:var(--font-mono);font-size:14px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase">THIS WEEK <span id="dashWeekCounter" style="color:var(--acid);font-family:var(--font-display);letter-spacing:2px"></span></div>
+      <div class="week-strip mini" id="dashWeekStrip"></div>
+    </div>
+
+    <div class="stat-line">
+      <span id="statWeeklySets">—</span>
+      <span id="statWeeklyVol">—</span>
+      <span id="statStreak">—</span>
+      <span id="statAvgRir">—</span>
+    </div>
+
+    <div class="dash-footer-line">
+      <span id="dashProgramSection"></span>
+      <span id="dashAwardsStrip"></span>
+    </div>
+  </div>
 
   <div class="spacer"></div>
 </div>
@@ -1895,24 +1911,13 @@ function renderDashboard() {
   if (setEl) setEl.innerHTML = weeklySets > 0 ? weeklySets + '<span> sets</span>' : NO;
   if (volEl) volEl.innerHTML = weeklyVol > 0 ? (weeklyVol >= 1000 ? (weeklyVol/1000).toFixed(1) + '<span>k kg</span>' : weeklyVol + '<span> kg</span>') : NO;
   if (streakEl) streakEl.innerHTML = streak + '<span> days</span>';
-  if (rirEl) rirEl.innerHTML = rirCount > 0 ? (rirTotal/rirCount).toFixed(1) : NO;
+  if (rirEl) rirEl.innerHTML = rirCount > 0 ? (rirTotal/rirCount).toFixed(1) + '<span> avg rir</span>' : NO;
 
-  // Awards strip
+  // Awards — most recent as a single compact badge (full history stays in the awards toast on unlock)
   const awardsStrip = document.getElementById('dashAwardsStrip');
   if (awardsStrip) {
     const awards = getAwards();
-    if (awards.length) {
-      const recent = awards.slice(0, 3);
-      awardsStrip.innerHTML = '<div style="padding:10px 16px 4px;font-family:var(--font-mono);font-size:12px;color:var(--muted);letter-spacing:.1em">ACHIEVEMENTS</div>'
-        + '<div style="display:flex;gap:6px;padding:0 16px 10px;overflow-x:auto;scrollbar-width:none">'
-        + recent.map(a => '<div style="flex-shrink:0;background:rgba(232,255,0,.05);border:1px solid rgba(232,255,0,.3);padding:8px 14px;white-space:nowrap">'
-          + '<div style="font-family:var(--font-display);font-size:13px;letter-spacing:2px;color:#e8ff00">' + a.name + '</div>'
-          + '<div style="font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-top:2px">' + a.date + '</div>'
-          + '</div>').join('')
-        + '</div>';
-    } else {
-      awardsStrip.innerHTML = '';
-    }
+    awardsStrip.innerHTML = awards.length ? '<span class="footer-award">&#9733; ' + awards[0].name + '</span>' : '';
   }
 
   // Deload banner
@@ -1934,24 +1939,25 @@ function renderDashboard() {
     }
   }
 
-  // Active program
+  // Active program: empty-state / cycle-complete are actionable, so they stay prominent
+  // in dashProgramAlert (top slot, right under the header). Normal steady-state is just
+  // context, so it collapses into dashProgramSection (compact footer line, below Today).
+  const alertEl = document.getElementById('dashProgramAlert');
   const progSection = document.getElementById('dashProgramSection');
-  if (progSection) {
+  if (alertEl && progSection) {
     if (!prog) {
-      progSection.innerHTML = '<div class="section-title"><span></span>ACTIVE PROGRAM</div>'
-        + '<div style="margin:0 16px 12px;padding:16px;background:var(--surface);border:1px solid var(--border)">'
+      alertEl.innerHTML = '<div style="margin:0 16px 12px;padding:16px;background:var(--surface);border:1px solid var(--border)">'
         + '<div style="font-family:var(--font-mono);font-size:14px;color:var(--muted);letter-spacing:.06em;margin-bottom:12px">// NO ACTIVE PROGRAM DETECTED<br>// INITIALISE A MESOCYCLE TO BEGIN</div>'
         + '<button data-goto="program" style="background:none;border:2px solid var(--acid);color:var(--acid);padding:12px 20px;font-family:var(--font-display);font-size:17px;letter-spacing:3px;cursor:pointer">BUILD PROGRAM &#x2192;</button>'
         + '</div>';
+      progSection.innerHTML = '';
     } else {
       const split = SPLITS[prog.splitKey];
       const startDate = prog.startDate ? new Date(prog.startDate) : new Date();
       const weekNum = Math.floor((today - startDate) / (7*24*60*60*1000)) + 1;
       const cycleComplete = weekNum > 6;
-      const progTarget = prog.weeklyTarget || (prog.selectedDays || []).length || prog.sessions.length;
       if (cycleComplete) {
-        progSection.innerHTML = '<div class="section-title"><span></span>ACTIVE PROGRAM</div>'
-          + '<div style="margin:0 16px 12px;background:linear-gradient(135deg,#12060a,#0c1014);border:1px solid #9d5cff;border-left:3px solid #9d5cff;padding:16px">'
+        alertEl.innerHTML = '<div style="margin:0 16px 12px;background:linear-gradient(135deg,#12060a,#0c1014);border:1px solid #9d5cff;border-left:3px solid #9d5cff;padding:16px">'
           + '<div style="font-family:var(--font-display);font-size:22px;letter-spacing:3px;color:#9d5cff;text-shadow:0 0 12px rgba(157,92,255,.4)">CYCLE COMPLETE</div>'
           + '<div style="font-size:14px;color:var(--muted);margin-top:4px;font-family:var(--font-body)">6 weeks done \u00B7 ' + (split ? split.name : prog.splitKey) + ' \u00B7 Time to reassess and reload.</div>'
           + '<div style="display:flex;gap:10px;margin-top:14px">'
@@ -1960,13 +1966,12 @@ function renderDashboard() {
           + '</div>'
           + '<button onclick="if(confirm(\'Clear active program?\')){{localStorage.removeItem(\'jacked_program\');renderDashboard();}}" style="background:none;border:none;color:var(--muted);font-size:12px;padding:0;cursor:pointer;text-decoration:underline;margin-top:10px">Clear program</button>'
           + '</div>';
+        progSection.innerHTML = '';
       } else {
-        progSection.innerHTML = '<div class="section-title"><span></span>ACTIVE PROGRAM</div>'
-          + '<div style="margin:0 16px 12px;background:linear-gradient(135deg,#0a0c06,#0c1014);border:1px solid var(--border);border-left:3px solid var(--acid);padding:16px">'
-          + '<div class="program-name">' + (split ? split.name.toUpperCase() : prog.splitKey.toUpperCase()) + '</div>'
-          + '<div class="program-meta">Week ' + weekNum + ' of 6 \u00B7 ' + progTarget + '\u00D7/week target \u00B7 started ' + startDate.getDate() + ' ' + MONTHS[startDate.getMonth()] + '</div>'
-          + '<button onclick="if(confirm(\'Clear active program?\')){{localStorage.removeItem(\'jacked_program\');renderDashboard();}}" style="background:none;border:none;color:var(--muted);font-size:12px;padding:0;cursor:pointer;text-decoration:underline;margin-top:10px">Clear program</button>'
-          + '</div>';
+        alertEl.innerHTML = '';
+        progSection.innerHTML = '<span class="program-meta">' + (split ? split.name.toUpperCase() : prog.splitKey.toUpperCase())
+          + ' \u00B7 wk ' + weekNum + '/6</span>'
+          + '<button class="clear-link" onclick="if(confirm(\'Clear active program?\')){{localStorage.removeItem(\'jacked_program\');renderDashboard();}}">clear</button>';
       }
     }
   }
