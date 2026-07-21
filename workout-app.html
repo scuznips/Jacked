@@ -1988,15 +1988,16 @@ function renderDashboard() {
   if (!session || !session.exercises) { todaySection.innerHTML = ''; return; }
   const sessionIdx = nextInfo.weekCount % prog.sessions.length;
   const nextEyebrow = (alreadyLogged ? '// NEXT SESSION \u2014 ' : '// TODAY \u2014 ') + (sessionIdx+1) + ' OF ' + prog.sessions.length;
-  // Three full session cards: last completed (actual weights/reps), this one (ready to go), and the one after.
+  // Action first (button, then what it starts), then supporting context below: what you
+  // did last, and a quiet preview of what's further out.
   todaySection.innerHTML = '<div class="section-title"><span></span>' + (alreadyLogged ? 'NEXT UP' : 'TODAY') + '</div>'
-    + renderLastSessionFull(log, prog)
-    + renderSessionPlanCard(session, nextEyebrow)
-    + renderFutureSessionInfo(prog, log)
     + (alreadyLogged
-      ? '<div style="margin:0 16px 20px;padding:18px;background:rgba(232,255,0,.08);border:2px solid var(--acid);text-align:center">'
+      ? '<div style="margin:0 16px 4px;padding:18px;background:rgba(232,255,0,.08);border:2px solid var(--acid);text-align:center">'
         + '<div style="font-family:var(--font-display);font-size:22px;letter-spacing:3px;color:var(--acid)">\u2713 LOGGED TODAY</div></div>'
-      : '<button class="start-btn" onclick="startTodaySession()">START SESSION &#x2192;</button>');
+      : '<button class="start-btn" style="margin:4px 16px 4px" onclick="startTodaySession()">START SESSION &#x2192;</button>')
+    + renderSessionPlanCard(session, nextEyebrow, true)
+    + renderLastSessionFull(log, prog)
+    + renderFutureSessionInfo(prog, log);
 }
 
 // ══════════════════════════════════════════
@@ -2133,15 +2134,35 @@ function renderSessionExerciseRows(exercises, limit) {
   return exRows + moreText;
 }
 
-// ── Reusable: full card for a planned (not-yet-done) session ──
-function renderSessionPlanCard(session, eyebrow) {
-  return '<div style="margin:14px 16px 0;background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--accent)">'
+// ── Reusable: full card for a planned (not-yet-done) session. `prominent` gives it the
+// acid accent treatment for the one that's actually actionable right now; otherwise teal. ──
+function renderSessionPlanCard(session, eyebrow, prominent) {
+  const edgeColor = prominent ? 'var(--acid)' : 'var(--accent)';
+  const eyebrowColor = prominent ? 'var(--acid)' : 'var(--accent)';
+  const titleStyle = prominent ? 'color:var(--acid);text-shadow:0 0 12px rgba(232,255,0,.35)' : 'color:var(--text)';
+  return '<div style="margin:14px 16px 0;background:var(--surface);border:1px solid var(--border);border-top:3px solid ' + edgeColor + '">'
     + '<div style="padding:14px 16px;border-bottom:1px solid var(--border)">'
-    + '<div style="font-family:var(--font-mono);font-size:14px;color:var(--accent);letter-spacing:.1em;margin-bottom:4px">' + eyebrow + '</div>'
-    + '<div class="card-title" style="color:var(--acid)">' + (session.name||'SESSION') + '</div>'
+    + '<div style="font-family:var(--font-mono);font-size:14px;color:' + eyebrowColor + ';letter-spacing:.1em;margin-bottom:4px">' + eyebrow + '</div>'
+    + '<div class="card-title" style="' + titleStyle + '">' + (session.name||'SESSION') + '</div>'
     + '<div style="font-size:14px;color:var(--muted);margin-top:2px;font-family:var(--font-body)">' + (session.sub||'') + '</div>'
     + '</div>'
     + '<div style="padding:0 16px 8px">' + renderSessionExerciseRows(session.exercises, 5) + '</div>'
+    + '</div>';
+}
+
+// ── Lightweight preview for a session further out — names only, no suggestions, no full weight/reps ──
+function renderSessionPreviewCard(session, eyebrow) {
+  const names = (session.exercises || []).slice(0, 4).map(ex =>
+    '<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px">'
+    + '<span style="color:var(--muted)">' + ex.name + '</span>'
+    + '<span style="color:var(--muted);font-family:var(--font-mono);font-size:12px;opacity:.7">' + ex.sets + '×' + ex.reps + '</span>'
+    + '</div>'
+  ).join('');
+  const moreText = (session.exercises||[]).length > 4 ? '<div style="font-size:13px;color:var(--muted);opacity:.6;margin-top:2px">+' + (session.exercises.length-4) + ' more</div>' : '';
+  return '<div style="margin:12px 16px 0;padding:12px 14px;border:1px dashed var(--border);opacity:.85">'
+    + '<div style="font-family:var(--font-mono);font-size:12px;color:var(--muted);letter-spacing:.1em;margin-bottom:4px">' + eyebrow + '</div>'
+    + '<div style="font-family:var(--font-display);font-size:16px;letter-spacing:1px;color:var(--muted)">' + (session.name||'SESSION') + '</div>'
+    + names + moreText
     + '</div>';
 }
 
@@ -2152,7 +2173,7 @@ function renderNextSessionInfo(prog, log) {
   const session = nextInfo.session;
   if (!session || !session.exercises) return '';
   const sessionIdx = nextInfo.weekCount % prog.sessions.length;
-  return renderSessionPlanCard(session, '// NEXT SESSION — ' + (sessionIdx+1) + ' OF ' + prog.sessions.length);
+  return renderSessionPlanCard(session, '// NEXT SESSION — ' + (sessionIdx+1) + ' OF ' + prog.sessions.length, true);
 }
 
 // ── The session after next — same rotation, one step further out ──
@@ -2163,7 +2184,7 @@ function renderFutureSessionInfo(prog, log) {
   const futureIdx = (nextInfo.weekCount + 1) % prog.sessions.length;
   const session = prog.sessions[futureIdx];
   if (!session || !session.exercises) return '';
-  return renderSessionPlanCard(session, '// THEN — ' + (futureIdx+1) + ' OF ' + prog.sessions.length);
+  return renderSessionPreviewCard(session, '// THEN — ' + (futureIdx+1) + ' OF ' + prog.sessions.length);
 }
 
 // ── Full detail on the last completed session: aggregate stats + actual weight×reps per exercise ──
