@@ -1987,18 +1987,12 @@ function renderDashboard() {
   const session = nextInfo.session;
   if (!session || !session.exercises) { todaySection.innerHTML = ''; return; }
   const sessionIdx = nextInfo.weekCount % prog.sessions.length;
-  const exList = session.exercises.slice(0,4).map(ex =>
-    '<div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border)">'
-    + '<span style="color:var(--text)">' + ex.name + '</span>'
-    + '<span style="color:var(--muted);font-family:var(--font-mono);font-size:13px">' + ex.sets + 'x' + ex.reps + '</span></div>'
-  ).join('');
-  const moreText = session.exercises.length > 4 ? '<div style="font-size:14px;color:var(--muted);margin-top:6px">+' + (session.exercises.length-4) + ' more</div>' : '';
-  const sessionLabel = alreadyLogged ? '// NEXT SESSION' : '// SESSION ' + (sessionIdx+1) + ' OF ' + prog.sessions.length;
+  const nextEyebrow = (alreadyLogged ? '// NEXT SESSION \u2014 ' : '// TODAY \u2014 ') + (sessionIdx+1) + ' OF ' + prog.sessions.length;
+  // Three full session cards: last completed (actual weights/reps), this one (ready to go), and the one after.
   todaySection.innerHTML = '<div class="section-title"><span></span>' + (alreadyLogged ? 'NEXT UP' : 'TODAY') + '</div>'
-    + '<div style="margin:0 16px 12px;background:var(--surface);border:1px solid var(--border);padding:16px">'
-    + '<div style="font-family:var(--font-mono);font-size:15px;color:var(--acid);letter-spacing:.08em;margin-bottom:6px">' + sessionLabel + '</div>'
-    + '<div class="card-title">' + session.name + '</div>'
-    + '<div style="margin-bottom:10px">' + exList + moreText + '</div></div>'
+    + renderLastSessionFull(log, prog)
+    + renderSessionPlanCard(session, nextEyebrow)
+    + renderFutureSessionInfo(prog, log)
     + (alreadyLogged
       ? '<div style="margin:0 16px 20px;padding:18px;background:rgba(232,255,0,.08);border:2px solid var(--acid);text-align:center">'
         + '<div style="font-family:var(--font-display);font-size:22px;letter-spacing:3px;color:var(--acid)">\u2713 LOGGED TODAY</div></div>'
@@ -2093,35 +2087,8 @@ function renderLogStaticView(prog) {
     + '<button onclick="_goToDash()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:4px">&#x2715;</button>'
     + '</div></div>';
 
-  // Last session summary
-  let lastSessionHtml = '';
-  const allLogEntries = Object.entries(log).sort((a, b) => b[0].localeCompare(a[0]));
-  if (allLogEntries.length) {
-    const [lastKey, lastEntry] = allLogEntries[0];
-    const vol = (lastEntry.volume||0) >= 1000 ? ((lastEntry.volume||0)/1000).toFixed(1)+'k' : (lastEntry.volume||0);
-    const dur = lastEntry.duration ? Math.floor(lastEntry.duration/60) + ' min' : '';
-    // Determine session name from program
-    let sessionName = 'SESSION';
-    if (prog && prog.startDate) {
-      const progStartKey = prog.startDate.slice(0,10);
-      const logsBefore = Object.keys(log).filter(k => k <= lastKey && k >= progStartKey).length - 1;
-      const s = prog.sessions[Math.max(0,logsBefore) % prog.sessions.length];
-      if (s && s.name) sessionName = s.name;
-    }
-    lastSessionHtml = '<div style="margin:14px 16px 0">'
-      + '<div style="font-family:var(--font-mono);font-size:14px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px">'
-      + '<span style="display:block;width:2px;height:10px;background:var(--acid)"></span>LAST SESSION · ' + fmtDate(lastKey)
-      + '</div>'
-      + '<div style="background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent);padding:14px">'
-      + '<div style="font-family:var(--font-display);font-size:20px;letter-spacing:2px;color:var(--acid);margin-bottom:10px">' + sessionName + '</div>'
-      + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'
-      + _miniStat('SETS', lastEntry.sets || 0)
-      + _miniStat('VOLUME', vol + ' kg')
-      + _miniStat('AVG RIR', lastEntry.rir != null ? lastEntry.rir : '—')
-      + '</div>'
-      + (dur ? '<div style="margin-top:8px;font-family:var(--font-mono);font-size:14px;color:var(--muted)">' + dur + '</div>' : '')
-      + '</div></div>';
-  }
+  // Last session summary (shared with the Home dashboard — see renderLastSessionFull)
+  const lastSessionHtml = renderLastSessionFull(log, prog);
 
   // Next session preview
   const nextPreview = prog ? renderNextSessionInfo(prog, log) : '';
@@ -2144,15 +2111,10 @@ function _miniStat(label, value) {
     + '</div>';
 }
 
-function renderNextSessionInfo(prog, log) {
-  if (!prog || !prog.sessions || !prog.sessions.length) return '';
-  const nextInfo = getNextSession(prog, log);
-  if (!nextInfo) return '';
-  const session = nextInfo.session;
-  if (!session || !session.exercises) return '';
-  const sessionIdx = nextInfo.weekCount % prog.sessions.length;
-
-  const exRows = (session.exercises || []).slice(0, 5).map(ex => {
+// ── Reusable: a planned session's exercise rows (name, muscle, sets×reps, suggested weight) ──
+function renderSessionExerciseRows(exercises, limit) {
+  const list = limit ? (exercises || []).slice(0, limit) : (exercises || []);
+  const exRows = list.map(ex => {
     const libEx = allExercises.find(e => e.name === ex.name);
     const parts = (ex.reps||'6-15').split('-').map(Number);
     const sug = libEx ? calcSuggestion({...libEx, repMin: parts[0]||6, repMax: parts[1]||15}) : null;
@@ -2167,16 +2129,90 @@ function renderNextSessionInfo(prog, log) {
       + '<span style="font-family:var(--font-mono);font-size:14px;color:var(--muted);flex-shrink:0;margin-left:8px">' + ex.sets + '×' + ex.reps + '</span>'
       + '</div>';
   }).join('');
-  const moreText = session.exercises.length > 5 ? '<div style="font-size:14px;color:var(--muted);margin-top:6px">+' + (session.exercises.length-5) + ' more</div>' : '';
+  const moreText = limit && exercises.length > limit ? '<div style="font-size:14px;color:var(--muted);margin-top:6px">+' + (exercises.length-limit) + ' more</div>' : '';
+  return exRows + moreText;
+}
 
+// ── Reusable: full card for a planned (not-yet-done) session ──
+function renderSessionPlanCard(session, eyebrow) {
   return '<div style="margin:14px 16px 0;background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--accent)">'
     + '<div style="padding:14px 16px;border-bottom:1px solid var(--border)">'
-    + '<div style="font-family:var(--font-mono);font-size:14px;color:var(--accent);letter-spacing:.1em;margin-bottom:4px">// NEXT SESSION — ' + (sessionIdx+1) + ' OF ' + prog.sessions.length + '</div>'
+    + '<div style="font-family:var(--font-mono);font-size:14px;color:var(--accent);letter-spacing:.1em;margin-bottom:4px">' + eyebrow + '</div>'
     + '<div class="card-title" style="color:var(--acid)">' + (session.name||'SESSION') + '</div>'
     + '<div style="font-size:14px;color:var(--muted);margin-top:2px;font-family:var(--font-body)">' + (session.sub||'') + '</div>'
     + '</div>'
-    + '<div style="padding:0 16px 8px">' + exRows + moreText + '</div>'
+    + '<div style="padding:0 16px 8px">' + renderSessionExerciseRows(session.exercises, 5) + '</div>'
     + '</div>';
+}
+
+function renderNextSessionInfo(prog, log) {
+  if (!prog || !prog.sessions || !prog.sessions.length) return '';
+  const nextInfo = getNextSession(prog, log);
+  if (!nextInfo) return '';
+  const session = nextInfo.session;
+  if (!session || !session.exercises) return '';
+  const sessionIdx = nextInfo.weekCount % prog.sessions.length;
+  return renderSessionPlanCard(session, '// NEXT SESSION — ' + (sessionIdx+1) + ' OF ' + prog.sessions.length);
+}
+
+// ── The session after next — same rotation, one step further out ──
+function renderFutureSessionInfo(prog, log) {
+  if (!prog || !prog.sessions || prog.sessions.length < 2) return '';
+  const nextInfo = getNextSession(prog, log);
+  if (!nextInfo) return '';
+  const futureIdx = (nextInfo.weekCount + 1) % prog.sessions.length;
+  const session = prog.sessions[futureIdx];
+  if (!session || !session.exercises) return '';
+  return renderSessionPlanCard(session, '// THEN — ' + (futureIdx+1) + ' OF ' + prog.sessions.length);
+}
+
+// ── Full detail on the last completed session: aggregate stats + actual weight×reps per exercise ──
+function renderLastSessionFull(log, prog) {
+  const allLogEntries = Object.entries(log).sort((a, b) => b[0].localeCompare(a[0]));
+  if (!allLogEntries.length) return '';
+  const [lastKey, lastEntry] = allLogEntries[0];
+  const vol = (lastEntry.volume||0) >= 1000 ? ((lastEntry.volume||0)/1000).toFixed(1)+'k' : (lastEntry.volume||0);
+  const dur = lastEntry.duration ? Math.floor(lastEntry.duration/60) + ' min' : '';
+
+  let sessionName = 'SESSION', sessionExercisesList = [];
+  if (prog && prog.startDate) {
+    const progStartKey = prog.startDate.slice(0,10);
+    const logsBefore = Object.keys(log).filter(k => k <= lastKey && k >= progStartKey).length - 1;
+    const s = prog.sessions[Math.max(0,logsBefore) % prog.sessions.length];
+    if (s && s.name) sessionName = s.name;
+    if (s && s.exercises) sessionExercisesList = s.exercises;
+  }
+
+  const exRows = sessionExercisesList.map(ex => {
+    const libEx = allExercises.find(e => e.name === ex.name);
+    const hist = libEx ? getHistory(libEx.id) : [];
+    const entry = hist.find(h => h.date === lastKey);
+    const setsText = entry && entry.sets && entry.sets.length
+      ? entry.sets.map(s => (s.w||'—') + 'kg×' + (s.r||'—')).join(' · ')
+      : '—';
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)">'
+      + '<div style="flex:1"><div style="font-size:14px;color:var(--text);font-family:var(--font-condensed);text-transform:uppercase;letter-spacing:.03em">' + ex.name + '</div>'
+      + '<span class="muscle-pill ' + (ex.muscle||'').toLowerCase() + '">' + (ex.muscle||'') + '</span></div>'
+      + '<span style="font-family:var(--font-mono);font-size:13px;color:var(--muted);text-align:right;flex-shrink:0;margin-left:8px">' + setsText + '</span>'
+      + '</div>';
+  }).join('');
+
+  return '<div style="margin:14px 16px 0">'
+    + '<div style="font-family:var(--font-mono);font-size:14px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px">'
+    + '<span style="display:block;width:2px;height:10px;background:var(--acid)"></span>LAST · ' + fmtDate(lastKey)
+    + '</div>'
+    + '<div style="background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent)">'
+    + '<div style="padding:14px 16px;border-bottom:1px solid var(--border)">'
+    + '<div class="card-title" style="color:var(--acid);margin-bottom:8px">' + sessionName + '</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'
+    + _miniStat('SETS', lastEntry.sets || 0)
+    + _miniStat('VOLUME', vol + ' kg')
+    + _miniStat('AVG RIR', lastEntry.rir != null ? lastEntry.rir : '—')
+    + '</div>'
+    + (dur ? '<div style="margin-top:8px;font-family:var(--font-mono);font-size:14px;color:var(--muted)">' + dur + '</div>' : '')
+    + '</div>'
+    + (exRows ? '<div style="padding:0 16px 8px">' + exRows + '</div>' : '')
+    + '</div></div>';
 }
 
 function _goToDash() { showScreen('dash'); }
