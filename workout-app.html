@@ -68,19 +68,13 @@ body::before{animation:scanpulse 3s ease-in-out infinite}
 .day-dot .dot{width:38px;height:38px;border-radius:0;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--muted);font-family:var(--font-mono)}
 .day-dot .dot.done{background:var(--acid);border-color:var(--acid);color:#060809;box-shadow:0 0 12px rgba(232,255,0,.6)}
 .day-dot .dot.today{border-color:#ff6a00;color:#ff6a00;box-shadow:0 0 10px rgba(255,106,0,0.5)}
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 12px}
 .stat-box{background:var(--surface);border:1px solid var(--border);border-radius:0;padding:14px;position:relative}
 .stat-box::before{content:"";position:absolute;top:0;right:0;width:10px;height:10px;background:var(--acid);clip-path:polygon(100% 0,0 0,100% 100%)}
-.stat-label{font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px;font-family:var(--font-mono)}
 .stat-val{font-family:var(--font-display);font-size:28px;font-weight:700;letter-spacing:2px;color:var(--accent);text-shadow:0 0 10px rgba(0,240,208,.35);line-height:1.1}
 .stat-val span{font-size:15px;font-family:var(--font-body);color:var(--muted)}
 .section-title{font-family:var(--font-mono);font-size:14px;letter-spacing:.1em;color:var(--muted);padding:10px 16px 6px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
 .section-title::before{content:"";display:block;width:2px;height:12px;background:var(--acid);flex-shrink:0;box-shadow:0 0 6px rgba(232,255,0,.5)}
-.program-card{margin:0 16px 12px;background:linear-gradient(135deg,#080f12 0%,#0e1215 60%);border:1px solid var(--border);border-left:3px solid #ff6a00;border-radius:0;padding:16px;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)}
-.program-name{font-family:var(--font-display);font-size:24px;letter-spacing:3px;text-shadow:0 0 12px rgba(0,240,208,.3)}
 .program-meta{font-size:15px;color:var(--muted);margin-top:4px;font-family:var(--font-condensed);letter-spacing:.04em}
-.meso-bar{height:6px;background:var(--border);border-radius:3px;margin-top:12px;overflow:hidden}
-.meso-fill{height:100%;background:var(--acid);border-radius:0;box-shadow:0 0 8px rgba(232,255,0,.4)}
 .start-btn{display:block;width:calc(100% - 32px);margin:4px 16px 12px;padding:16px;background:var(--orange);color:#05080a;border:none;border-radius:0;font-family:var(--font-display);font-size:22px;letter-spacing:5px;cursor:pointer;transition:opacity .15s,box-shadow .15s;box-shadow:0 0 32px rgba(255,106,0,0.6),inset 0 0 20px rgba(255,130,0,0.15);clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%)}
 .start-btn:active{opacity:.85}
 /* dashboard: compact secondary block (week/stats/program-footer, demoted below Today) */
@@ -131,22 +125,12 @@ body::before{animation:scanpulse 3s ease-in-out infinite}
 .modal-close{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer}
 .modal-search{padding:12px 16px;flex-shrink:0}
 .modal-results{overflow-y:auto;flex:1}
-.meso-selector{display:flex;gap:8px;padding:16px;overflow-x:auto;scrollbar-width:none}
 .meso-chip{flex-shrink:0;padding:11px 20px;border-radius:0;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:15px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font-condensed);letter-spacing:.06em;text-transform:uppercase}
 .meso-chip.active{background:var(--accent);border-color:var(--accent);color:#080b0d;box-shadow:0 0 10px rgba(0,240,208,0.3)}
 .day-card{margin:0 16px 10px;background:var(--surface);border:1px solid var(--border);border-radius:0;overflow:hidden;border-left:2px solid var(--border)}
 .day-card:hover{border-left-color:var(--accent);box-shadow:inset 2px 0 0 var(--accent)}
-.day-card-hdr{padding:16px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
-.day-card-title{font-family:var(--font-display);font-size:20px;letter-spacing:3px;color:var(--acid)}
-.day-card-sub{font-size:14px;color:var(--muted);margin-top:2px;font-family:var(--font-body)}
-.day-badge{background:var(--surface2);border:1px solid var(--border);border-radius:0;padding:5px 12px;font-size:14px;color:var(--muted);font-family:var(--font-mono);letter-spacing:.04em}
-.day-exercises{border-top:1px solid var(--border);padding:14px 18px}
 .ex-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
 .ex-item:last-child{border-bottom:none}
-.ex-item-name{font-size:15px;font-weight:600;color:var(--text)}
-.ex-item-meta{font-size:14px;color:var(--muted);margin-top:3px}
-.ex-sets{font-family:var(--font-mono);font-size:14px;color:var(--orange)}
-.new-program-btn{display:block;width:calc(100% - 32px);margin:4px 16px 12px;padding:14px;background:none;border:1px dashed var(--border);border-radius:var(--radius);color:var(--muted);font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer;text-align:center}
 
 .pill-tabs{display:flex;gap:6px;padding:12px 16px;overflow-x:auto;scrollbar-width:none}
 .pill-tab{flex-shrink:0;padding:10px 20px;border-radius:0;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:15px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font-condensed);letter-spacing:.08em;text-transform:uppercase}
@@ -184,13 +168,11 @@ body::before{animation:scanpulse 3s ease-in-out infinite}
 select.form-input{-webkit-appearance:none}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .submit-btn{padding:14px;background:var(--accent);color:#080b0d;border:none;border-radius:0;font-family:var(--font-display);font-size:20px;letter-spacing:3px;cursor:pointer;margin-top:4px;box-shadow:0 0 20px rgba(0,240,208,0.4);clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%)}
-.divider{height:1px;background:var(--border);margin:4px 16px 12px}
 .spacer{height:24px}
 input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
 .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--accent);color:#f0e8e0;padding:12px 24px;border-radius:0;font-weight:700;font-size:14px;letter-spacing:.1em;font-family:var(--font-display);z-index:9999;transition:transform .3s ease;white-space:nowrap;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%)}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .empty-state{padding:40px 16px;text-align:center;color:var(--muted);font-size:14px}
-.empty-icon{font-size:40px;margin-bottom:12px}
 .lib-tabs{display:flex;border-bottom:1px solid var(--border)}
 .day-pick-btn{width:100%;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--border);border-radius:0;cursor:pointer;font-family:var(--font-display);font-size:18px;color:var(--muted);transition:all .15s;padding:0}
 .day-pick-btn .day-abbr{font-size:13px;font-family:var(--font-condensed);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
@@ -202,25 +184,10 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
 .split-option.selected .split-option-radio{border-color:var(--acid);background:var(--acid);box-shadow:0 0 6px rgba(232,255,0,.5)}
 .split-option-name{font-family:var(--font-condensed);font-size:19px;font-weight:900;letter-spacing:.05em;color:var(--text);text-transform:uppercase}
 .split-option.selected .split-option-name{color:var(--acid)}
-.split-option-meta{font-size:14px;color:var(--muted);margin-top:3px;font-family:var(--font-body);font-weight:400;letter-spacing:0;line-height:1.4}
-.split-rec-tag{font-size:13px;font-family:var(--font-body);font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#080b0d;background:var(--accent);padding:4px 10px;margin-left:auto;flex-shrink:0}
 .gen-day-card{margin:0 16px 10px;background:var(--surface);border:1px solid var(--border);border-left:2px solid var(--border);overflow:hidden}
 .gen-day-card.training{border-left-color:var(--accent)}
-.gen-day-hdr{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
-.gen-day-label{font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
-.gen-day-name{font-family:var(--font-display);font-size:20px;letter-spacing:3px;color:var(--acid);margin-top:2px;text-shadow:0 0 8px rgba(232,255,0,.3)}
-.gen-day-sub{font-size:14px;color:var(--muted);margin-top:1px}
-.gen-day-rest{padding:12px 16px;font-family:var(--font-display);font-size:15px;letter-spacing:.1em;color:var(--muted)}
-.week-badge{background:rgba(255,106,0,.12);border:1px solid rgba(255,106,0,.3);color:var(--orange);font-size:14px;font-family:var(--font-mono);padding:5px 12px;letter-spacing:.04em}
 .rtab{flex:1;padding:13px 6px;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:var(--font-condensed);font-size:15px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;white-space:nowrap}
 .rtab.active{color:var(--acid);border-bottom-color:var(--acid);text-shadow:0 0 6px rgba(232,255,0,.4)}
-.routine-meta-card{margin:12px 16px;background:linear-gradient(135deg,#060d12,#0e1215);border:1px solid var(--border);border-left:3px solid #ff6a00;border-radius:0;padding:16px;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)}
-.science-badge{display:inline-block;padding:6px 12px;border-radius:0;font-size:14px;letter-spacing:.06em;font-family:var(--font-mono);background:rgba(232,255,0,.06);color:var(--acid);border:1px solid rgba(232,255,0,.3);white-space:nowrap;flex-shrink:0}
-.science-notes{margin-top:14px;display:flex;flex-direction:column;gap:6px}
-.sn-row{display:flex;justify-content:space-between;align-items:center;font-size:15px}
-.sn-key{color:var(--muted);font-weight:500}
-.sn-val{color:var(--text);font-family:var(--font-mono);font-size:15px}
-.rest-day-row{padding:12px 16px;font-size:14px;color:var(--muted);font-weight:600;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--border);margin:0 0 10px;border-left:2px solid var(--border);margin-left:16px;margin-right:16px}
 .lib-tab{flex:1;padding:15px;text-align:center;font-size:15px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;font-family:var(--font-condensed);letter-spacing:.1em;text-transform:uppercase}
 .lib-tab.active{color:var(--acid);border-bottom-color:var(--acid);text-shadow:0 0 6px rgba(232,255,0,.4)}
 
@@ -257,16 +224,12 @@ input[type=range].feedback-range.acid::-webkit-slider-thumb{background:var(--aci
 .vl-status.mav{color:var(--accent)}
 .vl-status.mrv{color:var(--danger)}
 .vl-corner{position:absolute;top:0;right:0;width:8px;height:8px;clip-path:polygon(100% 0,0 0,100% 100%);opacity:.8}
-.meso-week-strip{display:flex;gap:8px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none}
 .meso-week-dot{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px}
 .wdot{width:40px;height:40px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:17px;color:var(--muted)}
 .wdot.done{background:var(--acid);border-color:var(--acid);color:#060809}
 .wdot.current{border-color:var(--acid);color:var(--acid);box-shadow:0 0 8px rgba(232,255,0,.3)}
 .wdot.deload{background:#9d5cff;border-color:#9d5cff;color:#000}
 .meso-week-dot span{font-size:14px;color:var(--muted);letter-spacing:.03em;text-transform:uppercase}
-.deload-banner{margin:0 16px 12px;background:rgba(157,92,255,.08);border:1px solid #9d5cff;border-left:3px solid #9d5cff;padding:14px}
-.deload-title{font-family:var(--font-display);font-size:20px;letter-spacing:1px;color:#9d5cff}
-.bw-input-row{display:flex;gap:10px;padding:0 16px 12px;align-items:center}
 .bw-input{flex:1;background:var(--surface);border:1px solid var(--border);padding:12px 14px;color:var(--text);font-family:var(--font-mono);font-size:20px;text-align:center;border-radius:0}
 .bw-input:focus{outline:none;border-color:var(--accent)}
 .bw-log-btn{padding:12px 20px;background:#ff6a00;color:#000;border:none;font-family:var(--font-display);font-size:18px;letter-spacing:1px;cursor:pointer}
@@ -1698,6 +1661,25 @@ const SPLITS = {
     priority:['fbuA','fbuB','fbuC'],
   },
 
+  // ── 60 Min Full Body (custom) ───────────────────────────────────────────
+  fb60: { name:'60 Min Full Body', days:3, recMin:2, desc:'Same full-body session 3x/week — chest, back, arms, legs in about 60 minutes',
+    sessions:[
+      {id:'fb60A',name:'FULL BODY',sub:'Chest · Back · Arms · Legs — same session every day',exercises:[
+        {name:'Incline Bench',muscle:'Chest',sets:'3',reps:'8-12'},
+        {name:'Peck Deck',muscle:'Chest',sets:'3',reps:'8-12'},
+        {name:'Pull Down (Reverse Grip)',muscle:'Back',sets:'3',reps:'8-12'},
+        {name:'Bicep Curl (Brachialis)',muscle:'Biceps',sets:'3',reps:'8-12'},
+        {name:'Seated Row',muscle:'Back',sets:'3',reps:'8-12'},
+        {name:'Dips',muscle:'Triceps',sets:'3',reps:'8-12'},
+        {name:'Tricep Pushdown',muscle:'Triceps',sets:'3',reps:'8-12'},
+        {name:'Overhead Tricep',muscle:'Triceps',sets:'3',reps:'8-12'},
+        {name:'Leg Extension',muscle:'Legs',sets:'3',reps:'8-12'},
+        {name:'Standing Hamstring Curl',muscle:'Legs',sets:'3',reps:'8-12'},
+      ]},
+    ],
+    priority:['fb60A'],
+  },
+
 };
 
 // ══════════════════════════════════════════
@@ -2743,6 +2725,23 @@ const QUOTES = [
   "Difficulties strengthen the mind, as labour does the body.",
   "No man is free who is not master of himself.",
   "You become what you give your attention to.",
+  // Bodybuilding legends
+  "Everybody wants to be a bodybuilder, but nobody wants to lift no heavy-ass weights. — Ronnie Coleman",
+  "The last three or four reps is what makes the muscle grow. — Arnold Schwarzenegger",
+  "Strength does not come from winning. Your struggles develop your strengths. — Arnold Schwarzenegger",
+  "Nothing is impossible, the word itself says 'I'm possible'. — Audrey Hepburn (Arnold's favorite)",
+  "Train like you're chasing someone, and you're one rep behind.",
+  "The pump is temporary. The discipline is permanent.",
+  "You don't get the body you want. You build the body you earn.",
+  "A little progress each day adds up to big results.",
+  // More on grit and consistency
+  "Consistency beats intensity when intensity isn't sustainable.",
+  "The weight doesn't know your excuses.",
+  "Motivation gets you started. Habit keeps you going.",
+  "Nobody cares. Work harder.",
+  "Show up on the days you don't want to. That's the whole game.",
+  "It's supposed to be hard. If it were easy, everyone would do it.",
+  "Fall in love with the process, and the results will come.",
 ];
 function getRandomQuote() { return QUOTES[Math.floor(Math.random() * QUOTES.length)]; }
 
