@@ -400,6 +400,7 @@ input[type=range].feedback-range.acid::-webkit-slider-thumb{background:var(--aci
     <div id="exercisesContainer"></div>
     <button onclick="openAddExModal()" style="display:block;width:calc(100% - 32px);margin:8px 16px 0;padding:13px;background:none;border:1px dashed var(--accent);color:var(--accent);font-family:var(--font-display);font-size:16px;letter-spacing:3px;cursor:pointer;text-align:center">+ ADD EXERCISE</button>
     <button class="finish-btn" onclick="finishWorkout()">&#x2713; FINISH WORKOUT</button>
+    <button onclick="discardWorkout()" style="display:block;margin:14px auto 0;background:none;border:none;color:var(--muted);font-family:var(--font-mono);font-size:13px;letter-spacing:.08em;text-decoration:underline;cursor:pointer;padding:8px">DISCARD WORKOUT</button>
     <div class="spacer"></div>
   </div>
 
@@ -1985,7 +1986,9 @@ function renderDashboard() {
     + (alreadyLogged
       ? '<div style="margin:0 16px 4px;padding:18px;background:rgba(232,255,0,.08);border:2px solid var(--acid);text-align:center">'
         + '<div style="font-family:var(--font-display);font-size:22px;letter-spacing:3px;color:var(--acid)">\u2713 LOGGED TODAY</div></div>'
-      : '<button class="start-btn" style="margin:4px 16px 4px" onclick="startTodaySession()">START SESSION &#x2192;</button>')
+      : workoutActive
+        ? '<button class="start-btn" style="margin:4px 16px 4px" onclick="goToLog()">RESUME SESSION &#x2192;</button>'
+        : '<button class="start-btn" style="margin:4px 16px 4px" onclick="startTodaySession()">START SESSION &#x2192;</button>')
     + renderSessionPlanCard(session, nextEyebrow, true)
     + renderLastSessionFull(log, prog)
     + renderFutureSessionInfo(prog, log);
@@ -2087,7 +2090,9 @@ function renderLogStaticView(prog) {
 
   // Start button or trained-today badge
   let actionHtml = '';
-  if (todayLogged) {
+  if (workoutActive && sessionExercises.length) {
+    actionHtml = '<button class="start-btn" onclick="goToLog()">RESUME SESSION &#x2192;</button>';
+  } else if (todayLogged) {
     actionHtml = '<div style="margin:12px 16px 4px;padding:14px;background:rgba(232,255,0,.08);border:2px solid var(--acid);text-align:center;font-family:var(--font-display);font-size:18px;letter-spacing:2px;color:var(--acid)">✓ TRAINED TODAY</div>';
   } else if (prog && (sessionsLeft === null || sessionsLeft > 0)) {
     actionHtml = '<button class="start-btn" onclick="startTodaySession()">START NEXT SESSION &#x2192;</button>';
@@ -2255,6 +2260,7 @@ function showLogStatic(html) {
 }
 
 function startDeloadSession() {
+  if (_resumeIfActive()) return;
   workoutTimerStarted = false; workoutSecs = 0;
   const el = document.getElementById('workoutTimer');
   if (el) { el.textContent = 'READY'; el.style.color = 'var(--muted)'; }
@@ -2301,6 +2307,7 @@ function startDeloadSession() {
 }
 
 function startTodaySession() {
+  if (_resumeIfActive()) return;
   isDeloadSession = false;
   workoutTimerStarted = false; workoutSecs = 0;
   const el = document.getElementById('workoutTimer');
@@ -2349,6 +2356,66 @@ function startTodaySession() {
   startWorkout();
 }
 
+// ── ACTIVE WORKOUT PERSISTENCE ──────────────
+// The in-progress session is mirrored to localStorage on every change so closing,
+// reloading or the OS killing the app never loses logged sets.
+const ACTIVE_WORKOUT_KEY = 'jacked_active_workout';
+function _saveActiveWorkout() {
+  if (!workoutActive) return;
+  try {
+    localStorage.setItem(ACTIVE_WORKOUT_KEY, JSON.stringify({
+      exercises: sessionExercises, secs: workoutSecs, timerStarted: workoutTimerStarted,
+      deload: isDeloadSession, sessionIdx: currentSessionIdx,
+      title: document.getElementById('logTitle')?.textContent || '',
+      sub: document.getElementById('logSub')?.textContent || '',
+    }));
+  } catch(e) {}
+}
+function _clearActiveWorkout() { try { localStorage.removeItem(ACTIVE_WORKOUT_KEY); } catch(e) {} }
+function _restoreActiveWorkout() {
+  let saved;
+  try { saved = JSON.parse(localStorage.getItem(ACTIVE_WORKOUT_KEY) || 'null'); } catch(e) { return false; }
+  if (!saved || !Array.isArray(saved.exercises) || !saved.exercises.length) return false;
+  sessionExercises.length = 0;
+  sessionExercises.push(...saved.exercises);
+  isDeloadSession = !!saved.deload;
+  currentSessionIdx = saved.sessionIdx ?? -1;
+  const titleEl = document.getElementById('logTitle');
+  const subEl = document.getElementById('logSub');
+  if (titleEl) titleEl.textContent = saved.title || 'SESSION';
+  if (subEl) subEl.textContent = saved.sub || '';
+  workoutActive = true; workoutSecs = saved.secs || 0; workoutTimerStarted = false;
+  const band = document.getElementById('deloadBand');
+  if (band) band.style.display = isDeloadSession ? 'block' : 'none';
+  const timerEl = document.getElementById('workoutTimer');
+  if (saved.timerStarted) startWorkoutTimer();
+  else if (timerEl) { timerEl.textContent = 'READY'; timerEl.style.color = 'var(--muted)'; }
+  renderExercises();
+  return true;
+}
+// Starting a session while one is in progress resumes it instead of wiping it.
+function _resumeIfActive() {
+  if (!workoutActive || !sessionExercises.length) return false;
+  goToLog();
+  showToast('Workout in progress — resumed');
+  return true;
+}
+function discardWorkout() {
+  if (!confirm('Discard this workout? All sets logged in this session will be lost.')) return;
+  if (!confirm('Are you sure? This cannot be undone.')) return;
+  clearInterval(workoutInt); clearInterval(restInt);
+  const o = document.getElementById('restOverlay'); if (o) o.classList.remove('show');
+  workoutActive = false; workoutTimerStarted = false; workoutSecs = 0;
+  sessionExercises.length = 0;
+  isDeloadSession = false;
+  _clearActiveWorkout();
+  showScreen('dash');
+}
+window.addEventListener('beforeunload', e => {
+  if (workoutActive && sessionExercises.length) { _saveActiveWorkout(); e.preventDefault(); e.returnValue = ''; }
+});
+document.addEventListener('visibilitychange', () => { if (document.hidden) _saveActiveWorkout(); });
+
 function startWorkout() {
   workoutActive = true; workoutSecs = 0; workoutTimerStarted = false;
   const band = document.getElementById('deloadBand');
@@ -2366,6 +2433,7 @@ function startWorkoutTimer() {
     const m = Math.floor(workoutSecs/60), s = workoutSecs%60;
     const el = document.getElementById('workoutTimer');
     if (el) el.textContent = m + ':' + (s<10?'0':'') + s;
+    if (workoutSecs % 5 === 0) _saveActiveWorkout();
   }, 1000);
 }
 
@@ -2376,6 +2444,7 @@ function finishWorkout() {
   }
   clearInterval(workoutInt);
   workoutActive = false;
+  _clearActiveWorkout();
   const log = getWorkoutLog();
   const tk = todayKey();
   let totalSets = 0, totalVol = 0, rirTotal = 0, rirCount = 0;
@@ -2411,6 +2480,7 @@ function getRirStyle(rir) {
 }
 
 function renderExercises() {
+  _saveActiveWorkout();
   const container = document.getElementById('exercisesContainer');
   if (!container) return;
   container.innerHTML = sessionExercises.map((ex, ei) => {
@@ -2481,12 +2551,14 @@ function renderExercises() {
 function updSet(ei, si, field, val) {
   if (sessionExercises[ei] && sessionExercises[ei].sets_data[si]) {
     sessionExercises[ei].sets_data[si][field] = val;
+    _saveActiveWorkout();
   }
 }
 
 function togSet(ei, si) {
   const set = sessionExercises[ei].sets_data[si];
   set.done = !set.done;
+  _saveActiveWorkout();
   const row = document.getElementById('sr-' + ei + '-' + si);
   if (row) {
     row.className = 'set-row' + (set.done?' completed':'');
@@ -3971,7 +4043,8 @@ async function checkOpenNotification() {
   } catch(e) {}
 }
 
-renderDashboard();
+if (_restoreActiveWorkout()) { goToLog(); setTimeout(() => showToast('Workout restored'), 300); }
+else renderDashboard();
 document.addEventListener('click', function(e) {
   const btn = e.target.closest('[data-goto]');
   if (btn) showScreen(btn.getAttribute('data-goto'));
