@@ -2,6 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<!-- CSP: inline script/handlers are required by the single-file design, but external scripts,
+     plugins, framing targets and data exfiltration endpoints are all blocked. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://raw.githubusercontent.com; media-src 'self' data: blob:; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -990,17 +994,31 @@ function fmtDate(s) {
   const [,m,d] = s.split('-').map(Number);
   return d + ' ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1];
 }
-function getWorkoutLog() { try { return JSON.parse(localStorage.getItem('jacked_log') || '{}'); } catch(e) { return {}; } }
+// Stored data is cleaned on every read: a restored backup file is untrusted input.
+function _deepClean(v, depth) {
+  if ((depth || 0) > 8) return null;
+  if (typeof v === 'string') return v.replace(/[<>"`]/g, '');
+  if (Array.isArray(v)) return v.map(x => _deepClean(x, (depth || 0) + 1));
+  if (v && typeof v === 'object') {
+    const o = {};
+    Object.keys(v).forEach(k => { if (k !== '__proto__' && k !== 'constructor' && k !== 'prototype') o[_deepClean(k)] = _deepClean(v[k], (depth || 0) + 1); });
+    return o;
+  }
+  return v;
+}
+function _num(v) { const s = String(v ?? '').trim(); return /^\d{1,4}(\.\d{1,3})?$/.test(s) ? s : ''; }
+function _isDateKey(v) { return typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v); }
+function getWorkoutLog() { try { const l = _deepClean(JSON.parse(localStorage.getItem('jacked_log') || '{}')); return l && !Array.isArray(l) ? l : {}; } catch(e) { return {}; } }
 function saveWorkoutLog(log) { localStorage.setItem('jacked_log', JSON.stringify(log)); }
-function getActiveProgram() { try { return JSON.parse(localStorage.getItem('jacked_program') || 'null'); } catch(e) { return null; } }
+function getActiveProgram() { try { const p = _deepClean(JSON.parse(localStorage.getItem('jacked_program') || 'null')); return p && typeof p === 'object' && !Array.isArray(p) ? p : null; } catch(e) { return null; } }
 function saveActiveProgram(prog) { localStorage.setItem('jacked_program', JSON.stringify(prog)); }
-function getFeedbackLog() { try { return JSON.parse(localStorage.getItem('jacked_feedback') || '[]'); } catch(e) { return []; } }
+function getFeedbackLog() { try { return _deepClean(JSON.parse(localStorage.getItem('jacked_feedback') || '[]')); } catch(e) { return []; } }
 function saveFeedbackLog(log) { localStorage.setItem('jacked_feedback', JSON.stringify(log)); }
-function getBodyweightLog() { try { return JSON.parse(localStorage.getItem('jacked_bw') || '[]'); } catch(e) { return []; } }
+function getBodyweightLog() { try { const l = JSON.parse(localStorage.getItem('jacked_bw') || '[]'); return Array.isArray(l) ? l.filter(e => e && _isDateKey(e.date) && _num(e.kg)).map(e => ({ date: e.date, kg: parseFloat(e.kg) })) : []; } catch(e) { return []; } }
 function saveBodyweightLog(log) { localStorage.setItem('jacked_bw', JSON.stringify(log)); }
-function getDeloadFlag() { try { return JSON.parse(localStorage.getItem('jacked_deload_flag') || 'null'); } catch(e) { return null; } }
+function getDeloadFlag() { try { return _deepClean(JSON.parse(localStorage.getItem('jacked_deload_flag') || 'null')); } catch(e) { return null; } }
 function clearDeloadFlag() { localStorage.removeItem('jacked_deload_flag'); showToast('Deload cleared'); renderDashboard(); }
-function getAwards() { try { return JSON.parse(localStorage.getItem('jacked_awards') || '[]'); } catch(e) { return []; } }
+function getAwards() { try { return _deepClean(JSON.parse(localStorage.getItem('jacked_awards') || '[]')); } catch(e) { return []; } }
 function saveAwards(a) { localStorage.setItem('jacked_awards', JSON.stringify(a)); }
 
 function collectBackupData() {
@@ -1032,27 +1050,34 @@ function importBackup(input) {
   const file = input.files[0];
   if (!file) return;
   const statusEl = document.getElementById('importStatus');
+  if (file.size > 5 * 1024 * 1024) {
+    statusEl.style.display = 'block'; statusEl.style.color = 'var(--danger)';
+    statusEl.textContent = 'Backup file is too large.'; input.value = ''; return;
+  }
   const reader = new FileReader();
   reader.onload = function(e) {
     try {
       const parsed = JSON.parse(e.target.result);
-      if (!parsed.data || parsed.app !== 'JACKED') {
+      if (!parsed || typeof parsed.data !== 'object' || parsed.data === null || Array.isArray(parsed.data) || parsed.app !== 'JACKED') {
         statusEl.style.display = 'block';
         statusEl.style.color = 'var(--danger)';
         statusEl.textContent = 'Invalid backup file.';
         return;
       }
-      if (!confirm('This will overwrite your current data with the backup from ' + (parsed.exportedAt || 'unknown date') + '. Continue?')) {
+      if (!confirm('This will overwrite your current data with the backup from ' + String(parsed.exportedAt || 'unknown date').slice(0, 20) + '. Continue?')) {
         input.value = '';
         return;
       }
-      Object.entries(parsed.data).forEach(([k, v]) => {
+      // Only restore this app's own keys; everything is re-sanitised on load/render.
+      const entries = Object.entries(parsed.data).filter(([k]) => /^(jacked|bloc)_[A-Za-z0-9_-]{1,80}$/.test(k));
+      entries.forEach(([k, v]) => {
         localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v));
       });
+      allExercises = loadExercises();
       statusEl.style.display = 'block';
       statusEl.style.color = 'var(--acid)';
-      const keyCount = Object.keys(parsed.data).length;
-      statusEl.textContent = 'Restored ' + keyCount + ' data keys from ' + (parsed.exportedAt || 'backup') + '.';
+      const keyCount = entries.length;
+      statusEl.textContent = 'Restored ' + keyCount + ' data keys from ' + String(parsed.exportedAt || 'backup').slice(0, 20) + '.';
       input.value = '';
       renderDashboard();
       renderDataSummary();
@@ -1120,6 +1145,23 @@ function _dataRow(label, value) {
 }
 
 // ══════════════════════════════════════════
+// SECURITY HELPERS
+// ══════════════════════════════════════════
+// Any stored/imported string rendered via innerHTML must go through esc() —
+// exercise names can come from a third-party JSON feed or a backup file.
+function esc(v) {
+  return String(v ?? '').replace(/[&<>"'`]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
+}
+function _safeId(v) { return String(v ?? '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64); }
+function _safeStr(v, max) { return (typeof v === 'string' ? v : '').replace(/[\u0000-\u001f]/g, '').trim().slice(0, max); }
+function _sanitizeCustomExercise(e) {
+  if (!e || typeof e !== 'object') return null;
+  const id = _safeId(e.id), name = _safeStr(e.name, 80);
+  if (!id || !name) return null;
+  return { id, name, muscle: _safeStr(e.muscle, 30) || 'Other', equip: _safeStr(e.equip, 30) || 'Other', notes: _safeStr(e.notes, 200), custom: true };
+}
+
+// ══════════════════════════════════════════
 // EXERCISES
 // ══════════════════════════════════════════
 function loadExercises() {
@@ -1130,7 +1172,11 @@ function loadExercises() {
       localStorage.setItem('jacked_lib_version', APP_VERSION);
     }
     const s = localStorage.getItem('bloc_ex');
-    if (s) { const c = JSON.parse(s).filter(e => e.custom); return [...DEFAULT_EXERCISES, ...c]; }
+    if (s) {
+      const parsed = JSON.parse(s);
+      const c = (Array.isArray(parsed) ? parsed : []).filter(e => e && e.custom).map(_sanitizeCustomExercise).filter(Boolean);
+      return [...DEFAULT_EXERCISES, ...c];
+    }
   } catch(e) {}
   return [...DEFAULT_EXERCISES];
 }
@@ -1159,7 +1205,14 @@ function generateWarmupSets(workingWeight) {
   return sets.map(s => ({ ...s, done: false }));
 }
 
-function getHistory(exId) { try { return JSON.parse(localStorage.getItem('bloc_hist_' + exId) || '[]'); } catch(e) { return []; } }
+function getHistory(exId) {
+  try {
+    const h = JSON.parse(localStorage.getItem('bloc_hist_' + exId) || '[]');
+    if (!Array.isArray(h)) return [];
+    return h.filter(e => e && _isDateKey(e.date) && Array.isArray(e.sets))
+      .map(e => ({ date: e.date, sets: e.sets.map(s => ({ w: _num(s && s.w), r: _num(s && s.r) })) }));
+  } catch(e) { return []; }
+}
 function saveHistory(exId, hist) { localStorage.setItem('bloc_hist_' + exId, JSON.stringify(hist.slice(-20))); }
 function getLastSession(exId) { const h = getHistory(exId); return h.length ? h[h.length-1] : null; }
 
@@ -1184,7 +1237,7 @@ function getAllE1RMData() {
     const ex = allExercises.find(e => e.id === exId);
     if (!ex) continue;
     let hist;
-    try { hist = JSON.parse(localStorage.getItem(k) || '[]'); } catch(e) { continue; }
+    hist = getHistory(exId);
     if (!hist.length) continue;
     const e1rms = hist.map(entry => ({ date: entry.date, e1rm: bestE1RM(entry) })).filter(p => p.e1rm > 0);
     if (!e1rms.length) continue;
@@ -1788,11 +1841,11 @@ function goToStep2() {
     '<div style="margin:0 16px 6px;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--acid);overflow:hidden">'
     + '<div onclick="toggleExList(this)" style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">'
     + '<div><div style="font-family:var(--font-mono);font-size:15px;color:var(--acid)">SESSION ' + idx + '</div>'
-    + '<div style="font-family:var(--font-display);font-size:20px;letter-spacing:2px;color:var(--acid);margin-top:2px">' + s.name + '</div>'
-    + '<div style="font-size:14px;color:var(--muted);font-family:var(--font-body)">' + s.sub + '</div></div>'
+    + '<div style="font-family:var(--font-display);font-size:20px;letter-spacing:2px;color:var(--acid);margin-top:2px">' + esc(s.name) + '</div>'
+    + '<div style="font-size:14px;color:var(--muted);font-family:var(--font-body)">' + esc(s.sub) + '</div></div>'
     + '<span style="font-family:var(--font-mono);font-size:14px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);padding:5px 10px">' + s.exercises.length + ' ex</span></div>'
     + '<div style="display:none;border-top:1px solid var(--border);padding:12px 16px">'
-    + s.exercises.map(ex => '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:14px;font-weight:600;color:var(--text)">' + ex.name + '</div><div style="font-size:14px;color:var(--muted)">' + ex.muscle + '</div></div><span style="font-family:var(--font-mono);font-size:15px;color:var(--acid)">' + ex.sets + '\u00D7' + ex.reps + '</span></div>').join('')
+    + s.exercises.map(ex => '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><div><div style="font-size:14px;font-weight:600;color:var(--text)">' + esc(ex.name) + '</div><div style="font-size:14px;color:var(--muted)">' + esc(ex.muscle) + '</div></div><span style="font-family:var(--font-mono);font-size:15px;color:var(--acid)">' + esc(ex.sets) + '\u00D7' + esc(ex.reps) + '</span></div>').join('')
     + '</div></div>'
   ).join('');
   document.getElementById('genProgramTitle').textContent = split.name.toUpperCase();
@@ -2121,9 +2174,9 @@ function renderSessionExerciseRows(exercises, limit) {
         + '</span>'
       : '';
     return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)">'
-      + '<div style="flex:1"><div style="font-size:14px;color:var(--text);font-family:var(--font-condensed);text-transform:uppercase;letter-spacing:.03em">' + ex.name + '</div>'
+      + '<div style="flex:1"><div style="font-size:14px;color:var(--text);font-family:var(--font-condensed);text-transform:uppercase;letter-spacing:.03em">' + esc(ex.name) + '</div>'
       + '<div style="display:flex;align-items:center;gap:6px;margin-top:2px"><span class="muscle-pill ' + (ex.muscle||'').toLowerCase() + '">' + (ex.muscle||'') + '</span>' + sugText + '</div></div>'
-      + '<span style="font-family:var(--font-mono);font-size:14px;color:var(--muted);flex-shrink:0;margin-left:8px">' + ex.sets + '×' + ex.reps + '</span>'
+      + '<span style="font-family:var(--font-mono);font-size:14px;color:var(--muted);flex-shrink:0;margin-left:8px">' + esc(ex.sets) + '×' + esc(ex.reps) + '</span>'
       + '</div>';
   }).join('');
   const moreText = limit && exercises.length > limit ? '<div style="font-size:14px;color:var(--muted);margin-top:6px">+' + (exercises.length-limit) + ' more</div>' : '';
@@ -2150,8 +2203,8 @@ function renderSessionPlanCard(session, eyebrow, prominent) {
 function renderSessionPreviewCard(session, eyebrow) {
   const names = (session.exercises || []).slice(0, 4).map(ex =>
     '<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px">'
-    + '<span style="color:var(--muted)">' + ex.name + '</span>'
-    + '<span style="color:var(--muted);font-family:var(--font-mono);font-size:12px;opacity:.7">' + ex.sets + '×' + ex.reps + '</span>'
+    + '<span style="color:var(--muted)">' + esc(ex.name) + '</span>'
+    + '<span style="color:var(--muted);font-family:var(--font-mono);font-size:12px;opacity:.7">' + esc(ex.sets) + '×' + esc(ex.reps) + '</span>'
     + '</div>'
   ).join('');
   const moreText = (session.exercises||[]).length > 4 ? '<div style="font-size:13px;color:var(--muted);opacity:.6;margin-top:2px">+' + (session.exercises.length-4) + ' more</div>' : '';
@@ -2208,8 +2261,8 @@ function renderLastSessionFull(log, prog) {
       ? entry.sets.map(s => (s.w||'—') + 'kg×' + (s.r||'—')).join(' · ')
       : '—';
     return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)">'
-      + '<div style="flex:1"><div style="font-size:14px;color:var(--text);font-family:var(--font-condensed);text-transform:uppercase;letter-spacing:.03em">' + ex.name + '</div>'
-      + '<span class="muscle-pill ' + (ex.muscle||'').toLowerCase() + '">' + (ex.muscle||'') + '</span></div>'
+      + '<div style="flex:1"><div style="font-size:14px;color:var(--text);font-family:var(--font-condensed);text-transform:uppercase;letter-spacing:.03em">' + esc(ex.name) + '</div>'
+      + '<span class="muscle-pill ' + esc((ex.muscle||'').toLowerCase()) + '">' + esc(ex.muscle||'') + '</span></div>'
       + '<span style="font-family:var(--font-mono);font-size:13px;color:var(--muted);text-align:right;flex-shrink:0;margin-left:8px">' + setsText + '</span>'
       + '</div>';
   }).join('');
@@ -2220,7 +2273,7 @@ function renderLastSessionFull(log, prog) {
     + '</div>'
     + '<div style="background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--accent)">'
     + '<div style="padding:14px 16px;border-bottom:1px solid var(--border)">'
-    + '<div class="card-title" style="color:var(--acid);margin-bottom:8px">' + sessionName + '</div>'
+    + '<div class="card-title" style="color:var(--acid);margin-bottom:8px">' + esc(sessionName) + '</div>'
     + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'
     + _miniStat('SETS', lastEntry.sets || 0)
     + _miniStat('VOLUME', vol + ' kg')
@@ -2374,7 +2427,7 @@ function _saveActiveWorkout() {
 function _clearActiveWorkout() { try { localStorage.removeItem(ACTIVE_WORKOUT_KEY); } catch(e) {} }
 function _restoreActiveWorkout() {
   let saved;
-  try { saved = JSON.parse(localStorage.getItem(ACTIVE_WORKOUT_KEY) || 'null'); } catch(e) { return false; }
+  try { saved = _deepClean(JSON.parse(localStorage.getItem(ACTIVE_WORKOUT_KEY) || 'null')); } catch(e) { return false; }
   if (!saved || !Array.isArray(saved.exercises) || !saved.exercises.length) return false;
   sessionExercises.length = 0;
   sessionExercises.push(...saved.exercises);
@@ -2494,8 +2547,8 @@ function renderExercises() {
       const sugBar = hasSug ? '<div style="grid-column:2/4;font-size:14px;color:var(--acid);font-family:var(--font-mono);opacity:.65;text-align:center;padding-top:2px">\u25B2 ' + (set.sugW?set.sugW+'kg':'') + (set.sugW&&set.sugR?' \u00B7 ':'') + (set.sugR?set.sugR+' reps':'') + '</div>' : '';
       return '<div class="set-row' + (set.done?' completed':'') + '" id="sr-' + ei + '-' + si + '">'
         + '<div class="set-num">' + (si+1) + '</div>'
-        + '<input class="set-input" type="number" placeholder="' + (set.sugW||'--') + '" value="' + set.w + '" oninput="updSet(' + ei + ',' + si + ',\'w\',this.value)" inputmode="decimal">'
-        + '<input class="set-input" type="number" placeholder="' + (set.sugR||'REPS') + '" value="' + set.r + '" oninput="updSet(' + ei + ',' + si + ',\'r\',this.value)" inputmode="numeric">'
+        + '<input class="set-input" type="number" placeholder="' + (set.sugW||'--') + '" value="' + esc(set.w) + '" oninput="updSet(' + ei + ',' + si + ',\'w\',this.value)" inputmode="decimal">'
+        + '<input class="set-input" type="number" placeholder="' + (set.sugR||'REPS') + '" value="' + esc(set.r) + '" oninput="updSet(' + ei + ',' + si + ',\'r\',this.value)" inputmode="numeric">'
         + '<button class="set-check' + (set.done?' done':'') + '" onclick="togSet(' + ei + ',' + si + ')"><svg viewBox="0 0 24 24" fill="none" stroke="' + (set.done?'#060809':'var(--muted)') + '" stroke-width="3"><polyline points="20,6 9,17 4,12"/></svg></button>'
         + sugBar + '</div>';
     }).join('');
@@ -2522,8 +2575,8 @@ function renderExercises() {
           const lineThrough = ws.done ? 'opacity:.4;text-decoration:line-through' : '';
           return '<div style="display:grid;grid-template-columns:42px 1fr 1fr 46px;gap:8px;align-items:center;padding:10px 12px;background:' + (ws.done ? 'rgba(0,240,208,.03)' : '#080c0f') + ';border-bottom:1px solid var(--border);border-left:2px solid var(--accent)">'
             + '<div style="font-family:var(--font-mono);font-size:11px;color:var(--accent);text-align:center;letter-spacing:.05em">' + ws.label + '</div>'
-            + '<div style="font-family:var(--font-mono);font-size:20px;color:var(--text);text-align:center;' + lineThrough + '">' + ws.w + '<span style="font-size:11px;color:var(--muted)">kg</span></div>'
-            + '<div style="font-family:var(--font-mono);font-size:20px;color:var(--text);text-align:center;' + lineThrough + '">' + ws.r + '<span style="font-size:11px;color:var(--muted)">r</span></div>'
+            + '<div style="font-family:var(--font-mono);font-size:20px;color:var(--text);text-align:center;' + lineThrough + '">' + esc(ws.w) + '<span style="font-size:11px;color:var(--muted)">kg</span></div>'
+            + '<div style="font-family:var(--font-mono);font-size:20px;color:var(--text);text-align:center;' + lineThrough + '">' + esc(ws.r) + '<span style="font-size:11px;color:var(--muted)">r</span></div>'
             + '<button onclick="togWarmup(' + ei + ',' + wi + ')" style="width:46px;height:46px;background:' + (ws.done ? 'var(--accent)' : 'none') + ';border:2px solid ' + (ws.done ? 'var(--accent)' : '#1a2830') + ';cursor:pointer;display:flex;align-items:center;justify-content:center">'
             + '<svg viewBox="0 0 24 24" fill="none" stroke="' + (ws.done ? '#060809' : 'var(--muted)') + '" stroke-width="3"><polyline points="20,6 9,17 4,12"/></svg></button>'
             + '</div>';
@@ -2534,8 +2587,8 @@ function renderExercises() {
 
     return '<div class="exercise-block">'
       + '<div class="exercise-hdr">'
-      + '<div><div class="exercise-name">' + ex.name + '</div>'
-      + '<div style="display:flex;align-items:center;gap:8px;margin-top:4px"><span class="muscle-pill ' + ex.muscle.toLowerCase() + '">' + ex.muscle + '</span><span class="exercise-meta">' + ex.equip + ' \u00B7 ' + ex.repMin + '-' + ex.repMax + ' reps</span></div></div>'
+      + '<div><div class="exercise-name">' + esc(ex.name) + '</div>'
+      + '<div style="display:flex;align-items:center;gap:8px;margin-top:4px"><span class="muscle-pill ' + esc(ex.muscle.toLowerCase()) + '">' + esc(ex.muscle) + '</span><span class="exercise-meta">' + esc(ex.equip) + ' \u00B7 ' + ex.repMin + '-' + ex.repMax + ' reps</span></div></div>'
       + '<div style="display:flex;align-items:center;gap:6px">'
       + '<button class="swap-btn" onclick="openSwap(' + ei + ')">SWAP</button>'
       + '<div class="rir-badge" style="' + getRirStyle(ex.rir) + '">RIR ' + ex.rir + '</div>'
@@ -2633,10 +2686,10 @@ function renderSwapList() {
   if (q) exercises = exercises.filter(e => e.name.toLowerCase().includes(q) || e.muscle.toLowerCase().includes(q) || e.equip.toLowerCase().includes(q));
   list.innerHTML = exercises.map(e => {
     const isSame = ex && e.muscle === ex.muscle;
-    return '<div class="swap-item" data-exid="' + e.id + '" style="padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;justify-content:space-between;align-items:center">'
-      + '<div><div style="font-size:13px;font-weight:700;font-family:var(--font-condensed);text-transform:uppercase;color:var(--text)">' + e.name + '</div>'
-      + '<div style="display:flex;gap:6px;margin-top:3px;align-items:center"><span class="muscle-pill ' + e.muscle.toLowerCase() + '">' + e.muscle + '</span>'
-      + '<span style="font-size:14px;color:var(--muted);font-family:var(--font-mono)">' + e.equip + '</span></div></div>'
+    return '<div class="swap-item" data-exid="' + esc(e.id) + '" style="padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;justify-content:space-between;align-items:center">'
+      + '<div><div style="font-size:13px;font-weight:700;font-family:var(--font-condensed);text-transform:uppercase;color:var(--text)">' + esc(e.name) + '</div>'
+      + '<div style="display:flex;gap:6px;margin-top:3px;align-items:center"><span class="muscle-pill ' + esc(e.muscle.toLowerCase()) + '">' + esc(e.muscle) + '</span>'
+      + '<span style="font-size:14px;color:var(--muted);font-family:var(--font-mono)">' + esc(e.equip) + '</span></div></div>'
       + (isSame ? '<span style="font-size:11px;color:var(--acid);font-family:var(--font-mono);background:rgba(232,255,0,.1);padding:3px 8px">MATCH</span>' : '')
       + '</div>';
   }).join('') || '<div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--font-mono);font-size:13px">// no matches</div>';
@@ -2701,10 +2754,10 @@ function renderAddExList() {
   if (q) exercises = exercises.filter(e =>
     e.name.toLowerCase().includes(q) || e.muscle.toLowerCase().includes(q) || e.equip.toLowerCase().includes(q));
   list.innerHTML = exercises.map(e =>
-    '<div class="swap-item" data-exid="' + e.id + '" style="padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;justify-content:space-between;align-items:center">'
-    + '<div><div style="font-size:13px;font-weight:700;font-family:var(--font-condensed);text-transform:uppercase;color:var(--text)">' + e.name + '</div>'
-    + '<div style="display:flex;gap:6px;margin-top:3px;align-items:center"><span class="muscle-pill ' + e.muscle.toLowerCase() + '">' + e.muscle + '</span>'
-    + '<span style="font-size:14px;color:var(--muted);font-family:var(--font-mono)">' + e.equip + '</span></div></div>'
+    '<div class="swap-item" data-exid="' + esc(e.id) + '" style="padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;justify-content:space-between;align-items:center">'
+    + '<div><div style="font-size:13px;font-weight:700;font-family:var(--font-condensed);text-transform:uppercase;color:var(--text)">' + esc(e.name) + '</div>'
+    + '<div style="display:flex;gap:6px;margin-top:3px;align-items:center"><span class="muscle-pill ' + esc(e.muscle.toLowerCase()) + '">' + esc(e.muscle) + '</span>'
+    + '<span style="font-size:14px;color:var(--muted);font-family:var(--font-mono)">' + esc(e.equip) + '</span></div></div>'
     + '</div>'
   ).join('') || '<div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--font-mono);font-size:13px">// no matches</div>';
   list.querySelectorAll('.swap-item').forEach(item =>
@@ -2881,7 +2934,7 @@ function renderLastSession() {
   sessionExercises.forEach(ex => {
     const last = getLastSession(ex.id);
     if (!last || !last.sets || !last.sets.length) return;
-    html += '<div style="border-left:2px solid var(--border);padding-left:10px"><div style="font-size:13px;font-family:var(--font-condensed);color:var(--text);text-transform:uppercase;margin-bottom:4px">' + ex.name + '</div><div style="display:flex;gap:8px;flex-wrap:wrap">';
+    html += '<div style="border-left:2px solid var(--border);padding-left:10px"><div style="font-size:13px;font-family:var(--font-condensed);color:var(--text);text-transform:uppercase;margin-bottom:4px">' + esc(ex.name) + '</div><div style="display:flex;gap:8px;flex-wrap:wrap">';
     last.sets.forEach((s,i) => { html += '<span style="font-family:var(--font-mono);font-size:14px;color:var(--acid)">' + (i+1) + '. ' + (s.w||'?') + 'kg \u00D7 ' + (s.r||'?') + '</span>'; });
     html += '</div></div>';
   });
@@ -3030,7 +3083,7 @@ function renderBodyweightLog() {
     const prev = log[i+1];
     const diff = prev ? (e.kg - prev.kg) : null;
     const dh = diff !== null ? '<span class="bw-change '+(diff>0?'up':'down')+'">'+(diff>0?'+':'')+diff.toFixed(1)+' kg</span>' : '';
-    return '<div class="bw-entry"><div><div class="bw-date">'+e.date+'</div>'+dh+'</div><div class="bw-val">'+e.kg+'<span style="font-size:14px;color:var(--muted)"> kg</span></div></div>';
+    return '<div class="bw-entry"><div><div class="bw-date">'+esc(e.date)+'</div>'+dh+'</div><div class="bw-val">'+esc(e.kg)+'<span style="font-size:14px;color:var(--muted)"> kg</span></div></div>';
   }).join('');
   if (chartEl && log.length >= 2) {
     chartEl.style.display = 'block';
@@ -3189,10 +3242,10 @@ function renderLibrary() {
     const hasDel = e.custom;
     const hist = getHistory(e.id);
     const histBtn = hist.length
-      ? '<button class="lib-add-btn" style="color:var(--accent);border-color:var(--border);margin-right:6px" data-hist="'+e.id+'" data-name="'+e.name.replace(/"/g,'&quot;')+'">HIST</button>'
+      ? '<button class="lib-add-btn" style="color:var(--accent);border-color:var(--border);margin-right:6px" data-hist="'+esc(e.id)+'" data-name="'+esc(e.name)+'">HIST</button>'
       : '<button class="lib-add-btn" style="color:var(--muted);border-color:var(--border);opacity:.35;margin-right:6px;cursor:default">HIST</button>';
-    const delBtn = hasDel ? '<button class="lib-add-btn" style="color:var(--danger);border-color:var(--danger)" data-del="'+e.id+'">\u2715</button>' : '';
-    return '<div class="lib-item"><div class="lib-item-left"><div class="lib-name">'+e.name+customTag+'</div><div style="display:flex;align-items:center;gap:6px;margin-top:3px"><span class="muscle-pill '+e.muscle.toLowerCase()+'">'+e.muscle+'</span><span class="lib-eq">'+e.equip+'</span></div>'+(e.notes?'<div class="lib-meta" style="margin-top:2px">'+e.notes+'</div>':'')+'</div><div style="display:flex;align-items:center;flex-shrink:0">'+histBtn+delBtn+'</div></div>';
+    const delBtn = hasDel ? '<button class="lib-add-btn" style="color:var(--danger);border-color:var(--danger)" data-del="'+esc(e.id)+'">\u2715</button>' : '';
+    return '<div class="lib-item"><div class="lib-item-left"><div class="lib-name">'+esc(e.name)+customTag+'</div><div style="display:flex;align-items:center;gap:6px;margin-top:3px"><span class="muscle-pill '+esc(e.muscle.toLowerCase())+'">'+esc(e.muscle)+'</span><span class="lib-eq">'+esc(e.equip)+'</span></div>'+(e.notes?'<div class="lib-meta" style="margin-top:2px">'+esc(e.notes)+'</div>':'')+'</div><div style="display:flex;align-items:center;flex-shrink:0">'+histBtn+delBtn+'</div></div>';
   }).join('');
   el.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => delEx(b.getAttribute('data-del'))));
   el.querySelectorAll('[data-hist]').forEach(b => b.addEventListener('click', () => openExHistory(b.getAttribute('data-hist'), b.getAttribute('data-name'))));
@@ -3254,7 +3307,7 @@ function createExercise() {
   const equip = document.getElementById("newExEquip").value;
   const notes = document.getElementById("newExNotes").value.trim();
   if (!name||!muscle||!equip) { showToast("Fill in all fields"); return; }
-  allExercises.push({id:"c"+Date.now(),name,muscle,equip,notes,custom:true});
+  allExercises.push(_sanitizeCustomExercise({id:"c"+Date.now(),name,muscle,equip,notes}));
   saveExercises();
   document.getElementById("newExName").value="";
   document.getElementById("newExMuscle").value="";
@@ -3277,19 +3330,22 @@ async function importExerciseDB() {
     const res = await fetch('https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
+    if (!Array.isArray(data) || data.length > 5000) throw new Error('Unexpected data format');
     const eM={'barbell':'Barbell','dumbbell':'Dumbbell','cable':'Cable','machine':'Machine','body only':'Bodyweight','bands':'Band','kettlebells':'Kettlebell','e-z curl bar':'Barbell','smith machine':'Smith machine','other':'Other'};
     const mM={'chest':'Chest','middle back':'Back','lower back':'Back','lats':'Back','traps':'Traps','shoulders':'Shoulders','front deltoids':'Shoulders','triceps':'Triceps','biceps':'Biceps','forearms':'Forearms','quadriceps':'Legs','hamstrings':'Legs','glutes':'Legs','adductors':'Legs','calves':'Calves','abdominals':'Core','abductors':'Core'};
     const rEq=['barbell','dumbbell','cable','machine','body only','smith machine','e-z curl bar','kettlebells'];
     const existing=new Set(allExercises.map(e=>e.name.toLowerCase().trim()));
     let added=0,skipped=0; const ne=[];
     data.forEach(e => {
-      if (e.category!=='strength') return;
+      if (!e || typeof e.name !== 'string' || e.category!=='strength') return;
       if (!rEq.includes((e.equipment||'').toLowerCase())) return;
       const m=mM[(e.primaryMuscles||[])[0]?.toLowerCase()]; if(!m) return;
       const eq=eM[(e.equipment||'').toLowerCase()]||'Other';
       const n=e.name.trim();
       if (existing.has(n.toLowerCase())) { skipped++; return; }
-      ne.push({id:'db_'+e.id,name:n,muscle:m,equip:eq,notes:'',custom:true});
+      const clean=_sanitizeCustomExercise({id:'db_'+e.id,name:n,muscle:m,equip:eq,notes:''});
+      if (!clean) return;
+      ne.push(clean);
       existing.add(n.toLowerCase()); added++;
     });
     allExercises=[...allExercises,...ne]; saveExercises();
@@ -3640,7 +3696,7 @@ function renderWeightSparkline(hist, containerId) {
   const xs = points.map((p,i) => padX + i * (W - 2*padX) / (points.length-1));
   const ys = points.map(p => padY + (H - 2*padY) * (1 - (p.w - minW) / range));
   const polyline = xs.map((x,i) => x+','+ys[i]).join(' ');
-  const dots = points.map((p,i) => '<circle cx="'+xs[i]+'" cy="'+ys[i]+'" r="3" fill="#e8ff00"/><title>'+p.date+' · '+p.w+'kg</title>').join('');
+  const dots = points.map((p,i) => '<circle cx="'+xs[i]+'" cy="'+ys[i]+'" r="3" fill="#e8ff00"/><title>'+p.date+' · '+esc(p.w)+'kg</title>').join('');
   el.innerHTML = '<div style="font-family:var(--font-mono);font-size:12px;color:var(--muted);margin-bottom:4px">TOP SET WEIGHT TREND</div>'
     + '<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="display:block;overflow:visible">'
     + '<polyline points="'+polyline+'" fill="none" stroke="#e8ff00" stroke-width="2" opacity="0.8"/>'
@@ -3668,8 +3724,8 @@ function renderStrengthTab() {
     return '<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid ' + mc + ';padding:14px 16px">'
       + '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">'
       + '<div style="flex:1;min-width:0">'
-      + '<div style="font-family:var(--font-condensed);font-size:17px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.03em;line-height:1.3">' + ex.name + '</div>'
-      + '<div style="font-family:var(--font-mono);font-size:12px;color:' + mc + ';margin-top:2px">' + ex.muscle.toUpperCase() + '</div>'
+      + '<div style="font-family:var(--font-condensed);font-size:17px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.03em;line-height:1.3">' + esc(ex.name) + '</div>'
+      + '<div style="font-family:var(--font-mono);font-size:12px;color:' + mc + ';margin-top:2px">' + esc(ex.muscle.toUpperCase()) + '</div>'
       + '</div>'
       + '<div style="text-align:right;flex-shrink:0;margin-left:12px">'
       + '<div style="font-family:var(--font-display);font-size:26px;letter-spacing:2px;color:var(--acid);line-height:1">' + ex.current + '<span style="font-size:14px;color:var(--muted)"> kg</span></div>'

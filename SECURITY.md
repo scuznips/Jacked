@@ -13,9 +13,10 @@ JACKED is a client-side progressive web application with no backend infrastructu
 | Data breach via server compromise | **None** | N/A | No server exists |
 | Credential theft | **None** | N/A | No authentication layer |
 | Man-in-the-middle attack on data in transit | **None** | N/A | No data transmitted |
-| XSS via user-controlled input | Low | Low | No dynamic HTML injection from user input; inputs are numeric only |
+| XSS via stored/imported data (exercise names, backup files, Exercise DB feed) | Low | Medium | Output encoding (`esc()`) on every render site; data sanitised on read from storage; CSP blocks external scripts and exfiltration |
+| Malicious backup file | Low | Medium | 5 MB size cap, app-key allowlist (`jacked_*` / `bloc_*`), all restored values re-validated on read |
 | Unauthorised access to workout data | Low | Low | Data is on-device; attacker needs physical access to unlocked device |
-| Supply chain attack via CDN | Low | Medium | Google Fonts is the only external dependency (non-executable) |
+| Supply chain attack via CDN / third-party feed | Low | Medium | Google Fonts (non-executable CSS) and the optional free-exercise-db JSON import; imported entries are type-checked, length-capped and escaped |
 | Repo hijack / code tampering | Low | Medium | GitHub account 2FA recommended; see below |
 
 ---
@@ -56,7 +57,17 @@ Workout logs (sets, reps, weight, RIR) are fitness performance data with no regu
 GitHub Pages enforces HTTPS with a valid TLS certificate for all `github.io` subdomains. The "Enforce HTTPS" flag is enabled in repository Pages settings. All traffic between the user's browser and the CDN is encrypted in transit.
 
 ### Content Security
-The only external resource loaded at runtime is the Google Fonts stylesheet and font files (for Bebas Neue, DM Sans, DM Mono). These are loaded over HTTPS from `fonts.googleapis.com` and `fonts.gstatic.com`. No JavaScript is loaded from external sources.
+External resources loaded at runtime:
+- Google Fonts stylesheet and font files, over HTTPS from `fonts.googleapis.com` and `fonts.gstatic.com`
+- The optional **Import Exercise DB** button fetches a JSON file from `raw.githubusercontent.com` (yuhonas/free-exercise-db). It is only fetched when the user taps the button, is treated as untrusted data (shape-checked, IDs restricted to `[A-Za-z0-9_-]`, strings length-capped) and is never executed.
+
+No JavaScript is loaded from external sources.
+
+### XSS Defences (OWASP A03 Injection)
+- **Output encoding:** every stored or imported string rendered through `innerHTML` (exercise names, notes, muscle, equipment, session names, logged weights/reps, dates) passes through `esc()`, which HTML-encodes `& < > " ' \``.
+- **Input validation on read:** workout history, bodyweight, program, workout log, feedback, awards and the in-progress session are validated/cleaned every time they are read from `localStorage` (dates must be `YYYY-MM-DD`, weights/reps must be numeric, markup characters stripped, `__proto__`/`constructor` keys dropped).
+- **Backup restore:** capped at 5 MB, must be a JSON object tagged `app: "JACKED"`, and only keys matching `^(jacked|bloc)_…$` are written.
+- No `eval`, `new Function`, `document.write` or string-based timers.
 
 No advertising networks, tracking pixels, analytics scripts, or third-party SDKs are present.
 
@@ -69,10 +80,10 @@ Browser `localStorage` is stored in plaintext on the device filesystem. On an un
 
 **Mitigation:** This risk is equivalent to someone reading your paper training diary. For a personal fitness app, this is an accepted risk.
 
-### No Content Security Policy Headers
-GitHub Pages does not support custom HTTP response headers, so a `Content-Security-Policy` header cannot be applied at the hosting layer.
+### Content Security Policy via `<meta>` Only
+GitHub Pages does not support custom HTTP response headers, so the CSP is delivered as a `<meta http-equiv>` tag. It restricts scripts to same-origin, styles/fonts to Google Fonts, network requests (`connect-src`) to same-origin and `raw.githubusercontent.com`, and blocks plugins (`object-src 'none'`), `<base>` hijacking and form submission.
 
-The practical risk is low given the absence of dynamic content injection and the narrow set of trusted external origins.
+Limitations: the single-file design uses inline scripts and inline event handlers, so `script-src` must allow `'unsafe-inline'`; output encoding is therefore the primary XSS control and CSP is defence in depth. `frame-ancestors` (clickjacking protection) cannot be set from a meta tag; the practical risk is low as the app has no account actions or sensitive state-changing operations to trick a user into.
 
 ### Public Source Code
 The repository is public. Anyone can read the application source code.
@@ -109,5 +120,5 @@ Raise an issue at: `https://github.com/scuznips/Jacked/issues`
 
 ---
 
-*Last reviewed: June 2026*
+*Last reviewed: September 2026 (OWASP Top 10 pass: XSS/output encoding, input validation, CSP, third-party data)*
 *Reviewed by: scuznips*
