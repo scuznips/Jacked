@@ -194,6 +194,9 @@ input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
 .rtab.active{color:var(--acid);border-bottom-color:var(--acid);text-shadow:0 0 6px rgba(232,255,0,.4)}
 .lib-tab{flex:1;padding:15px;text-align:center;font-size:15px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;font-family:var(--font-condensed);letter-spacing:.1em;text-transform:uppercase}
 .lib-tab.active{color:var(--acid);border-bottom-color:var(--acid);text-shadow:0 0 6px rgba(232,255,0,.4)}
+.lib-tabs.an-tabs{overflow-x:auto;scrollbar-width:none}
+.lib-tabs.an-tabs::-webkit-scrollbar{display:none}
+.an-tabs .lib-tab{flex:1 0 auto;padding:14px 8px;font-size:14px;letter-spacing:.04em}
 
 /* ── POST-SESSION FEEDBACK ── */
 .feedback-overlay{display:none;position:fixed;inset:0;background:rgba(4,8,12,.97);z-index:400;flex-direction:column;overflow-y:auto}
@@ -425,13 +428,16 @@ input[type=range].feedback-range.acid::-webkit-slider-thumb{background:var(--aci
       <div style="display:flex;flex-direction:column;gap:2px">
         <div style="display:flex;align-items:center;gap:8px">
           <svg width="18" height="32" viewBox="0 0 18 32" style="flex-shrink:0"><polygon points="0,0 18,16 0,32" fill="#ff6a00"/></svg>
-          <div class="logo">PROGRAM</div>
+          <div class="logo">MESOS</div>
         </div>
         <div class="header-sub" style="padding-left:11px">BUILD YOUR SCHEDULE</div>
       </div>
     </div>
 
     <div style="padding:16px">
+
+      <!-- CURRENT PROGRAM (only when one is active) -->
+      <div id="currentProgramCard"></div>
 
       <!-- FREQUENCY PICKER -->
       <div style="font-family:var(--font-mono);font-size:14px;color:var(--muted);letter-spacing:.1em;margin-bottom:10px">// WORKOUTS PER WEEK (TARGET)</div>
@@ -481,7 +487,7 @@ input[type=range].feedback-range.acid::-webkit-slider-thumb{background:var(--aci
       <div class="logo">PROGRESS</div>
     </div>
   </div>
-  <div class="lib-tabs">
+  <div class="lib-tabs an-tabs">
     <div class="lib-tab active" id="an-tab-stats" onclick="switchAnTab('stats')">Stats</div>
     <div class="lib-tab" id="an-tab-volume" onclick="switchAnTab('volume')">Volume</div>
     <div class="lib-tab" id="an-tab-charts" onclick="switchAnTab('charts')">Charts</div>
@@ -617,7 +623,7 @@ input[type=range].feedback-range.acid::-webkit-slider-thumb{background:var(--aci
   <div style="font-size:14px;font-family:var(--font-mono);color:var(--muted);letter-spacing:.08em;margin-bottom:8px">// IMPORT FROM DATABASE</div>
   <div style="font-size:14px;color:var(--muted);margin-bottom:10px;line-height:1.6">Fetch exercises from the free-exercise-db (800+ public domain exercises). Imports strength exercises only, filtered for hypertrophy-relevant equipment.</div>
   <button id="importBtn" onclick="importExerciseDB()" style="background:var(--acid);color:#060809;border:none;padding:10px 18px;font-family:var(--font-display);font-size:16px;letter-spacing:2px;cursor:pointer;width:100%">IMPORT EXERCISE DB</button>
-  <div id="importStatus" style="font-family:var(--font-mono);font-size:14px;color:var(--muted);margin-top:8px;text-align:center"></div>
+  <div id="dbImportStatus" style="font-family:var(--font-mono);font-size:14px;color:var(--muted);margin-top:8px;text-align:center"></div>
 </div>
 <div class="create-form">
       <div class="form-group">
@@ -971,13 +977,9 @@ const DEFAULT_EXERCISES=[
   {id:"e209",name:"Single Leg Romanian DL",muscle:"Legs",equip:"Dumbbell",notes:"Unilateral hamstring & glute",custom:false},
   {id:"e210",name:"Smith Machine Front Squat",muscle:"Legs",equip:"Smith machine",notes:"Quad dominant guided",custom:false},
   // ── 60 Min Full Body (fb60) — names must match SPLITS.fb60 exactly so history/progression resolve ──
+  // e212, e214–e217 were merged into existing exercises (see EXERCISE_MERGES) — don't reuse those ids.
   {id:"e211",name:"Incline Bench",muscle:"Chest",equip:"Barbell",notes:"Upper chest",custom:false},
-  {id:"e212",name:"Peck Deck",muscle:"Chest",equip:"Machine",notes:"Pec deck fly",custom:false},
   {id:"e213",name:"Pull Down (Reverse Grip)",muscle:"Back",equip:"Cable",notes:"Underhand lat pulldown",custom:false},
-  {id:"e214",name:"Bicep Curl (Brachialis)",muscle:"Biceps",equip:"Dumbbell",notes:"Neutral/hammer grip, brachialis emphasis",custom:false},
-  {id:"e215",name:"Seated Row",muscle:"Back",equip:"Cable",notes:"",custom:false},
-  {id:"e216",name:"Dips",muscle:"Triceps",equip:"Bodyweight",notes:"",custom:false},
-  {id:"e217",name:"Overhead Tricep",muscle:"Triceps",equip:"Cable",notes:"Long head, stretched position",custom:false},
   {id:"e218",name:"Standing Hamstring Curl",muscle:"Legs",equip:"Machine",notes:"Single leg",custom:false},
 ];
 // ══════════════════════════════════════════
@@ -1131,7 +1133,7 @@ function renderDataSummary() {
     + _dataRow('Exercises tracked', histCount)
     + _dataRow('Bodyweight entries', bw.length)
     + _dataRow('Awards earned', awards.length)
-    + _dataRow('Active program', prog ? prog.splitKey.toUpperCase() : 'None')
+    + _dataRow('Active program', prog ? esc(SPLITS[prog.splitKey]?.name || prog.splitKey) : 'None')
     + _dataRow('Storage used', kb + ' KB')
     + (firstDate ? _dataRow('Training since', fmtDate(firstDate)) : '')
     + '</div>';
@@ -1185,6 +1187,46 @@ function saveExercises() {
   localStorage.setItem('bloc_ex', JSON.stringify(custom));
 }
 let allExercises = loadExercises();
+
+// Duplicate exercises retired from the library: move their history onto the surviving
+// exercise and rename them in the saved program / in-progress workout. Idempotent.
+const EXERCISE_MERGES = [
+  { from:'e212', fromName:'Peck Deck',               to:'e10',  toName:'Pec Deck' },
+  { from:'e214', fromName:'Bicep Curl (Brachialis)', to:'e24',  toName:'Hammer Curl' },
+  { from:'e215', fromName:'Seated Row',              to:'e13',  toName:'Seated Cable Row' },
+  { from:'e216', fromName:'Dips',                    to:'e112', toName:'Tricep Dip' },
+  { from:'e217', fromName:'Overhead Tricep',         to:'e20',  toName:'Overhead Tri Extension' },
+];
+function runExerciseMerges() {
+  EXERCISE_MERGES.forEach(m => {
+    if (localStorage.getItem('bloc_hist_' + m.from) === null) return;
+    const byDate = {};
+    [...getHistory(m.to), ...getHistory(m.from)].forEach(e => { byDate[e.date] = e; });
+    saveHistory(m.to, Object.keys(byDate).sort().map(d => byDate[d]));
+    localStorage.removeItem('bloc_hist_' + m.from);
+  });
+  const rename = n => (EXERCISE_MERGES.find(m => m.fromName === n) || {}).toName || n;
+  const prog = getActiveProgram();
+  if (prog && prog.sessions) {
+    let changed = false;
+    prog.sessions.forEach(s => (s.exercises || []).forEach(ex => {
+      const n = rename(ex.name); if (n !== ex.name) { ex.name = n; changed = true; }
+    }));
+    if (changed) saveActiveProgram(prog);
+  }
+  try {
+    const aw = JSON.parse(localStorage.getItem('jacked_active_workout') || 'null');
+    if (aw && Array.isArray(aw.exercises)) {
+      let changed = false;
+      aw.exercises.forEach(ex => {
+        const m = EXERCISE_MERGES.find(x => x.from === ex.id || x.fromName === ex.name);
+        if (m) { ex.id = m.to; ex.name = m.toName; changed = true; }
+      });
+      if (changed) localStorage.setItem('jacked_active_workout', JSON.stringify(aw));
+    }
+  } catch(e) {}
+}
+runExerciseMerges();
 
 // ══════════════════════════════════════════
 // EXERCISE HISTORY
@@ -1298,7 +1340,7 @@ function showScreen(id) {
   // log screen - route through goToLog for smart state detection
   if (id === 'log') { goToLog(); return; }
   if (id === 'library') { renderMuscleFilter(); renderLibrary(); }
-  if (id === 'program') initFrequencyPicker();
+  if (id === 'program') { _syncBuilderToActive(); initFrequencyPicker(); }
   if (id === 'analytics') renderAnalytics();
 }
 
@@ -1729,13 +1771,13 @@ const SPLITS = {
     sessions:[
       {id:'fb60A',name:'FULL BODY',sub:'Chest · Back · Arms · Legs — same session every day',exercises:[
         {name:'Incline Bench',muscle:'Chest',sets:'3',reps:'8-12'},
-        {name:'Peck Deck',muscle:'Chest',sets:'3',reps:'8-12'},
+        {name:'Pec Deck',muscle:'Chest',sets:'3',reps:'8-12'},
         {name:'Pull Down (Reverse Grip)',muscle:'Back',sets:'3',reps:'8-12'},
-        {name:'Bicep Curl (Brachialis)',muscle:'Biceps',sets:'3',reps:'8-12'},
-        {name:'Seated Row',muscle:'Back',sets:'3',reps:'8-12'},
-        {name:'Dips',muscle:'Triceps',sets:'3',reps:'8-12'},
+        {name:'Hammer Curl',muscle:'Biceps',sets:'3',reps:'8-12'},
+        {name:'Seated Cable Row',muscle:'Back',sets:'3',reps:'8-12'},
+        {name:'Tricep Dip',muscle:'Triceps',sets:'3',reps:'8-12'},
         {name:'Tricep Pushdown',muscle:'Triceps',sets:'3',reps:'8-12'},
-        {name:'Overhead Tricep',muscle:'Triceps',sets:'3',reps:'8-12'},
+        {name:'Overhead Tri Extension',muscle:'Triceps',sets:'3',reps:'8-12'},
         {name:'Leg Extension',muscle:'Legs',sets:'3',reps:'8-12'},
         {name:'Standing Hamstring Curl',muscle:'Legs',sets:'3',reps:'8-12'},
       ]},
@@ -1762,9 +1804,34 @@ function getRecommendedSplit(n) {
   return 'ppl';
 }
 
+function _syncBuilderToActive() {
+  const prog = getActiveProgram();
+  if (!prog || !SPLITS[prog.splitKey]) return;
+  weeklyTarget = prog.weeklyTarget || (prog.sessions || []).length || weeklyTarget;
+  selectedSplit = prog.splitKey;
+}
+
+function renderCurrentProgramCard() {
+  const el = document.getElementById('currentProgramCard');
+  if (!el) return;
+  const prog = getActiveProgram();
+  const split = prog && SPLITS[prog.splitKey];
+  if (!split) { el.innerHTML = ''; return; }
+  const start = prog.startDate ? new Date(prog.startDate) : new Date();
+  const weekNum = Math.max(1, Math.floor((new Date() - start) / (7*24*60*60*1000)) + 1);
+  const perWeek = prog.weeklyTarget || (prog.sessions || []).length;
+  el.innerHTML = '<div style="margin-bottom:18px;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent)">'
+    + '<div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);letter-spacing:.1em">// CURRENT PROGRAM</div>'
+    + '<div style="font-family:var(--font-condensed);font-size:22px;font-weight:700;color:var(--accent);text-transform:uppercase;margin-top:4px">' + esc(split.name) + '</div>'
+    + '<div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);margin-top:4px">' + perWeek + '\u00D7/WEEK \u00B7 WEEK ' + Math.min(weekNum, 6) + ' OF 6 \u00B7 STARTED ' + esc(fmtDate(prog.startDate ? prog.startDate.slice(0,10) : '')).toUpperCase() + '</div>'
+    + '<div style="font-size:14px;color:var(--muted);margin-top:8px">Pick a different split below to switch. Your logged history is kept.</div>'
+    + '</div>';
+}
+
 function initFrequencyPicker() {
   const grid = document.getElementById('freqPickerGrid');
   if (!grid) return;
+  renderCurrentProgramCard();
   grid.innerHTML = [2,3,4,5,6].map(n =>
     '<button class="day-pick-btn' + (weeklyTarget===n?' selected':'') + '" onclick="setFrequency(' + n + ')" style="flex:1;aspect-ratio:auto;padding:16px 0;flex-direction:column;gap:4px">'
     + '<span style="font-family:var(--font-display);font-size:26px">' + n + '</span>'
@@ -1806,12 +1873,15 @@ function renderSplitOptions() {
     const bg = isSel ? 'rgba(232,255,0,.05)' : 'var(--surface)';
     const nameColor = isSel ? 'var(--acid)' : 'var(--text)';
     const radioStyle = isSel ? 'background:var(--acid);border-color:var(--acid)' : 'background:none;border:2px solid var(--border)';
-    const recTag = key === recommendedSplit ? '<span style="font-size:11px;font-family:var(--font-mono);color:#060809;background:var(--acid);padding:3px 10px;margin-left:auto;flex-shrink:0">REC</span>' : '';
+    const activeKey = (getActiveProgram() || {}).splitKey;
+    const recTag = key === activeKey
+      ? '<span style="font-size:11px;font-family:var(--font-mono);color:#060809;background:var(--accent);padding:3px 10px;margin-left:auto;flex-shrink:0">CURRENT</span>'
+      : key === recommendedSplit ? '<span style="font-size:11px;font-family:var(--font-mono);color:#060809;background:var(--acid);padding:3px 10px;margin-left:auto;flex-shrink:0">REC</span>' : '';
     return '<div data-split="' + key + '" class="split-opt-btn" style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:' + bg + ';border:1px solid ' + borderColor + ';border-left:3px solid ' + borderColor + ';cursor:pointer;margin-bottom:6px">'
       + '<div style="width:14px;height:14px;flex-shrink:0;margin-top:3px;' + radioStyle + '"></div>'
       + '<div style="flex:1;min-width:0">'
       + '<div style="font-family:var(--font-condensed);font-size:21px;font-weight:700;color:' + nameColor + ';text-transform:uppercase">' + split.name + '</div>'
-      + '<div style="font-size:15px;color:#8a9ba8;margin-top:3px;line-height:1.4">' + split.desc + (caution?' <span style="color:#ff6a00">\u00b7 best at '+split.recMin+'+\u00d7/week</span>':'') + '</div>'
+      + '<div style="font-size:15px;color:#8a9ba8;margin-top:3px;line-height:1.4">' + split.desc + (caution?' <span style="color:#ff6a00">\u00b7 best at '+split.recMin+'+/week</span>':'') + '</div>'
       + '</div>' + recTag + '</div>';
   }).join('');
   container.querySelectorAll('.split-opt-btn').forEach(el => {
@@ -1859,6 +1929,10 @@ function activateGeneratedProgram() {
   const n = weeklyTarget;
   const splitKey = selectedSplit || recommendedSplit || 'fb';
   const split = SPLITS[splitKey];
+  if (workoutActive && sessionExercises.length) { showToast('Finish or discard your workout first'); return; }
+  const current = getActiveProgram();
+  const currentSplit = current && SPLITS[current.splitKey];
+  if (currentSplit && !confirm('Replace your current program (' + currentSplit.name + ') with ' + split.name + ' ' + n + '\u00D7/week?\n\nThe 6-week cycle restarts at week 1. Your logged workouts and exercise history are kept.')) return;
   const sessions = [];
   for (let i = 0; i < n; i++) {
     const sessionId = split.priority[i % split.priority.length];
@@ -2430,7 +2504,10 @@ function _restoreActiveWorkout() {
   try { saved = _deepClean(JSON.parse(localStorage.getItem(ACTIVE_WORKOUT_KEY) || 'null')); } catch(e) { return false; }
   if (!saved || !Array.isArray(saved.exercises) || !saved.exercises.length) return false;
   sessionExercises.length = 0;
-  sessionExercises.push(...saved.exercises);
+  sessionExercises.push(...saved.exercises
+    .filter(ex => ex && ex.name && Array.isArray(ex.sets_data))
+    .map(ex => ({ muscle:'', equip:'', notes:'', rest:90, ...ex })));
+  if (!sessionExercises.length) return false;
   isDeloadSession = !!saved.deload;
   currentSessionIdx = saved.sessionIdx ?? -1;
   const titleEl = document.getElementById('logTitle');
@@ -2538,19 +2615,16 @@ function renderExercises() {
   if (!container) return;
   container.innerHTML = sessionExercises.map((ex, ei) => {
     const sug = ex.suggestion;
-    const lastNote = sug ? '<div style="font-size:15px;color:var(--acid);padding:9px 14px;border-bottom:1px solid var(--border);font-family:var(--font-mono);opacity:.75">// ' + sug.msg + '</div>' : '';
     const progBadge = sug ? (sug.type==='weight'
       ? '<span style="font-size:13px;font-weight:700;color:#060809;background:var(--acid);padding:5px 12px;margin-right:6px;letter-spacing:.06em;font-family:var(--font-mono)">\u25B2 +2.5KG</span>'
       : '<span style="font-size:13px;font-weight:700;color:#060809;background:var(--orange);padding:5px 12px;margin-right:6px;letter-spacing:.06em;font-family:var(--font-mono)">\u25B2 +1 REP</span>') : '';
     const sets = ex.sets_data.map((set, si) => {
-      const hasSug = !set.done && (set.sugW || set.sugR);
-      const sugBar = hasSug ? '<div style="grid-column:2/4;font-size:14px;color:var(--acid);font-family:var(--font-mono);opacity:.65;text-align:center;padding-top:2px">\u25B2 ' + (set.sugW?set.sugW+'kg':'') + (set.sugW&&set.sugR?' \u00B7 ':'') + (set.sugR?set.sugR+' reps':'') + '</div>' : '';
       return '<div class="set-row' + (set.done?' completed':'') + '" id="sr-' + ei + '-' + si + '">'
         + '<div class="set-num">' + (si+1) + '</div>'
         + '<input class="set-input" type="number" placeholder="' + (set.sugW||'--') + '" value="' + esc(set.w) + '" oninput="updSet(' + ei + ',' + si + ',\'w\',this.value)" inputmode="decimal">'
         + '<input class="set-input" type="number" placeholder="' + (set.sugR||'REPS') + '" value="' + esc(set.r) + '" oninput="updSet(' + ei + ',' + si + ',\'r\',this.value)" inputmode="numeric">'
         + '<button class="set-check' + (set.done?' done':'') + '" onclick="togSet(' + ei + ',' + si + ')"><svg viewBox="0 0 24 24" fill="none" stroke="' + (set.done?'#060809':'var(--muted)') + '" stroke-width="3"><polyline points="20,6 9,17 4,12"/></svg></button>'
-        + sugBar + '</div>';
+        + '</div>';
     }).join('');
     const lastSess = getLastSession(ex.id);
     const lastBar = lastSess
@@ -2593,7 +2667,7 @@ function renderExercises() {
       + '<button class="swap-btn" onclick="openSwap(' + ei + ')">SWAP</button>'
       + '<div class="rir-badge" style="' + getRirStyle(ex.rir) + '">RIR ' + ex.rir + '</div>'
       + '</div></div>'
-      + lastBar + lastNote + warmupHtml + progBadge
+      + lastBar + warmupHtml + progBadge
       + '<div class="col-labels"><span>#</span><span>KG</span><span>REPS</span><span></span></div>'
       + sets
       + '<button class="add-set-btn" onclick="addSet(' + ei + ')">+ ADD SET</button>'
@@ -3323,7 +3397,7 @@ function createExercise() {
 // ══════════════════════════════════════════
 async function importExerciseDB() {
   const btn = document.getElementById('importBtn');
-  const status = document.getElementById('importStatus');
+  const status = document.getElementById('dbImportStatus');
   if (btn) { btn.textContent='FETCHING...'; btn.disabled=true; }
   if (status) status.textContent='// connecting...';
   try {
@@ -4099,7 +4173,11 @@ async function checkOpenNotification() {
   } catch(e) {}
 }
 
-if (_restoreActiveWorkout()) { goToLog(); setTimeout(() => showToast('Workout restored'), 300); }
+// A corrupt saved workout must never stop the app from opening.
+let _restored = false;
+try { _restored = _restoreActiveWorkout(); }
+catch(e) { workoutActive = false; sessionExercises.length = 0; }
+if (_restored) { goToLog(); setTimeout(() => showToast('Workout restored'), 300); }
 else renderDashboard();
 document.addEventListener('click', function(e) {
   const btn = e.target.closest('[data-goto]');
