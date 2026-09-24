@@ -92,7 +92,6 @@ body::before{animation:scanpulse 3s ease-in-out infinite}
 .stat-line span span{font-size:12px;font-weight:400;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-family:var(--font-body);margin-left:3px}
 .stat-line>span+span::before{content:"\00b7";margin-right:8px;color:var(--border);font-weight:400}
 .dash-footer-line{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 16px;font-size:13px;color:var(--muted);font-family:var(--font-condensed);letter-spacing:.03em}
-.dash-footer-line .clear-link{background:none;border:none;color:var(--muted);font-size:12px;font-family:var(--font-body);text-decoration:underline;cursor:pointer;padding:0}
 .footer-award{font-family:var(--font-mono);font-size:12px;color:var(--acid);letter-spacing:.03em;white-space:nowrap}
 .workout-header{background:#0a0f12;padding:18px 16px 14px;border-bottom:2px solid var(--border)}
 .workout-title{font-family:var(--font-display);font-size:32px;letter-spacing:4px;color:var(--acid);text-shadow:0 0 16px rgba(232,255,0,.5)}
@@ -349,9 +348,10 @@ input[type=range].feedback-range.acid::-webkit-slider-thumb{background:var(--aci
       <div class="header-sub" style="padding-left:11px">HYPERTROPHY SYSTEM</div>
     </div>
     <div style="text-align:right">
-      <div style="font-size:14px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase" id="dashDateLabel"></div>
+      <div style="font-size:14px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap" id="dashDateLabel"></div>
       <div style="font-family:var(--font-mono);font-size:14px;color:var(--accent);margin-top:2px" id="dashDayLabel"></div>
     </div>
+    <button data-goto="settings" aria-label="Settings" style="background:none;border:1px solid var(--border);color:var(--muted);width:40px;height:40px;margin-left:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></button>
   </div>
 
   <!-- alerts: no active program / cycle complete (mutually exclusive, actionable) -->
@@ -493,7 +493,6 @@ input[type=range].feedback-range.acid::-webkit-slider-thumb{background:var(--aci
     <div class="lib-tab" id="an-tab-charts" onclick="switchAnTab('charts')">Charts</div>
     <div class="lib-tab" id="an-tab-strength" onclick="switchAnTab('strength')">Strength</div>
     <div class="lib-tab" id="an-tab-body" onclick="switchAnTab('body')">Body</div>
-    <div class="lib-tab" id="an-tab-data" onclick="switchAnTab('data')">Data</div>
   </div>
 
   <!-- STATS TAB -->
@@ -554,8 +553,17 @@ input[type=range].feedback-range.acid::-webkit-slider-thumb{background:var(--aci
     <div id="bwList"></div>
   </div>
 
-  <!-- DATA TAB -->
-  <div id="an-data" style="display:none">
+  <div class="spacer"></div>
+</div>
+
+<!-- SETTINGS (opened from the gear on Home) -->
+<div class="screen" id="screen-settings">
+  <div class="header">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button onclick="_goToDash()" aria-label="Back" style="background:none;border:1px solid var(--border);color:var(--muted);width:38px;height:38px;font-size:18px;cursor:pointer">&larr;</button>
+      <div class="logo">SETTINGS</div>
+    </div>
+  </div>
     <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
 
       <!-- storage summary -->
@@ -588,14 +596,12 @@ input[type=range].feedback-range.acid::-webkit-slider-thumb{background:var(--aci
       <!-- danger zone -->
       <div style="background:var(--surface);border:1px solid rgba(255,32,32,.3);padding:16px">
         <div style="font-family:var(--font-mono);font-size:13px;color:var(--danger);letter-spacing:.1em;margin-bottom:10px">// DANGER ZONE</div>
-        <div style="font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.6">Permanently delete all workout logs, program, and history. Cannot be undone.</div>
+        <div style="font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.6">Clear Active Program removes your current program only (logged workouts and history are kept). Clear All Data permanently deletes everything. Neither can be undone.</div>
+        <button onclick="clearActiveProgram()" style="width:100%;padding:14px;margin-bottom:10px;background:none;border:1px solid var(--danger);color:var(--danger);font-family:var(--font-display);font-size:16px;letter-spacing:2px;cursor:pointer">CLEAR ACTIVE PROGRAM</button>
         <button onclick="clearAllData()" style="width:100%;padding:14px;background:none;border:1px solid var(--danger);color:var(--danger);font-family:var(--font-display);font-size:16px;letter-spacing:2px;cursor:pointer">CLEAR ALL DATA</button>
       </div>
 
     </div>
-    <div class="spacer"></div>
-  </div>
-
   <div class="spacer"></div>
 </div>
 
@@ -1093,6 +1099,17 @@ function importBackup(input) {
   reader.readAsText(file);
 }
 
+function clearActiveProgram() {
+  const prog = getActiveProgram();
+  if (!prog) { showToast('No active program'); return; }
+  if (workoutActive && sessionExercises.length) { showToast('Finish or discard your workout first'); return; }
+  const name = (SPLITS[prog.splitKey] || {}).name || 'your program';
+  if (!confirm('Clear ' + name + '? Your logged workouts and exercise history are kept.')) return;
+  localStorage.removeItem('jacked_program');
+  renderDataSummary();
+  showToast('Program cleared');
+}
+
 function clearAllData() {
   if (!confirm('Delete ALL data — workouts, program, history, awards, bodyweight? This cannot be undone.')) return;
   if (!confirm('Are you sure? This is permanent.')) return;
@@ -1342,6 +1359,7 @@ function showScreen(id) {
   if (id === 'library') { renderMuscleFilter(); renderLibrary(); }
   if (id === 'program') { _syncBuilderToActive(); initFrequencyPicker(); }
   if (id === 'analytics') renderAnalytics();
+  if (id === 'settings') { renderDataSummary(); renderNotifSettings(); }
 }
 
 // ══════════════════════════════════════════
@@ -1978,7 +1996,7 @@ function renderDashboard() {
 
   const dateEl = document.getElementById('dashDateLabel');
   const dayEl = document.getElementById('dashDayLabel');
-  if (dateEl) dateEl.textContent = DAYS[today.getDay()].toUpperCase() + ' ' + today.getDate() + ' ' + MONTHS[today.getMonth()].toUpperCase();
+  if (dateEl) dateEl.textContent = DAYS[today.getDay()].slice(0,3).toUpperCase() + ' ' + today.getDate() + ' ' + MONTHS[today.getMonth()].toUpperCase();
   if (dayEl) {
     if (prog) {
       const alreadyToday = !!log[tk];
@@ -2089,8 +2107,7 @@ function renderDashboard() {
       } else {
         alertEl.innerHTML = '';
         progSection.innerHTML = '<span class="program-meta">' + (split ? split.name.toUpperCase() : prog.splitKey.toUpperCase())
-          + ' \u00B7 wk ' + weekNum + '/6</span>'
-          + '<button class="clear-link" onclick="if(confirm(\'Clear active program?\')){{localStorage.removeItem(\'jacked_program\');renderDashboard();}}">clear</button>';
+          + ' \u00B7 wk ' + weekNum + '/6</span>';
       }
     }
   }
@@ -2117,7 +2134,7 @@ function renderDashboard() {
         ? '<button class="start-btn" style="margin:4px 16px 4px" onclick="goToLog()">RESUME SESSION &#x2192;</button>'
         : '<button class="start-btn" style="margin:4px 16px 4px" onclick="startTodaySession()">START SESSION &#x2192;</button>')
     + renderSessionPlanCard(session, nextEyebrow, true)
-    + renderLastSessionFull(log, prog)
+    + renderLastSessionCompact(log, prog)
     + renderFutureSessionInfo(prog, log);
 }
 
@@ -2311,6 +2328,29 @@ function renderFutureSessionInfo(prog, log) {
 }
 
 // ── Full detail on the last completed session: aggregate stats + actual weight×reps per exercise ──
+// Home shows a one-line recap; tapping it opens Log, which has the full breakdown.
+function renderLastSessionCompact(log, prog) {
+  const keys = Object.keys(log).sort();
+  if (!keys.length) return '';
+  const lastKey = keys[keys.length - 1], e = log[lastKey];
+  const vol = (e.volume||0) >= 1000 ? ((e.volume||0)/1000).toFixed(1)+'k' : (e.volume||0);
+  let name = 'SESSION';
+  if (prog && prog.startDate && prog.sessions && prog.sessions.length) {
+    const before = keys.filter(k => k <= lastKey && k >= prog.startDate.slice(0,10)).length - 1;
+    const s = prog.sessions[Math.max(0, before) % prog.sessions.length];
+    if (s && s.name) name = s.name;
+  }
+  const bits = [(e.sets||0) + ' sets', vol + ' kg', e.rir != null ? 'RIR ' + e.rir : '', e.duration ? Math.floor(e.duration/60) + ' min' : ''].filter(Boolean);
+  return '<div data-goto="log" style="margin:14px 16px 0;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-left:2px solid var(--accent);cursor:pointer;display:flex;align-items:center;gap:10px">'
+    + '<div style="flex:1;min-width:0">'
+    + '<div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);letter-spacing:.1em">LAST \u00B7 ' + esc(fmtDate(lastKey)).toUpperCase() + '</div>'
+    + '<div style="font-family:var(--font-condensed);font-size:17px;font-weight:700;color:var(--text);text-transform:uppercase;margin-top:2px">' + esc(name) + '</div>'
+    + '<div style="font-family:var(--font-mono);font-size:13px;color:var(--muted);margin-top:2px">' + esc(bits.join(' \u00B7 ')) + '</div>'
+    + '</div>'
+    + '<span style="color:var(--muted);font-size:18px">&#x2192;</span>'
+    + '</div>';
+}
+
 function renderLastSessionFull(log, prog) {
   const allLogEntries = Object.entries(log).sort((a, b) => b[0].localeCompare(a[0]));
   if (!allLogEntries.length) return '';
@@ -3230,7 +3270,7 @@ function renderBodyweightChart(entries, el) {
 let analyticsPeriod = 'week';
 
 function switchAnTab(tab) {
-  ['stats','volume','charts','strength','body','data'].forEach(t => {
+  ['stats','volume','charts','strength','body'].forEach(t => {
     const p = document.getElementById('an-'+t);
     const b = document.getElementById('an-tab-'+t);
     if (p) p.style.display = t===tab?'block':'none';
@@ -3240,7 +3280,6 @@ function switchAnTab(tab) {
   if (tab==='charts') { renderWeeklyVolumeChart(); renderComplianceGrid(); }
   if (tab==='strength') renderStrengthTab();
   if (tab==='body') renderBodyweightLog();
-  if (tab==='data') { renderDataSummary(); renderNotifSettings(); }
 }
 
 function setAnalyticsPeriod(period, el) {
