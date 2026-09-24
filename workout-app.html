@@ -965,6 +965,15 @@ const DEFAULT_EXERCISES=[
   {id:"e208",name:"Bayesian Curl",muscle:"Biceps",equip:"Cable",notes:"Stretched bicep, hip hinge position",custom:false},
   {id:"e209",name:"Single Leg Romanian DL",muscle:"Legs",equip:"Dumbbell",notes:"Unilateral hamstring & glute",custom:false},
   {id:"e210",name:"Smith Machine Front Squat",muscle:"Legs",equip:"Smith machine",notes:"Quad dominant guided",custom:false},
+  // ── 60 Min Full Body (fb60) — names must match SPLITS.fb60 exactly so history/progression resolve ──
+  {id:"e211",name:"Incline Bench",muscle:"Chest",equip:"Barbell",notes:"Upper chest",custom:false},
+  {id:"e212",name:"Peck Deck",muscle:"Chest",equip:"Machine",notes:"Pec deck fly",custom:false},
+  {id:"e213",name:"Pull Down (Reverse Grip)",muscle:"Back",equip:"Cable",notes:"Underhand lat pulldown",custom:false},
+  {id:"e214",name:"Bicep Curl (Brachialis)",muscle:"Biceps",equip:"Dumbbell",notes:"Neutral/hammer grip, brachialis emphasis",custom:false},
+  {id:"e215",name:"Seated Row",muscle:"Back",equip:"Cable",notes:"",custom:false},
+  {id:"e216",name:"Dips",muscle:"Triceps",equip:"Bodyweight",notes:"",custom:false},
+  {id:"e217",name:"Overhead Tricep",muscle:"Triceps",equip:"Cable",notes:"Long head, stretched position",custom:false},
+  {id:"e218",name:"Standing Hamstring Curl",muscle:"Legs",equip:"Machine",notes:"Single leg",custom:false},
 ];
 // ══════════════════════════════════════════
 // APP VERSION & STORAGE
@@ -2265,7 +2274,7 @@ function startDeloadSession() {
 
   sessionExercises.length = 0;
   session.exercises.forEach(ex => {
-    const libEx = allExercises.find(e => e.name === ex.name) || { id:'tmp_'+Date.now()+'_'+Math.random(), name:ex.name, muscle:ex.muscle||'', equip:ex.equip||'', notes:'' };
+    const libEx = allExercises.find(e => e.name === ex.name) || { id:'tmp_'+ex.name.toLowerCase().replace(/[^a-z0-9]+/g,'_'), name:ex.name, muscle:ex.muscle||'', equip:ex.equip||'', notes:'' };
     const normalSets = parseInt(ex.sets) || 4;
     const deloadSets = Math.max(2, Math.floor(normalSets * 0.6));
     const parts = (ex.reps||'6-15').split('-').map(Number);
@@ -2315,7 +2324,7 @@ function startTodaySession() {
   sessionExercises.length = 0;
   let exIdx = 0;
   session.exercises.forEach(ex => {
-    const libEx = allExercises.find(e => e.name === ex.name) || { id:'tmp_'+Date.now()+'_'+Math.random(), name:ex.name, muscle:ex.muscle||'', equip:ex.equip||'', notes:'' };
+    const libEx = allExercises.find(e => e.name === ex.name) || { id:'tmp_'+ex.name.toLowerCase().replace(/[^a-z0-9]+/g,'_'), name:ex.name, muscle:ex.muscle||'', equip:ex.equip||'', notes:'' };
     const setsCount = parseInt(ex.sets) || 4;
     const parts = (ex.reps||'6-15').split('-').map(Number);
     const repMin = parts[0] || 6, repMax = parts[1] || 15;
