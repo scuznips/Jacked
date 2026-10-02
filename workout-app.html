@@ -3954,10 +3954,30 @@ function toggleSfx() {
   if (on) playSetComplete();
 }
 
+// One shared AudioContext, unlocked on a user gesture. Contexts created later from a timer
+// (countdown ticks, rest end) start suspended on mobile and stay silent, and browsers cap
+// how many contexts a page may open.
+let _actx = null;
+function _audioCtx() {
+  if (!_actx) _actx = new (window.AudioContext || window.webkitAudioContext)();
+  if (_actx.state !== 'running') _actx.resume().catch(() => {});
+  return _actx;
+}
+function _unlockAudio() {
+  try {
+    const ctx = _audioCtx();
+    // iOS needs a sound actually started inside the gesture to fully unlock output
+    const b = ctx.createBuffer(1, 1, 22050), s = ctx.createBufferSource();
+    s.buffer = b; s.connect(ctx.destination); s.start(0);
+  } catch(e) {}
+}
+['pointerdown', 'touchend', 'keydown'].forEach(ev =>
+  document.addEventListener(ev, _unlockAudio, { capture: true, passive: true }));
+
 function playSetComplete() {
   if (!getSfxPref()) return;
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = _audioCtx();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain); gain.connect(ctx.destination);
@@ -3989,7 +4009,7 @@ function _loudOut(ctx) {
 function playRestEnd() {
   if (!getSfxPref()) return;
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = _audioCtx();
     const out = _loudOut(ctx);
     [1047, 1319, 1568, 2093].forEach((f, i) => {
       const osc = ctx.createOscillator();
@@ -4011,7 +4031,7 @@ function playRestEnd() {
 function playCountdownTick(n) {
   if (!getSfxPref()) return;
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = _audioCtx();
     const out = _loudOut(ctx);
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
